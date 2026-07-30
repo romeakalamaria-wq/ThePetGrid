@@ -14,10 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     petCount: document.getElementById("mapPetCount"), countryCount: document.getElementById("mapCountryCount"),
     cityCount: document.getElementById("mapCityCount"), onlineCount: document.getElementById("mapOnlineCount"),
     serviceStatus: document.getElementById("serviceStatus"), refreshServices: document.getElementById("refreshServices"),
-    layerPets: document.getElementById("layerPets"), geoapifyApiKey: document.getElementById("geoapifyApiKey"),
-    saveGeoapifyKey: document.getElementById("saveGeoapifyKey"), removeGeoapifyKey: document.getElementById("removeGeoapifyKey"),
-    toggleGeoapifyKey: document.getElementById("toggleGeoapifyKey"), keyStatus: document.getElementById("geoapifyKeyStatus"),
-    openMapSettings: document.getElementById("openMapSettings"), settingsModal: document.getElementById("mapSettingsModal"),
+    layerPets: document.getElementById("layerPets"),
     serviceToggles: [...document.querySelectorAll("[data-service-layer]")]
   };
 
@@ -57,35 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let visiblePets = [];
   let serviceRefreshTimer = null;
   let serviceRefreshSequence = 0;
-
-  function setKeyStatus(message, kind = "") {
-    if (!ui.keyStatus) return;
-    ui.keyStatus.textContent = message;
-    ui.keyStatus.className = `geoapify-key-status${kind ? ` is-${kind}` : ""}`;
-  }
-
-  function openMapSettings() {
-    if (!ui.settingsModal) return;
-    syncGeoapifySettings();
-    setKeyStatus(serviceClient.hasApiKey() ? `Saved key: ${serviceClient.getMaskedApiKey()}` : "");
-    ui.settingsModal.hidden = false;
-    document.body.classList.add("map-settings-open");
-    window.setTimeout(() => ui.geoapifyApiKey?.focus(), 30);
-  }
-
-  function closeMapSettings() {
-    if (!ui.settingsModal) return;
-    ui.settingsModal.hidden = true;
-    document.body.classList.remove("map-settings-open");
-  }
-
-  function syncGeoapifySettings() {
-    if (!ui.geoapifyApiKey) return;
-    ui.geoapifyApiKey.value = serviceClient.hasApiKey() ? serviceClient.apiKey : "";
-    ui.geoapifyApiKey.placeholder = serviceClient.hasApiKey()
-      ? `Saved: ${serviceClient.getMaskedApiKey()}`
-      : "Paste your Geoapify API key";
-  }
 
   function coordinatesFor(pet) {
     const lat = Number(pet.latitude), lng = Number(pet.longitude);
@@ -178,13 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setServiceStatus("Enable a service layer to show nearby places.");
       return;
     }
-    if (!serviceClient.hasApiKey()) {
-      serviceLayer.clear();
-      setServiceLoading(false);
-      setServiceStatus("Add your free Geoapify API key in Map settings first.", "error");
-      if (source === "manual") openMapSettings();
-      return;
-    }
     if (map.getZoom() < 13) {
       serviceClient.abort();
       serviceLayer.clear();
@@ -241,7 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
   manager.ready(async () => {
     try {
       petLayer.add();
-      syncGeoapifySettings();
       pets = await loadPets(); visiblePets = [...pets]; petLayer.setPets(visiblePets);
       renderTypes(); renderStats(); renderTopCountries(); renderSidebar(visiblePets); fitVisible();
       new Core.PresenceBridge(onlineIds => {
@@ -265,41 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.serviceToggles.forEach(input => input.addEventListener("change", () => {
     scheduleServiceRefresh({ immediate: true });
   }));
-  ui.openMapSettings?.addEventListener("click", openMapSettings);
-  document.querySelectorAll("[data-close-map-settings]").forEach(element => element.addEventListener("click", closeMapSettings));
-  document.addEventListener("keydown", event => { if (event.key === "Escape" && !ui.settingsModal?.hidden) closeMapSettings(); });
-
-  ui.toggleGeoapifyKey?.addEventListener("click", () => {
-    const reveal = ui.geoapifyApiKey?.type === "password";
-    if (ui.geoapifyApiKey) ui.geoapifyApiKey.type = reveal ? "text" : "password";
-    ui.toggleGeoapifyKey.textContent = reveal ? "Hide" : "Show";
-    ui.toggleGeoapifyKey.setAttribute("aria-label", reveal ? "Hide API key" : "Show API key");
-  });
-
-  ui.saveGeoapifyKey?.addEventListener("click", () => {
-    const key = ui.geoapifyApiKey?.value.trim() || "";
-    if (key.length <= 10) { setKeyStatus("Paste a valid Geoapify API key first.", "error"); return; }
-    serviceClient.setApiKey(key);
-    syncGeoapifySettings();
-    serviceLayer.clear();
-    setKeyStatus(`Key saved: ${serviceClient.getMaskedApiKey()}`, "success");
-    setServiceStatus("Geoapify API key saved. Nearby services now refresh automatically.", "success");
-    closeMapSettings();
-    scheduleServiceRefresh({ immediate: true });
-  });
-
-  ui.removeGeoapifyKey?.addEventListener("click", () => {
-    serviceClient.setApiKey("");
-    if (ui.geoapifyApiKey) ui.geoapifyApiKey.value = "";
-    serviceLayer.clear();
-    syncGeoapifySettings();
-    setKeyStatus("Saved key removed from this browser.", "success");
-    setServiceStatus("Geoapify API key removed.");
-  });
-
-  ui.geoapifyApiKey?.addEventListener("keydown", event => {
-    if (event.key === "Enter") ui.saveGeoapifyKey?.click();
-  });
   ui.refreshServices?.addEventListener("click", () => scheduleServiceRefresh({ immediate: true, force: true, source: "manual" }));
   map.on("movestart", () => { if (activeServiceTypes().length) serviceClient.abort(); });
   map.on("moveend", () => scheduleServiceRefresh());

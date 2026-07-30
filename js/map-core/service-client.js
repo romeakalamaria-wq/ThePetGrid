@@ -1,8 +1,7 @@
 (() => {
   "use strict";
 
-  const API_URL = "https://api.geoapify.com/v2/places";
-  const STORAGE_KEY = "tpg:geoapify-api-key";
+  const API_URL = "/api/geoapify";
 
   const CATEGORY_BY_TYPE = Object.freeze({
     veterinary: "pet.veterinary",
@@ -15,9 +14,8 @@
   class ServiceClient {
     constructor(options = {}) {
       const config = window.ThePetGridGeoapify || {};
-      this.apiKey = String(options.apiKey || localStorage.getItem(STORAGE_KEY) || config.apiKey || "").trim();
       this.language = options.language || config.language || "en";
-      this.resultLimit = Math.min(500, Math.max(1, Number(options.resultLimit || config.resultLimit || 150)));
+      this.resultLimit = Math.min(200, Math.max(1, Number(options.resultLimit || config.resultLimit || 150)));
       this.cacheTtl = options.cacheTtl || 30 * 60 * 1000;
       this.cooldownMs = options.cooldownMs || 900;
       this.timeoutMs = options.timeoutMs || 18000;
@@ -27,20 +25,8 @@
     }
 
     hasApiKey() {
-      return Boolean(this.apiKey && !this.apiKey.includes("PASTE_") && this.apiKey.length > 10);
-    }
-
-    setApiKey(value, { persist = true } = {}) {
-      this.apiKey = String(value || "").trim();
-      if (persist) {
-        if (this.apiKey) localStorage.setItem(STORAGE_KEY, this.apiKey);
-        else localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-
-    getMaskedApiKey() {
-      if (!this.hasApiKey()) return "";
-      return `${this.apiKey.slice(0, 5)}••••${this.apiKey.slice(-4)}`;
+      // The key is kept server-side in Vercel. Visitors never need to provide one.
+      return true;
     }
 
     abort() {
@@ -49,7 +35,7 @@
     }
 
     cacheKey(types, bbox) {
-      return `tpg:geoapify:v2:${types.slice().sort().join(",")}:${bbox.map(value => Number(value).toFixed(3)).join(",")}`;
+      return `tpg:geoapify:v3:${types.slice().sort().join(",")}:${bbox.map(value => Number(value).toFixed(3)).join(",")}`;
     }
 
     readCache(key) {
@@ -66,7 +52,7 @@
       try {
         localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
       } catch {
-        // The map still works when browser storage is unavailable or full.
+        // Nearby services still work if browser storage is unavailable or full.
       }
     }
 
@@ -75,18 +61,18 @@
     }
 
     buildUrl(types, bbox) {
-      if (!this.hasApiKey()) throw new Error("Geoapify API key is missing. Add your free key in the Map settings.");
       const categories = this.categoriesFor(types);
       if (!categories.length) throw new Error("No supported service category is selected.");
 
       const [south, west, north, east] = bbox.map(Number);
       const params = new URLSearchParams({
         categories: categories.join(","),
-        filter: `rect:${west},${south},${east},${north}`,
-        bias: `rect:${west},${south},${east},${north}`,
+        south: String(south),
+        west: String(west),
+        north: String(north),
+        east: String(east),
         limit: String(this.resultLimit),
-        lang: this.language,
-        apiKey: this.apiKey
+        lang: this.language
       });
       return `${API_URL}?${params.toString()}`;
     }
@@ -131,13 +117,18 @@
     }
 
     async fetchJson(url, signal) {
-      const response = await fetch(url, { method: "GET", signal, headers: { Accept: "application/geo+json,application/json" } });
+      const response = await fetch(url, {
+        method: "GET",
+        signal,
+        headers: { Accept: "application/geo+json,application/json" }
+      });
+
       if (!response.ok) {
         let detail = "";
         try { detail = (await response.json())?.message || ""; } catch {}
-        if (response.status === 401 || response.status === 403) throw new Error("Geoapify rejected the API key. Check the key and its allowed referrers.");
-        if (response.status === 429) throw new Error("Geoapify daily or rate limit reached. Try again later.");
-        throw new Error(detail || `Geoapify request failed (HTTP ${response.status}).`);
+        if (response.status === 429) throw new Error("Nearby-services request limit reached. Try again later.");
+        if (response.status === 503) throw new Error("Nearby services are not configured on the server yet.");
+        throw new Error(detail || `Nearby-services request failed (HTTP ${response.status}).`);
       }
       return response.json();
     }
@@ -172,7 +163,6 @@
     }
   }
 
-  ServiceClient.STORAGE_KEY = STORAGE_KEY;
   ServiceClient.CATEGORY_BY_TYPE = CATEGORY_BY_TYPE;
   window.ThePetGridMapCore = window.ThePetGridMapCore || {};
   window.ThePetGridMapCore.ServiceClient = ServiceClient;
