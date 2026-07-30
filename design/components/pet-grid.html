@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Pet Grid Component — ThePetGrid</title>
+
+    <!-- GOOGLE FONT -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- COMPONENT STYLES -->
+
+    <link rel="stylesheet" href="pet-grid.css">
+    <link rel="stylesheet" href="pet-card.css">
+
+</head>
+
+<body>
+
+    <main class="grid-page">
+
+        <!-- HEADER -->
+
+        <header class="grid-header">
+
+            <p class="grid-header__eyebrow">
+                ThePetGrid Component Library
+            </p>
+
+            <h1 class="grid-header__title">
+                Browse Pets
+            </h1>
+
+            <p class="grid-header__text">
+                Search, filter and discover pets from around the world.
+            </p>
+
+        </header>
+
+
+        <!-- SEARCH AND FILTERS -->
+
+        <section
+            class="pet-toolbar"
+            aria-label="Pet search and filters"
+        >
+
+            <div class="pet-toolbar__search">
+
+                <label
+                    class="sr-only"
+                    for="petSearch"
+                >
+                    Search pets
+                </label>
+
+                <span
+                    class="pet-toolbar__search-icon"
+                    aria-hidden="true"
+                >
+                    🔍
+                </span>
+
+                <input
+                    id="petSearch"
+                    class="pet-toolbar__search-input"
+                    type="search"
+                    placeholder="Search by name, breed, city or country..."
+                    autocomplete="off"
+                >
+
+                <button
+                    id="clearSearchBtn"
+                    class="pet-toolbar__clear"
+                    type="button"
+                    aria-label="Clear search"
+                    hidden
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="pet-toolbar__controls">
+
+                <div class="pet-toolbar__field">
+
+                    <label for="typeFilter">
+                        Pet type
+                    </label>
+
+                    <select id="typeFilter">
+
+                        <option value="all">
+                            All types
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="pet-toolbar__field">
+
+                    <label for="countryFilter">
+                        Country
+                    </label>
+
+                    <select id="countryFilter">
+
+                        <option value="all">
+                            All countries
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="pet-toolbar__field">
+
+                    <label for="sortFilter">
+                        Sort by
+                    </label>
+
+                    <select id="sortFilter">
+
+                        <option value="default">
+                            Recommended
+                        </option>
+
+                        <option value="likes-desc">
+                            Most liked
+                        </option>
+
+                        <option value="likes-asc">
+                            Least liked
+                        </option>
+
+                        <option value="name-asc">
+                            Name A–Z
+                        </option>
+
+                        <option value="name-desc">
+                            Name Z–A
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="pet-toolbar__quick-filters"
+                aria-label="Quick filters"
+            >
+
+                <button
+                    class="pet-filter-chip is-active"
+                    type="button"
+                    data-quick-filter="all"
+                    aria-pressed="true"
+                >
+                    🐾 All Pets
+                </button>
+
+                <button
+                    class="pet-filter-chip"
+                    type="button"
+                    data-quick-filter="favorites"
+                    aria-pressed="false"
+                >
+                    ⭐ Favorites
+                </button>
+
+                <button
+                    class="pet-filter-chip"
+                    type="button"
+                    data-quick-filter="most-liked"
+                    aria-pressed="false"
+                >
+                    ❤️ Most Liked
+                </button>
+
+                <button
+                    id="resetFiltersBtn"
+                    class="pet-filter-reset"
+                    type="button"
+                >
+                    Reset filters
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- RESULTS HEADER -->
+
+        <div class="pet-results">
+
+            <p
+                id="resultsCount"
+                class="pet-results__count"
+                aria-live="polite"
+            >
+                Showing 0 pets
+            </p>
+
+        </div>
+
+
+        <!-- PET GRID -->
+
+        <section
+            id="petGrid"
+            aria-label="Pet results"
+        ></section>
+
+
+        <!-- EMPTY STATE -->
+
+        <section
+            id="emptyState"
+            class="pet-empty-state"
+            hidden
+        >
+
+            <div
+                class="pet-empty-state__icon"
+                aria-hidden="true"
+            >
+                🐾
+            </div>
+
+            <h2>
+                No pets found
+            </h2>
+
+            <p>
+                Try changing your search or filters.
+            </p>
+
+            <button
+                id="emptyResetBtn"
+                type="button"
+            >
+                Show all pets
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!-- COMPONENT SCRIPTS -->
+
+    <script src="../../store/pet-store.js"></script>
+<script src="pet-card.js"></script>
+<script src="pet-grid.js"></script>
+</body>
+
+</html>

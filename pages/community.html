@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Community - ThePetGrid</title>
+<link href="../assets/favicon.png" rel="icon" type="image/png"/>
+
+
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/community.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<main class="community-page">
+<section class="community-hero">
+<div>
+<p class="community-eyebrow">🐾 THEPETGRID COMMUNITY</p>
+<h1>Share moments. Help pets. Meet your people.</h1>
+<p>Post updates, photos and stories with pet lovers from around the world.</p>
+</div>
+<div class="community-hero-badge">
+<strong id="communityPostCount">0</strong>
+<span>Community posts</span>
+</div>
+</section>
+<div class="community-layout">
+<section aria-label="Community feed" class="community-main">
+<article class="create-post-card">
+<div class="create-post-heading">
+<img alt="Your avatar" class="community-avatar" id="composerAvatar" src="../assets/avatar.png"/>
+<div>
+<h2>Create a post</h2>
+<p id="composerIdentity">Share something with the community.</p>
+</div>
+</div>
+<form id="createPostForm" novalidate="">
+<label class="sr-only" for="postText">Post text</label>
+<textarea id="postText" maxlength="600" placeholder="What is happening with your pet?"></textarea>
+<div class="image-preview-box" hidden="" id="imagePreviewBox">
+<img alt="Selected post preview" id="imagePreview"/>
+<button aria-label="Remove selected image" class="remove-image-button" id="removeImageButton" type="button">×</button>
+</div>
+<div class="composer-footer">
+<div class="composer-tools">
+<label class="composer-tool" for="postImageInput">📷 Add photo</label>
+<input accept="image/*" hidden="" id="postImageInput" type="file"/>
+<label class="composer-tool" for="taggedPet">🐾 Tag pet</label>
+<select aria-label="Tag one of your pets" id="taggedPet">
+<option value="">No pet tagged</option>
+</select>
+</div>
+<div class="composer-submit">
+<span id="postCharCount">0 / 600</span>
+<button class="publish-button" id="publishPostButton" type="submit">Publish</button>
+</div>
+</div>
+<p aria-live="polite" class="composer-message" id="composerMessage" role="status"></p>
+</form>
+</article>
+<div class="feed-header">
+<div>
+<p class="community-eyebrow">LATEST STORIES</p>
+<h2>Community feed</h2>
+</div>
+<button class="clear-posts-button" id="clearPostsButton" type="button">Reset demo feed</button>
+</div>
+<section aria-live="polite" class="community-feed" id="communityFeed"></section>
+<div class="empty-feed" hidden="" id="emptyFeed">
+<div>🐾</div>
+<h3>No posts yet</h3>
+<p>Be the first person to share a moment with the community.</p>
+</div>
+</section>
+<aside class="community-sidebar">
+<section class="sidebar-card">
+<p class="community-eyebrow">COMMUNITY GUIDE</p>
+<h2>Make every post count</h2>
+<ul>
+<li>Share helpful and respectful content.</li>
+<li>Never publish private contact information.</li>
+<li>Contact a veterinarian for urgent medical issues.</li>
+</ul>
+</section>
+<section class="sidebar-card sidebar-highlight">
+<span class="sidebar-icon">💛</span>
+<h2>Support rescue stories</h2>
+<p>Use the community to celebrate adoptions and help pets find safe homes.</p>
+<a href="#">Explore Rescue</a>
+</section>
+</aside>
+</div>
+</main>
+<script src="../store/pet-store.js"></script>
+<script src="../js/community.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/auth.js"></script><script src="../js/header.js"></script><script src="../js/header-live.js"></script>
+</body>
+</html>

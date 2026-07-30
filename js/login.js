@@ -1,0 +1,180 @@
+document.addEventListener("DOMContentLoaded", async () => {
+  "use strict";
+
+  const form = document.querySelector("#authForm");
+  const message = document.querySelector("#authMessage");
+  const title = document.querySelector("#authTitle");
+  const intro = document.querySelector("#authIntro");
+  const submitButton = document.querySelector("#authSubmit");
+  const modeButtons = document.querySelectorAll("[data-auth-mode]");
+  const usernameField = document.querySelector("#usernameField");
+  const authNote = document.querySelector(".auth-note");
+
+  if (!form || !message || !submitButton || !window.ThePetGridAuth) {
+    console.error("ThePetGrid: login page is missing required elements.");
+    return;
+  }
+
+  await window.ThePetGridAuth.ready;
+
+  const client = window.ThePetGridSupabase?.client || null;
+  let mode = "login";
+  let busy = false;
+
+  authNote.textContent = client
+    ? "Secure authentication powered by Supabase."
+    : "Supabase is not configured. Authentication is unavailable.";
+
+  function showMessage(text, type = "success") {
+    message.textContent = text;
+    message.className = `auth-message auth-message--${type}`;
+    message.hidden = false;
+  }
+
+  function hideMessage() {
+    message.hidden = true;
+    message.textContent = "";
+  }
+
+  function setBusy(value) {
+    busy = value;
+    submitButton.disabled = value;
+    modeButtons.forEach((button) => { button.disabled = value; });
+    submitButton.textContent = value
+      ? (mode === "register" ? "Creating account..." : "Logging in...")
+      : (mode === "register" ? "Create Account" : "Log In");
+  }
+
+  function setMode(nextMode) {
+    if (busy) return;
+    mode = nextMode === "register" ? "register" : "login";
+    const registering = mode === "register";
+
+    title.textContent = registering ? "Create your account" : "Welcome back";
+    intro.textContent = registering
+      ? "Join ThePetGrid and create a profile for your pets."
+      : "Log in to manage your pets and community activity.";
+    submitButton.textContent = registering ? "Create Account" : "Log In";
+    usernameField.hidden = !registering;
+    form.elements.username.required = registering;
+    form.elements.password.autocomplete = registering
+      ? "new-password"
+      : "current-password";
+    hideMessage();
+
+    modeButtons.forEach((button) => {
+      const active = button.dataset.authMode === mode;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+  }
+
+  function redirectAfterLogin() {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("returnTo");
+    const isSafe = requested &&
+      !requested.includes(":") &&
+      !requested.startsWith("//") &&
+      !requested.startsWith("/");
+
+    window.location.replace(isSafe ? requested : "my-profile.html");
+  }
+
+  function friendlyError(error) {
+    const raw = String(error?.message || "").toLowerCase();
+    if (raw.includes("invalid login credentials")) {
+      return "Incorrect email or password. Make sure you registered with this exact email.";
+    }
+    if (raw.includes("email not confirmed")) {
+      return "Your email is not confirmed yet. Open the Supabase confirmation email first.";
+    }
+    if (raw.includes("user already registered")) {
+      return "This email is already registered. Use Log In instead.";
+    }
+    if (raw.includes("password")) return error.message;
+    if (raw.includes("rate limit")) {
+      return "Too many attempts. Wait a moment and try again.";
+    }
+    return error?.message || "Authentication failed. Please try again.";
+  }
+
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", () => setMode(button.dataset.authMode));
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    hideMessage();
+
+    if (!client) {
+      showMessage("Supabase did not load. Check the internet connection and configuration.", "error");
+      return;
+    }
+
+    const email = form.elements.email.value.trim().toLowerCase();
+    const password = form.elements.password.value;
+    const username = form.elements.username.value.trim();
+
+    if (!email) {
+      showMessage("Enter your email.", "error");
+      return;
+    }
+    if (password.length < 6) {
+      showMessage("Password must contain at least 6 characters.", "error");
+      return;
+    }
+    if (mode === "register" && username.length < 2) {
+      showMessage("Username must contain at least 2 characters.", "error");
+      return;
+    }
+
+    setBusy(true);
+
+    try {
+      if (mode === "register") {
+        const { data, error } = await client.auth.signUp({
+          email,
+          password,
+          options: { data: { username } }
+        });
+        if (error) throw error;
+
+        if (data.session && data.user) {
+          window.ThePetGridAuth.setCurrentUser(data.user);
+          showMessage("Account created. You are now logged in.");
+          window.setTimeout(redirectAfterLogin, 500);
+        } else {
+          showMessage(
+            "Account created. Check your email and click the confirmation link, then return here and log in."
+          );
+          setMode("login");
+          form.elements.email.value = email;
+        }
+        return;
+      }
+
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (!data.user || !data.session) {
+        throw new Error("Login did not create a session.");
+      }
+
+      window.ThePetGridAuth.setCurrentUser(data.user);
+      showMessage(`Welcome back, ${data.user.user_metadata?.username || data.user.email?.split("@")[0] || "Member"}!`);
+      window.setTimeout(redirectAfterLogin, 450);
+    } catch (error) {
+      console.error("ThePetGrid authentication error:", error);
+      showMessage(friendlyError(error), "error");
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  const existingUser = window.ThePetGridAuth.getCurrentUser();
+  if (existingUser) {
+    showMessage(`You are already logged in as ${existingUser.username}.`);
+  }
+
+  setMode("login");
+});

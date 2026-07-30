@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Profile | ThePetGrid</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="../css/my-profile.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<main class="profile-page">
+<!-- PROFILE HEADER -->
+<section class="profile-header">
+<div class="avatar">
+            👤
+        </div>
+<div class="profile-info">
+<h1 id="profileUsername">
+                Username
+            </h1>
+<p id="memberSince">
+                Member since 2026
+            </p>
+</div>
+</section>
+<!-- DASHBOARD -->
+<section class="dashboard">
+<div class="stat-card">
+<h2 id="totalPets">
+                0
+            </h2>
+<p>Pets</p>
+</div>
+<div class="stat-card">
+<h2 id="totalLikes">
+                0
+            </h2>
+<p>Likes</p>
+</div>
+<div class="stat-card">
+<h2 id="totalFollowers">
+                0
+            </h2>
+<p>Followers</p>
+</div>
+<div class="stat-card">
+<h2 id="totalGifts">
+                0
+            </h2>
+<p>Gifts</p>
+</div>
+</section>
+<!-- MY PETS -->
+<section class="my-pets">
+<div class="section-title">
+<h2>My Pets</h2>
+<a href="upload.html">
+                + Add Pet
+            </a>
+</div>
+<div class="pets-grid" id="myPetsGrid">
+</div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/header.js"></script>
+<script src="../js/pet-favorites.js"></script>
+<script src="../js/my-profile.js?v=5"></script><script src="../js/header-live.js"></script>
+</body>
+</html>

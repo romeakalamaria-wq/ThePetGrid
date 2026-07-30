@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Edit your pet profile on ThePetGrid." name="description"/>
+<title>Edit Pet | ThePetGrid</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="../css/edit-pet.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css"/>
+<link rel="stylesheet" href="../css/premium-map-ui.css"/>
+</head>
+<body>
+<!-- =========================================
+         HEADER
+    ========================================== -->
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<!-- =========================================
+         MAIN
+    ========================================== -->
+<main class="edit-page">
+<!-- =====================================
+             HERO
+        ====================================== -->
+<section class="edit-hero">
+<div class="edit-container">
+<a class="back-link" href="my-profile.html">
+                    ← Back to My Profile
+                </a>
+<div class="edit-hero-content">
+<div>
+<span class="edit-badge">
+                            ✏️ Pet Management
+                        </span>
+<h1>
+                            Edit Pet Profile
+                        </h1>
+<p>
+                            Update your pet's details, profile photo
+                            and public information.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- =====================================
+             LOADING STATE
+        ====================================== -->
+<section class="edit-state edit-container" id="editPetLoading">
+<div class="state-card">
+<div class="loading-spinner"></div>
+<h2>
+                    Loading pet profile...
+                </h2>
+<p>
+                    Please wait while we prepare the information.
+                </p>
+</div>
+</section>
+<!-- =====================================
+             ERROR STATE
+        ====================================== -->
+<section class="edit-state edit-container" hidden="" id="editPetError">
+<div class="state-card state-card-error">
+<div class="state-icon">
+                    ⚠️
+                </div>
+<h2>
+                    Pet not found
+                </h2>
+<p id="editPetErrorMessage">
+                    We could not find the pet you are trying to edit.
+                </p>
+<a class="primary-button" href="my-profile.html">
+                    Return to My Profile
+                </a>
+</div>
+</section>
+<!-- =====================================
+             EDIT CONTENT
+        ====================================== -->
+<section class="edit-content edit-container" hidden="" id="editPetContent">
+<div class="edit-layout">
+<!-- =============================
+                     FORM
+                ============================== -->
+<div class="edit-form-card">
+<div class="card-heading">
+<div>
+<span class="section-eyebrow">
+                                Pet information
+                            </span>
+<h2>
+                                Update details
+                            </h2>
+</div>
+<span class="required-note">
+                            * Required fields
+                        </span>
+</div>
+<div aria-live="polite" class="edit-message" hidden="" id="editMessage" role="status"></div>
+<form id="editPetForm" novalidate="">
+<!-- PET NAME -->
+<div class="form-group">
+<label for="petName">
+                                Pet name
+                                <span aria-hidden="true">*</span>
+</label>
+<input autocomplete="off" id="petName" maxlength="50" name="petName" placeholder="Enter your pet's name" required="" type="text"/>
+<small class="form-error" id="petNameError"></small>
+</div>
+<!-- TYPE + BREED -->
+<div class="form-row">
+<div class="form-group">
+<label for="petType">
+                                    Pet type
+                                    <span aria-hidden="true">*</span>
+</label>
+<select id="petType" name="petType" required="">
+<option value="">
+                                        Select type
+                                    </option>
+<option value="Dog">
+                                        🐶 Dog
+                                    </option>
+<option value="Cat">
+                                        🐱 Cat
+                                    </option>
+<option value="Bird">
+                                        🐦 Bird
+                                    </option>
+<option value="Rabbit">
+                                        🐰 Rabbit
+                                    </option>
+<option value="Hamster">
+                                        🐹 Hamster
+                                    </option>
+<option value="Guinea Pig">
+                                        🐹 Guinea Pig
+                                    </option>
+<option value="Fish">
+                                        🐠 Fish
+                                    </option>
+<option value="Reptile">
+                                        🦎 Reptile
+                                    </option>
+<option value="Other">
+                                        🐾 Other
+                                    </option>
+</select>
+<small class="form-error" id="petTypeError"></small>
+</div>
+<div class="form-group">
+<label for="petBreed">
+                                    Breed
+                                </label>
+<input autocomplete="off" id="petBreed" maxlength="70" name="petBreed" placeholder="Example: Golden Retriever" type="text"/>
+<small class="form-error" id="petBreedError"></small>
+</div>
+</div>
+<!-- AGE + STATUS -->
+<div class="form-row">
+<div class="form-group">
+<label for="petAge">
+                                    Age
+                                </label>
+<input autocomplete="off" id="petAge" maxlength="30" name="petAge" placeholder="Example: 3 years" type="text"/>
+<small class="form-error" id="petAgeError"></small>
+</div>
+<div class="form-group">
+<label for="petStatus">
+                                    Status
+                                </label>
+<select id="petStatus" name="petStatus">
+<option value="new">
+                                        New
+                                    </option>
+<option value="featured">
+                                        Featured
+                                    </option>
+<option value="adoption">
+                                        For Adoption
+                                    </option>
+<option value="adopted">
+                                        Adopted
+                                    </option>
+<option value="lost">
+                                        Lost
+                                    </option>
+<option value="memorial">
+                                        Memorial
+                                    </option>
+</select>
+<small class="form-error" id="petStatusError"></small>
+</div>
+</div>
+<!-- COUNTRY + CITY -->
+<div class="form-row">
+<div class="form-group">
+<label for="petCountry">Country <span aria-hidden="true">*</span></label>
+<select id="petCountry" name="petCountry" required><option value="">Select country</option></select>
+<small class="form-error" id="petCountryError"></small>
+</div>
+<div class="form-group">
+<label for="petCity">City</label>
+<select id="petCity" name="petCity" disabled><option value="">Select city</option></select>
+<small class="form-error" id="petCityError"></small>
+</div>
+</div>
+<div class="form-group location-picker-card">
+<div class="location-picker__header"><div><strong>📍 Pet location</strong><small>Change the city or move the marker to update the exact location.</small></div></div>
+<div class="location-picker__search">
+<input id="locationSearch" type="search" placeholder="Search city, area or address" autocomplete="off">
+<button id="locationSearchButton" class="button button-secondary" type="button">Search</button>
+</div>
+<div id="petLocationMap" class="pet-location-map" aria-label="Pet location map"></div>
+<input id="petLatitude" name="petLatitude" type="hidden">
+<input id="petLongitude" name="petLongitude" type="hidden">
+<p id="locationStatus" class="location-picker__status">Loading saved location…</p>
+</div>
+<!-- OWNER -->
+<div class="form-group">
+<label for="petOwner">
+                                Owner
+                            </label>
+<input autocomplete="name" id="petOwner" maxlength="60" name="petOwner" placeholder="Owner name" readonly="" type="text"/>
+<small class="form-hint">
+                                The owner is connected to the logged-in account.
+                            </small>
+<small class="form-error" id="petOwnerError"></small>
+</div>
+<!-- BIO -->
+<div class="form-group">
+<div class="label-row">
+<label for="petBio">
+                                    About your pet
+                                </label>
+<span class="character-counter" id="bioCharacterCount">
+                                    0 / 300
+                                </span>
+</div>
+<textarea id="petBio" maxlength="300" name="petBio" placeholder="Tell the community something special about your pet..." rows="6"></textarea>
+<small class="form-error" id="petBioError"></small>
+</div>
+<!-- IMAGE -->
+<div class="form-group">
+<label for="petImage">
+                                Change profile photo
+                            </label>
+<div class="file-upload-area">
+<input accept="image/jpeg,image/png,image/webp" id="petImage" name="petImage" type="file"/>
+<label class="file-upload-label" for="petImage">
+<span class="file-upload-icon">
+                                        📷
+                                    </span>
+<span class="file-upload-title">
+                                        Choose a new photo
+                                    </span>
+<span class="file-upload-description">
+                                        JPG, PNG or WebP — maximum 5 MB
+                                    </span>
+</label>
+</div>
+<small class="form-hint">
+                                Leave this empty to keep the current photo.
+                            </small>
+<small class="form-error" id="petImageError"></small>
+</div>
+<!-- ACTIONS -->
+<div class="form-actions">
+<a class="secondary-button" href="my-profile.html">
+                                Cancel
+                            </a>
+<button class="primary-button" id="savePetButton" type="submit">
+<span class="button-default-text">
+                                    Save Changes
+                                </span>
+<span class="button-loading-text" hidden="">
+                                    Saving...
+                                </span>
+</button>
+</div>
+</form>
+</div>
+<!-- =============================
+                     LIVE PREVIEW
+                ============================== -->
+<aside class="preview-column">
+<div class="preview-heading">
+<span class="section-eyebrow">
+                            Live preview
+                        </span>
+<h2>
+                            Pet card
+                        </h2>
+</div>
+<article class="pet-preview-card">
+<div class="preview-image-wrapper">
+<img alt="Pet preview" hidden="" id="previewImage" src=""/>
+<div class="preview-placeholder" id="previewPlaceholder">
+<span>
+                                    🐾
+                                </span>
+<p>
+                                    Pet photo
+                                </p>
+</div>
+<span class="preview-status" id="previewStatus">
+                                New
+                            </span>
+</div>
+<div class="preview-card-content">
+<div class="preview-card-top">
+<div>
+<h3 id="previewName">
+                                        Your Pet
+                                    </h3>
+<p id="previewType">
+                                        Pet type • Breed
+                                    </p>
+</div>
+<button aria-label="Favorite preview" class="preview-favorite-button" disabled="" type="button">
+                                    ♡
+                                </button>
+</div>
+<div class="preview-meta">
+<p id="previewLocation">
+                                    📍 City, Country
+                                </p>
+<p id="previewOwner">
+                                    👤 Owner name
+                                </p>
+</div>
+<div class="preview-statistics">
+<div>
+<strong id="previewLikes">
+                                        0
+                                    </strong>
+<span>
+                                        Likes
+                                    </span>
+</div>
+<div>
+<strong id="previewFollowers">
+                                        0
+                                    </strong>
+<span>
+                                        Followers
+                                    </span>
+</div>
+<div>
+<strong id="previewGifts">
+                                        0
+                                    </strong>
+<span>
+                                        Gifts
+                                    </span>
+</div>
+</div>
+</div>
+</article>
+<div class="preview-info-card">
+<span class="preview-info-icon">
+                            💡
+                        </span>
+<div>
+<h3>
+                                Preview updates automatically
+                            </h3>
+<p>
+                                The card changes while you edit the form.
+                                Your changes are saved only after pressing
+                                Save Changes.
+                            </p>
+</div>
+</div>
+</aside>
+</div>
+</section>
+</main>
+<!-- =========================================
+         FOOTER
+    ========================================== -->
+<footer class="main-footer">
+<div class="footer-container">
+<a class="footer-brand" href="../index.html">
+                🐾 ThePetGrid
+            </a>
+<p>
+                Every pet has a place on the grid.
+            </p>
+<p class="footer-copyright">
+                © 2026 ThePetGrid
+            </p>
+</div>
+</footer>
+<!-- =========================================
+         SCRIPTS
+    ========================================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
+<script src="../js/map-style.js"></script>
+<script src="../js/map-core/map-manager.js"></script>
+<script src="../js/location-data.js"></script>
+<script src="../js/location-picker.js"></script>
+<script src="../js/edit-pet.js"></script>
+<script src="../js/header.js"></script>
+<script src="../js/header-live.js"></script>
+</body>
+</html>

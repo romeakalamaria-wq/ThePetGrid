@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile - ThePetGrid</title>
+<link href="../assets/favicon.png" rel="icon" type="image/png"/>
+
+
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/user-profile.css" rel="stylesheet"/>
+<link href="../css/pet-card.css" rel="stylesheet"/>
+</head>
+<body>
+<!-- ==========================================
+         HEADER
+    =========================================== -->
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<!-- ==========================================
+         PROFILE PAGE
+    =========================================== -->
+<main class="user-profile-page">
+<div class="user-profile-container">
+<!-- ==================================
+                 LOADING STATE
+            =================================== -->
+<section class="profile-state-card" id="profileLoading">
+<div class="profile-loader"></div>
+<p>
+                    Loading profile...
+                </p>
+</section>
+<!-- ==================================
+                 ERROR STATE
+            =================================== -->
+<section class="profile-state-card profile-error" hidden="" id="profileError">
+<div class="profile-state-icon">
+                    ⚠️
+                </div>
+<h2>
+                    Profile not found
+                </h2>
+<p id="profileErrorMessage">
+                    We could not find this user profile.
+                </p>
+<a class="profile-back-btn" href="pets.html">
+                    Browse Pets
+                </a>
+</section>
+<!-- ==================================
+                 PROFILE CONTENT
+            =================================== -->
+<div hidden="" id="profileContent">
+<!-- ==============================
+                     PROFILE HERO
+                =============================== -->
+<section class="profile-hero-card">
+<div class="profile-cover">
+<div class="profile-cover-decoration profile-cover-decoration-one"></div>
+<div class="profile-cover-decoration profile-cover-decoration-two"></div>
+</div>
+<div class="profile-main-info">
+<div class="profile-avatar-wrapper">
+<img alt="User profile photo" class="profile-avatar" id="profileAvatar" src="../assets/avatar.png"/>
+<div class="profile-verified-badge" hidden="" id="profileVerifiedBadge">
+                                ✔
+                            </div>
+</div>
+<div class="profile-identity">
+<div class="profile-name-row">
+<h1 id="profileDisplayName">
+                                    User
+                                </h1>
+<span class="profile-username" id="profileUsername">
+                                    @username
+                                </span>
+</div>
+<p class="profile-location" id="profileLocation">
+                                📍 Location not available
+                            </p>
+<p class="profile-bio" id="profileBio">
+                                This user has not added a bio yet.
+                            </p>
+</div>
+<div class="profile-actions" id="profileActions">
+<button class="profile-action-btn follow-btn" id="followButton" type="button">
+                                + Follow
+                            </button>
+<button class="profile-action-btn message-btn" id="messageButton" type="button">
+                                💬 Message
+                            </button>
+<button class="profile-action-btn share-btn" id="shareProfileButton" type="button">
+                                ↗ Share
+                            </button>
+</div>
+</div>
+<!-- PROFILE STATS -->
+<div class="profile-stats">
+<div class="profile-stat">
+<strong id="profilePetsCount">
+                                0
+                            </strong>
+<span>
+                                Pets
+                            </span>
+</div>
+<button aria-controls="connectionsModal" aria-haspopup="dialog" class="profile-stat profile-stat-button" data-connections-type="followers" id="openFollowersButton" type="button">
+<strong id="profileFollowersCount">
+                                0
+                            </strong>
+<span>
+                                Followers
+                            </span>
+</button>
+<button aria-controls="connectionsModal" aria-haspopup="dialog" class="profile-stat profile-stat-button" data-connections-type="following" id="openFollowingButton" type="button">
+<strong id="profileFollowingCount">
+                                0
+                            </strong>
+<span>
+                                Following
+                            </span>
+</button>
+<div class="profile-stat">
+<strong id="profileLikesCount">
+                                0
+                            </strong>
+<span>
+                                Pet Likes
+                            </span>
+</div>
+</div>
+</section>
+<!-- ==============================
+                     PROFILE DETAILS
+                =============================== -->
+<section class="profile-details-grid">
+<!-- ABOUT CARD -->
+<article class="profile-info-card">
+<div class="profile-section-heading">
+<div>
+<span class="profile-section-label">
+                                    Profile
+                                </span>
+<h2>
+                                    About
+                                </h2>
+</div>
+<span class="profile-section-icon">
+                                👤
+                            </span>
+</div>
+<div class="profile-detail-list">
+<div class="profile-detail-item">
+<span>
+                                    Display name
+                                </span>
+<strong id="profileAboutName">
+                                    —
+                                </strong>
+</div>
+<div class="profile-detail-item">
+<span>
+                                    Username
+                                </span>
+<strong id="profileAboutUsername">
+                                    —
+                                </strong>
+</div>
+<div class="profile-detail-item">
+<span>
+                                    Country
+                                </span>
+<strong id="profileCountry">
+                                    —
+                                </strong>
+</div>
+<div class="profile-detail-item">
+<span>
+                                    City
+                                </span>
+<strong id="profileCity">
+                                    —
+                                </strong>
+</div>
+<div class="profile-detail-item">
+<span>
+                                    Member since
+                                </span>
+<strong id="profileMemberSince">
+                                    —
+                                </strong>
+</div>
+</div>
+</article>
+<!-- COMMUNITY CARD -->
+<article class="profile-info-card">
+<div class="profile-section-heading">
+<div>
+<span class="profile-section-label">
+                                    Community
+                                </span>
+<h2>
+                                    Activity
+                                </h2>
+</div>
+<span class="profile-section-icon">
+                                🌍
+                            </span>
+</div>
+<div class="community-highlights">
+<div class="community-highlight">
+<div class="community-highlight-icon">
+                                    🐾
+                                </div>
+<div>
+<strong id="communityPetsValue">
+                                        0
+                                    </strong>
+<span>
+                                        pets shared
+                                    </span>
+</div>
+</div>
+<div class="community-highlight">
+<div class="community-highlight-icon">
+                                    ❤️
+                                </div>
+<div>
+<strong id="communityLikesValue">
+                                        0
+                                    </strong>
+<span>
+                                        total pet likes
+                                    </span>
+</div>
+</div>
+<div class="community-highlight">
+<div class="community-highlight-icon">
+                                    🎁
+                                </div>
+<div>
+<strong id="communityGiftsValue">
+                                        0
+                                    </strong>
+<span>
+                                        virtual gifts received
+                                    </span>
+</div>
+</div>
+</div>
+</article>
+</section>
+<!-- ==============================
+                     USER PETS
+                =============================== -->
+<section class="profile-pets-section">
+<div class="profile-pets-header">
+<div>
+<span class="profile-section-label">
+                                Pet Family
+                            </span>
+<h2 id="profilePetsTitle">
+                                User's Pets
+                            </h2>
+<p>
+                                Meet the pets shared by this member of
+                                ThePetGrid.
+                            </p>
+</div>
+<a class="browse-all-pets-link" href="pets.html">
+                            Browse All Pets →
+                        </a>
+</div>
+<!-- EMPTY PET STATE -->
+<div class="profile-pets-empty" hidden="" id="profilePetsEmpty">
+<div class="profile-pets-empty-icon">
+                            🐾
+                        </div>
+<h3>
+                            No pets shared yet
+                        </h3>
+<p>
+                            This user has not uploaded any pets.
+                        </p>
+</div>
+<!-- PET GRID -->
+<div class="profile-pets-grid" id="profilePetsGrid"></div>
+</section>
+<section class="profile-activity-section">
+<div class="profile-pets-header">
+<div>
+<span class="profile-section-label">Community</span>
+<h2>Recent Activity</h2>
+<p>Latest public updates from this member.</p>
+</div>
+</div>
+<div class="profile-activity-list" id="profileActivityList"></div>
+</section>
+</div>
+</div>
+</main>
+<!-- ==========================================
+         MESSAGE MODAL
+    =========================================== -->
+<div class="message-modal" hidden="" id="messageModal">
+<div class="message-modal-overlay" data-close-message-modal=""></div>
+<div class="message-modal-card">
+<button aria-label="Close message window" class="message-modal-close" id="closeMessageModal" type="button">
+                ×
+            </button>
+<div class="message-modal-heading">
+<span class="message-modal-icon">
+                    💬
+                </span>
+<div>
+<span>
+                        Send a message
+                    </span>
+<h2 id="messageModalTitle">
+                        Message user
+                    </h2>
+</div>
+</div>
+<form id="messageForm">
+<label for="messageText">
+                    Your message
+                </label>
+<textarea id="messageText" maxlength="500" placeholder="Write a friendly message..." required="" rows="5"></textarea>
+<div class="message-character-count">
+<span id="messageCharacterCount">
+                        0
+                    </span>
+<span>
+                        / 500
+                    </span>
+</div>
+<button class="send-message-btn" type="submit">
+                    Send Message
+                </button>
+</form>
+</div>
+</div>
+<!-- ==========================================
+         FOLLOWERS / FOLLOWING MODAL
+    =========================================== -->
+<div aria-labelledby="connectionsModalTitle" aria-modal="true" class="connections-modal" hidden="" id="connectionsModal" role="dialog">
+<div class="connections-modal-overlay" data-close-connections-modal=""></div>
+<section class="connections-modal-card">
+<header class="connections-modal-header">
+<div class="connections-modal-heading">
+<span aria-hidden="true" class="connections-modal-icon" id="connectionsModalIcon">
+                        👥
+                    </span>
+<div>
+<span class="connections-modal-eyebrow">
+                            Community
+                        </span>
+<h2 id="connectionsModalTitle">
+                            Followers
+                        </h2>
+<p id="connectionsModalSubtitle">
+                            People connected with this profile.
+                        </p>
+</div>
+</div>
+<button aria-label="Close followers and following window" class="connections-modal-close" id="closeConnectionsModal" type="button">
+                    ×
+                </button>
+</header>
+<div class="connections-search-wrapper">
+<span aria-hidden="true" class="connections-search-icon">
+                    🔍
+                </span>
+<label class="sr-only" for="connectionsSearchInput">
+                    Search users
+                </label>
+<input autocomplete="off" class="connections-search-input" id="connectionsSearchInput" placeholder="Search by name, username or country..." type="search"/>
+<button aria-label="Clear user search" class="connections-search-clear" hidden="" id="clearConnectionsSearch" type="button">
+                    ×
+                </button>
+</div>
+<div aria-live="polite" class="connections-list" id="connectionsList"></div>
+<div class="connections-empty-state" hidden="" id="connectionsEmptyState">
+<div class="connections-empty-icon">
+                    🐾
+                </div>
+<h3 id="connectionsEmptyTitle">
+                    No followers yet
+                </h3>
+<p id="connectionsEmptyText">
+                    New community connections will appear here.
+                </p>
+</div>
+</section>
+</div>
+<!-- ==========================================
+     SCRIPTS
+=========================================== -->
+<script src="../store/pet-store.js?v=3"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/user-profile.js?v=4"></script>
+<script src="../js/profile-follows.js?v=1"></script>
+<script src="../js/header.js"></script>
+<script src="../js/header-live.js"></script>
+</body>
+</html>

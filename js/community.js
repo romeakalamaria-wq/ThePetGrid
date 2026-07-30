@@ -1,0 +1,1523 @@
+(() => {
+    "use strict";
+
+    const STORAGE_KEY = "thePetGridCommunityPosts";
+    const DEFAULT_AVATAR = "../assets/avatar.png";
+
+    const elements = {
+        form: document.getElementById("createPostForm"),
+        postText: document.getElementById("postText"),
+        postImageInput: document.getElementById("postImageInput"),
+        taggedPet: document.getElementById("taggedPet"),
+        imagePreviewBox: document.getElementById("imagePreviewBox"),
+        imagePreview: document.getElementById("imagePreview"),
+        removeImageButton: document.getElementById("removeImageButton"),
+        publishPostButton: document.getElementById("publishPostButton"),
+        postCharCount: document.getElementById("postCharCount"),
+        composerMessage: document.getElementById("composerMessage"),
+        composerAvatar: document.getElementById("composerAvatar"),
+        composerIdentity: document.getElementById("composerIdentity"),
+        feed: document.getElementById("communityFeed"),
+        emptyFeed: document.getElementById("emptyFeed"),
+        postCount: document.getElementById("communityPostCount"),
+        clearPostsButton: document.getElementById("clearPostsButton"),
+        userArea: document.getElementById("userArea")
+    };
+
+    let selectedImage = "";
+    let posts = [];
+
+    const openCommentPostIds = new Set();
+    const currentUser = getLoggedUser();
+
+    function safeJsonParse(value, fallback) {
+        try {
+            return value ? JSON.parse(value) : fallback;
+        } catch (error) {
+            console.warn("Could not parse stored JSON:", error);
+            return fallback;
+        }
+    }
+
+    function getLoggedUser() {
+        const user = safeJsonParse(
+            localStorage.getItem("loggedUser"),
+            null
+        );
+
+        if (!user || typeof user !== "object") {
+            return {
+                username: "guest",
+                displayName: "Guest Pet Lover",
+                avatar: DEFAULT_AVATAR
+            };
+        }
+
+        return {
+            ...user,
+
+            username: String(
+                user.username ||
+                user.name ||
+                user.email ||
+                "guest"
+            ),
+
+            displayName: String(
+                user.displayName ||
+                user.name ||
+                user.username ||
+                user.email ||
+                "Pet Lover"
+            ),
+
+            avatar: String(
+                user.avatar ||
+                user.photo ||
+                user.image ||
+                DEFAULT_AVATAR
+            )
+        };
+    }
+
+    function normalizeComment(comment) {
+        if (!comment || typeof comment !== "object") {
+            return null;
+        }
+
+        return {
+            id:
+                comment.id ||
+                `${Date.now()}-${Math.random()
+                    .toString(16)
+                    .slice(2)}`,
+
+            authorUsername: String(
+                comment.authorUsername ||
+                comment.username ||
+                "guest"
+            ),
+
+            authorName: String(
+                comment.authorName ||
+                comment.displayName ||
+                comment.authorUsername ||
+                "Pet Lover"
+            ),
+
+            authorAvatar: String(
+                comment.authorAvatar ||
+                comment.avatar ||
+                DEFAULT_AVATAR
+            ),
+
+            text: String(comment.text || "").trim(),
+
+            createdAt:
+                comment.createdAt ||
+                new Date().toISOString()
+        };
+    }
+
+    function normalizePost(post) {
+        const storedComments = Array.isArray(post.comments)
+            ? post.comments
+                  .map(normalizeComment)
+                  .filter(Boolean)
+                  .filter((comment) => comment.text)
+            : [];
+
+        const legacyCommentCount =
+            Array.isArray(post.comments)
+                ? Number(post.legacyCommentCount || 0)
+                : Number(post.comments || 0);
+
+        return {
+            ...post,
+
+            id:
+                post.id ||
+                `${Date.now()}-${Math.random()
+                    .toString(16)
+                    .slice(2)}`,
+
+            authorUsername: String(
+                post.authorUsername ||
+                post.username ||
+                "guest"
+            ),
+
+            authorName: String(
+                post.authorName ||
+                post.displayName ||
+                post.authorUsername ||
+                "Pet Lover"
+            ),
+
+            authorAvatar: String(
+                post.authorAvatar ||
+                post.avatar ||
+                DEFAULT_AVATAR
+            ),
+
+            text: String(post.text || ""),
+
+            image: String(post.image || ""),
+
+            taggedPet: String(post.taggedPet || ""),
+
+            createdAt:
+                post.createdAt ||
+                new Date().toISOString(),
+
+            likes: Math.max(
+                0,
+                Number(post.likes || 0)
+            ),
+
+            likedByCurrentUser:
+                Boolean(post.likedByCurrentUser),
+
+            comments: storedComments,
+
+            legacyCommentCount: Math.max(
+                0,
+                legacyCommentCount
+            )
+        };
+    }
+
+    function loadPosts() {
+        const stored = safeJsonParse(
+            localStorage.getItem(STORAGE_KEY),
+            []
+        );
+
+        posts = Array.isArray(stored)
+            ? stored
+                  .filter(Boolean)
+                  .map(normalizePost)
+            : [];
+
+        if (posts.length === 0) {
+            posts = createDemoPosts();
+        }
+
+        savePosts();
+    }
+
+    function savePosts() {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(posts)
+        );
+    }
+
+    function createDemoPosts() {
+        const now = Date.now();
+
+        return [
+            normalizePost({
+                id: now - 2000,
+                authorUsername: "maria",
+                authorName: "Maria Pet Lover",
+                authorAvatar: DEFAULT_AVATAR,
+
+                text:
+                    "Our rescued puppy finally feels safe at home. Small steps, huge progress. 💛",
+
+                image: "",
+                taggedPet: "Milo",
+
+                createdAt: new Date(
+                    now - 1000 * 60 * 42
+                ).toISOString(),
+
+                likes: 18,
+                likedByCurrentUser: false,
+
+                comments: [
+                    {
+                        id: `${now}-demo-comment-1`,
+                        authorUsername: "anna",
+                        authorName: "Anna",
+                        authorAvatar: DEFAULT_AVATAR,
+                        text:
+                            "This is wonderful news! Milo is very lucky. ❤️",
+                        createdAt: new Date(
+                            now - 1000 * 60 * 30
+                        ).toISOString()
+                    },
+
+                    {
+                        id: `${now}-demo-comment-2`,
+                        authorUsername: "george",
+                        authorName: "George",
+                        authorAvatar: DEFAULT_AVATAR,
+                        text:
+                            "Small steps really make a huge difference.",
+                        createdAt: new Date(
+                            now - 1000 * 60 * 18
+                        ).toISOString()
+                    }
+                ]
+            }),
+
+            normalizePost({
+                id: now - 1000,
+                authorUsername: "nikos",
+                authorName: "Nikos",
+                authorAvatar: DEFAULT_AVATAR,
+
+                text:
+                    "What is your pet's favorite way to spend a sunny afternoon?",
+
+                image: "",
+                taggedPet: "",
+
+                createdAt: new Date(
+                    now - 1000 * 60 * 130
+                ).toISOString(),
+
+                likes: 9,
+                likedByCurrentUser: false,
+
+                comments: [
+                    {
+                        id: `${now}-demo-comment-3`,
+                        authorUsername: "maria",
+                        authorName: "Maria Pet Lover",
+                        authorAvatar: DEFAULT_AVATAR,
+                        text:
+                            "Long walks and then a very long nap! 🐾",
+                        createdAt: new Date(
+                            now - 1000 * 60 * 95
+                        ).toISOString()
+                    }
+                ]
+            })
+        ];
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function formatRelativeTime(dateValue) {
+        const date = new Date(dateValue);
+
+        if (Number.isNaN(date.getTime())) {
+            return "Just now";
+        }
+
+        const seconds = Math.max(
+            0,
+            Math.floor(
+                (Date.now() - date.getTime()) / 1000
+            )
+        );
+
+        if (seconds < 60) {
+            return "Just now";
+        }
+
+        if (seconds < 3600) {
+            const minutes = Math.floor(seconds / 60);
+
+            return `${minutes} ${
+                minutes === 1 ? "min" : "mins"
+            } ago`;
+        }
+
+        if (seconds < 86400) {
+            const hours = Math.floor(seconds / 3600);
+
+            return `${hours} ${
+                hours === 1 ? "hr" : "hrs"
+            } ago`;
+        }
+
+        if (seconds < 172800) {
+            return "Yesterday";
+        }
+
+        if (seconds < 604800) {
+            const days = Math.floor(seconds / 86400);
+
+            return `${days} days ago`;
+        }
+
+        return new Intl.DateTimeFormat("en", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        }).format(date);
+    }
+
+    function getAllPets() {
+        if (
+            window.PetStore &&
+            typeof window.PetStore.getAll === "function"
+        ) {
+            const result = window.PetStore.getAll();
+
+            return Array.isArray(result)
+                ? result
+                : [];
+        }
+
+        return [];
+    }
+
+    function getPetOwner(pet) {
+        return String(
+            pet?.owner ||
+            pet?.username ||
+            pet?.createdBy ||
+            pet?.user ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+    }
+
+    function populatePetOptions() {
+        if (!elements.taggedPet) {
+            return;
+        }
+
+        const username =
+            currentUser.username.toLowerCase();
+
+        const userPets = getAllPets().filter(
+            (pet) =>
+                getPetOwner(pet) === username
+        );
+
+        elements.taggedPet.innerHTML =
+            '<option value="">No pet tagged</option>';
+
+        userPets.forEach((pet) => {
+            const option =
+                document.createElement("option");
+
+            option.value = String(
+                pet.name || "Pet"
+            );
+
+            option.textContent =
+                `🐾 ${pet.name || "Pet"}`;
+
+            elements.taggedPet.appendChild(option);
+        });
+    }
+
+    function renderHeaderUser() {
+        if (!elements.userArea) {
+            return;
+        }
+
+        if (currentUser.username === "guest") {
+            elements.userArea.innerHTML =
+                '<a href="login.html" class="login-btn">Log In</a>';
+
+            return;
+        }
+
+        const profileUrl =
+            `user-profile.html?username=${encodeURIComponent(
+                currentUser.username
+            )}`;
+
+        elements.userArea.innerHTML = `
+            <a href="${profileUrl}" class="login-btn">
+                👤 ${escapeHtml(currentUser.displayName)}
+            </a>
+        `;
+    }
+
+    function renderComposerIdentity() {
+        elements.composerAvatar.src =
+            currentUser.avatar;
+
+        elements.composerAvatar.onerror = () => {
+            elements.composerAvatar.src =
+                DEFAULT_AVATAR;
+        };
+
+        elements.composerIdentity.textContent =
+            `Posting as ${currentUser.displayName}`;
+    }
+
+    function getCommentCount(post) {
+        const actualComments =
+            Array.isArray(post.comments)
+                ? post.comments.length
+                : 0;
+
+        const legacyCount = Math.max(
+            0,
+            Number(post.legacyCommentCount || 0)
+        );
+
+        return actualComments + legacyCount;
+    }
+
+    function canDeletePost(post) {
+        return (
+            post.authorUsername === currentUser.username ||
+            (
+                currentUser.username === "guest" &&
+                post.authorUsername === "guest"
+            )
+        );
+    }
+
+    function canDeleteComment(comment) {
+        return (
+            comment.authorUsername ===
+                currentUser.username ||
+            (
+                currentUser.username === "guest" &&
+                comment.authorUsername === "guest"
+            )
+        );
+    }
+
+    function renderPosts() {
+        elements.feed.innerHTML = "";
+
+        elements.postCount.textContent =
+            String(posts.length);
+
+        elements.emptyFeed.hidden =
+            posts.length !== 0;
+
+        posts
+            .slice()
+            .sort(
+                (a, b) =>
+                    new Date(b.createdAt) -
+                    new Date(a.createdAt)
+            )
+            .forEach((post) => {
+                elements.feed.appendChild(
+                    createPostElement(post)
+                );
+            });
+    }
+
+    function createPostElement(post) {
+        const article =
+            document.createElement("article");
+
+        article.className = "community-post";
+        article.dataset.postId = String(post.id);
+        article.id = `post-${post.id}`;
+
+        const profileUrl =
+            `user-profile.html?username=${encodeURIComponent(
+                post.authorUsername || "user"
+            )}`;
+
+        const commentsOpen =
+            openCommentPostIds.has(String(post.id));
+
+        article.innerHTML = `
+            <div class="post-header">
+
+                <div class="post-author">
+
+                    <a href="${profileUrl}">
+                        <img
+                            class="community-avatar"
+                            src="${escapeHtml(
+                                post.authorAvatar ||
+                                DEFAULT_AVATAR
+                            )}"
+                            alt="${escapeHtml(
+                                post.authorName
+                            )} avatar"
+                        >
+                    </a>
+
+                    <div class="post-author-info">
+
+                        <a
+                            class="post-author-name"
+                            href="${profileUrl}"
+                        >
+                            ${escapeHtml(post.authorName)}
+                        </a>
+
+                        <div class="post-meta">
+                            @${escapeHtml(
+                                post.authorUsername
+                            )}
+                            ·
+                            ${escapeHtml(
+                                formatRelativeTime(
+                                    post.createdAt
+                                )
+                            )}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                ${
+                    canDeletePost(post)
+                        ? `
+                            <button
+                                type="button"
+                                class="post-delete-button"
+                                data-action="delete"
+                                aria-label="Delete post"
+                            >
+                                🗑️
+                            </button>
+                        `
+                        : ""
+                }
+
+            </div>
+
+            <div class="post-content">
+
+                ${
+                    post.text
+                        ? `
+                            <p class="post-text">
+                                ${escapeHtml(post.text)}
+                            </p>
+                        `
+                        : ""
+                }
+
+                ${
+                    post.taggedPet
+                        ? `
+                            <span class="post-tag">
+                                🐾 With ${escapeHtml(
+                                    post.taggedPet
+                                )}
+                            </span>
+                        `
+                        : ""
+                }
+
+            </div>
+
+            ${
+                post.image
+                    ? `
+                        <img
+                            class="post-image"
+                            src="${escapeHtml(post.image)}"
+                            alt="Community post image"
+                        >
+                    `
+                    : ""
+            }
+
+            <div class="post-stats">
+
+                <span>
+                    ${Number(post.likes) || 0}
+                    ${
+                        Number(post.likes) === 1
+                            ? "like"
+                            : "likes"
+                    }
+                </span>
+
+                <button
+                    type="button"
+                    class="comments-count-button"
+                    data-action="comment"
+                >
+                    ${getCommentCount(post)}
+                    ${
+                        getCommentCount(post) === 1
+                            ? "comment"
+                            : "comments"
+                    }
+                </button>
+
+            </div>
+
+            <div class="post-actions">
+
+                <button
+                    type="button"
+                    class="post-action ${
+                        post.likedByCurrentUser
+                            ? "is-liked"
+                            : ""
+                    }"
+                    data-action="like"
+                >
+                    ❤️ Like
+                </button>
+
+                <button
+                    type="button"
+                    class="post-action ${
+                        commentsOpen
+                            ? "is-comment-active"
+                            : ""
+                    }"
+                    data-action="comment"
+                >
+                    💬 Comment
+                </button>
+
+                <button
+                    type="button"
+                    class="post-action"
+                    data-action="share"
+                >
+                    🔗 Share
+                </button>
+
+            </div>
+
+            ${createCommentsMarkup(post, commentsOpen)}
+        `;
+
+        article
+            .querySelectorAll(
+                ".community-avatar, .comment-avatar"
+            )
+            .forEach((avatar) => {
+                avatar.addEventListener(
+                    "error",
+                    () => {
+                        avatar.src = DEFAULT_AVATAR;
+                    },
+                    { once: true }
+                );
+            });
+
+        return article;
+    }
+
+    function createCommentsMarkup(post, commentsOpen) {
+        const comments = Array.isArray(post.comments)
+            ? post.comments
+            : [];
+
+        return `
+            <section
+                class="comments-section"
+                ${commentsOpen ? "" : "hidden"}
+            >
+
+                <div class="comments-section-header">
+
+                    <div>
+                        <span class="comments-eyebrow">
+                            COMMUNITY DISCUSSION
+                        </span>
+
+                        <h3>Comments</h3>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="close-comments-button"
+                        data-action="close-comments"
+                        aria-label="Close comments"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <div class="comments-list">
+
+                    ${
+                        comments.length
+                            ? comments
+                                  .map(
+                                      (comment) =>
+                                          createCommentMarkup(
+                                              comment
+                                          )
+                                  )
+                                  .join("")
+                            : `
+                                <div class="no-comments-message">
+                                    <span>💬</span>
+
+                                    <div>
+                                        <strong>
+                                            No comments yet
+                                        </strong>
+
+                                        <p>
+                                            Start the conversation.
+                                        </p>
+                                    </div>
+                                </div>
+                            `
+                    }
+
+                </div>
+
+                <form
+                    class="comment-form"
+                    data-post-id="${escapeHtml(post.id)}"
+                >
+
+                    <img
+                        class="comment-composer-avatar"
+                        src="${escapeHtml(
+                            currentUser.avatar ||
+                            DEFAULT_AVATAR
+                        )}"
+                        alt="${escapeHtml(
+                            currentUser.displayName
+                        )} avatar"
+                    >
+
+                    <div class="comment-input-wrapper">
+
+                        <label class="sr-only">
+                            Write a comment
+                        </label>
+
+                        <textarea
+                            class="comment-input"
+                            maxlength="300"
+                            rows="1"
+                            placeholder="Write a comment..."
+                            required
+                        ></textarea>
+
+                        <div class="comment-form-footer">
+
+                            <span class="comment-character-count">
+                                0 / 300
+                            </span>
+
+                            <button
+                                type="submit"
+                                class="send-comment-button"
+                            >
+                                Send
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </section>
+        `;
+    }
+
+    function createCommentMarkup(comment) {
+        const profileUrl =
+            `user-profile.html?username=${encodeURIComponent(
+                comment.authorUsername || "user"
+            )}`;
+
+        return `
+            <article
+                class="community-comment"
+                data-comment-id="${escapeHtml(comment.id)}"
+            >
+
+                <a
+                    href="${profileUrl}"
+                    class="comment-avatar-link"
+                >
+                    <img
+                        class="comment-avatar"
+                        src="${escapeHtml(
+                            comment.authorAvatar ||
+                            DEFAULT_AVATAR
+                        )}"
+                        alt="${escapeHtml(
+                            comment.authorName
+                        )} avatar"
+                    >
+                </a>
+
+                <div class="comment-main">
+
+                    <div class="comment-bubble">
+
+                        <div class="comment-header">
+
+                            <a
+                                href="${profileUrl}"
+                                class="comment-author-name"
+                            >
+                                ${escapeHtml(
+                                    comment.authorName
+                                )}
+                            </a>
+
+                            ${
+                                canDeleteComment(comment)
+                                    ? `
+                                        <button
+                                            type="button"
+                                            class="delete-comment-button"
+                                            data-action="delete-comment"
+                                            data-comment-id="${escapeHtml(
+                                                comment.id
+                                            )}"
+                                            aria-label="Delete comment"
+                                        >
+                                            🗑️
+                                        </button>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                        <p>${escapeHtml(comment.text)}</p>
+
+                    </div>
+
+                    <time
+                        class="comment-time"
+                        datetime="${escapeHtml(
+                            comment.createdAt
+                        )}"
+                    >
+                        ${escapeHtml(
+                            formatRelativeTime(
+                                comment.createdAt
+                            )
+                        )}
+                    </time>
+
+                </div>
+
+            </article>
+        `;
+    }
+
+    function setComposerMessage(
+        message,
+        isError = false
+    ) {
+        elements.composerMessage.textContent =
+            message;
+
+        elements.composerMessage.style.color =
+            isError
+                ? "#be123c"
+                : "#15803d";
+    }
+
+    function resetComposer() {
+        elements.form.reset();
+
+        selectedImage = "";
+
+        elements.imagePreview.removeAttribute("src");
+        elements.imagePreviewBox.hidden = true;
+
+        updateCharacterCount();
+    }
+
+    function updateCharacterCount() {
+        elements.postCharCount.textContent =
+            `${elements.postText.value.length} / 600`;
+    }
+
+    function readImage(file) {
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            setComposerMessage(
+                "Please choose a valid image file.",
+                true
+            );
+
+            elements.postImageInput.value = "";
+
+            return;
+        }
+
+        if (file.size > 4 * 1024 * 1024) {
+            setComposerMessage(
+                "The image must be smaller than 4 MB.",
+                true
+            );
+
+            elements.postImageInput.value = "";
+
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            selectedImage = String(
+                reader.result || ""
+            );
+
+            elements.imagePreview.src =
+                selectedImage;
+
+            elements.imagePreviewBox.hidden =
+                false;
+
+            setComposerMessage("");
+        };
+
+        reader.onerror = () => {
+            setComposerMessage(
+                "The image could not be read.",
+                true
+            );
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function publishPost(event) {
+        event.preventDefault();
+
+        const text =
+            elements.postText.value.trim();
+
+        const taggedPet =
+            elements.taggedPet.value.trim();
+
+        if (!text && !selectedImage) {
+            setComposerMessage(
+                "Write something or add a photo before publishing.",
+                true
+            );
+
+            elements.postText.focus();
+
+            return;
+        }
+
+        elements.publishPostButton.disabled = true;
+
+        const post = normalizePost({
+            id: Date.now(),
+
+            authorUsername:
+                currentUser.username,
+
+            authorName:
+                currentUser.displayName,
+
+            authorAvatar:
+                currentUser.avatar,
+
+            text,
+            image: selectedImage,
+            taggedPet,
+
+            createdAt:
+                new Date().toISOString(),
+
+            likes: 0,
+
+            likedByCurrentUser: false,
+
+            comments: []
+        });
+
+        posts.push(post);
+
+        try {
+            savePosts();
+            resetComposer();
+            renderPosts();
+
+            setComposerMessage(
+                "Your post was published successfully."
+            );
+        } catch (error) {
+            posts = posts.filter(
+                (item) => item.id !== post.id
+            );
+
+            console.error(error);
+
+            setComposerMessage(
+                "The post could not be saved. Try a smaller image.",
+                true
+            );
+        } finally {
+            elements.publishPostButton.disabled =
+                false;
+        }
+    }
+
+    function findPostFromTarget(target) {
+        const article =
+            target.closest(".community-post");
+
+        if (!article) {
+            return null;
+        }
+
+        const postId =
+            String(article.dataset.postId);
+
+        return (
+            posts.find(
+                (post) =>
+                    String(post.id) === postId
+            ) || null
+        );
+    }
+
+    function toggleComments(post, forceOpen = null) {
+        const postId = String(post.id);
+
+        const shouldOpen =
+            forceOpen === null
+                ? !openCommentPostIds.has(postId)
+                : Boolean(forceOpen);
+
+        if (shouldOpen) {
+            openCommentPostIds.add(postId);
+        } else {
+            openCommentPostIds.delete(postId);
+        }
+
+        renderPosts();
+
+        if (shouldOpen) {
+            requestAnimationFrame(() => {
+                const article =
+                    document.querySelector(
+                        `.community-post[data-post-id="${CSS.escape(
+                            postId
+                        )}"]`
+                    );
+
+                const input =
+                    article?.querySelector(
+                        ".comment-input"
+                    );
+
+                input?.focus();
+            });
+        }
+    }
+
+    function publishComment(form) {
+        const postId =
+            String(form.dataset.postId);
+
+        const post = posts.find(
+            (item) =>
+                String(item.id) === postId
+        );
+
+        if (!post) {
+            return;
+        }
+
+        const input =
+            form.querySelector(".comment-input");
+
+        const text =
+            input?.value.trim() || "";
+
+        if (!text) {
+            input?.focus();
+            return;
+        }
+
+        if (text.length > 300) {
+            window.alert(
+                "A comment can contain up to 300 characters."
+            );
+
+            return;
+        }
+
+        const newComment = normalizeComment({
+            id:
+                `${Date.now()}-${Math.random()
+                    .toString(16)
+                    .slice(2)}`,
+
+            authorUsername:
+                currentUser.username,
+
+            authorName:
+                currentUser.displayName,
+
+            authorAvatar:
+                currentUser.avatar,
+
+            text,
+
+            createdAt:
+                new Date().toISOString()
+        });
+
+        if (!Array.isArray(post.comments)) {
+            post.comments = [];
+        }
+
+        post.comments.push(newComment);
+
+        openCommentPostIds.add(postId);
+
+        savePosts();
+        renderPosts();
+
+        requestAnimationFrame(() => {
+            const article =
+                document.querySelector(
+                    `.community-post[data-post-id="${CSS.escape(
+                        postId
+                    )}"]`
+                );
+
+            const commentsSection =
+                article?.querySelector(
+                    ".comments-section"
+                );
+
+            commentsSection?.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+
+            article
+                ?.querySelector(".comment-input")
+                ?.focus();
+        });
+    }
+
+    function deleteComment(post, commentId) {
+        const comment = post.comments.find(
+            (item) =>
+                String(item.id) ===
+                String(commentId)
+        );
+
+        if (
+            !comment ||
+            !canDeleteComment(comment)
+        ) {
+            return;
+        }
+
+        if (
+            !window.confirm(
+                "Delete this comment?"
+            )
+        ) {
+            return;
+        }
+
+        post.comments =
+            post.comments.filter(
+                (item) =>
+                    String(item.id) !==
+                    String(commentId)
+            );
+
+        openCommentPostIds.add(
+            String(post.id)
+        );
+
+        savePosts();
+        renderPosts();
+    }
+
+    async function handleFeedAction(event) {
+        const button =
+            event.target.closest("[data-action]");
+
+        if (!button) {
+            return;
+        }
+
+        const post =
+            findPostFromTarget(button);
+
+        if (!post) {
+            return;
+        }
+
+        const action =
+            button.dataset.action;
+
+        if (action === "like") {
+            post.likedByCurrentUser =
+                !post.likedByCurrentUser;
+
+            post.likes = Math.max(
+                0,
+                Number(post.likes || 0) +
+                    (
+                        post.likedByCurrentUser
+                            ? 1
+                            : -1
+                    )
+            );
+
+            savePosts();
+            renderPosts();
+
+            return;
+        }
+
+        if (action === "delete") {
+            if (
+                !window.confirm(
+                    "Delete this post?"
+                )
+            ) {
+                return;
+            }
+
+            posts = posts.filter(
+                (item) =>
+                    String(item.id) !==
+                    String(post.id)
+            );
+
+            openCommentPostIds.delete(
+                String(post.id)
+            );
+
+            savePosts();
+            renderPosts();
+
+            return;
+        }
+
+        if (action === "comment") {
+            toggleComments(post);
+            return;
+        }
+
+        if (action === "close-comments") {
+            toggleComments(post, false);
+            return;
+        }
+
+        if (action === "delete-comment") {
+            deleteComment(
+                post,
+                button.dataset.commentId
+            );
+
+            return;
+        }
+
+        if (action === "share") {
+            const shareUrl =
+                `${window.location.origin}` +
+                `${window.location.pathname}` +
+                `#post-${post.id}`;
+
+            try {
+                if (navigator.share) {
+                    await navigator.share({
+                        title:
+                            "ThePetGrid Community",
+
+                        text:
+                            post.text ||
+                            "Community post",
+
+                        url: shareUrl
+                    });
+                } else if (
+                    navigator.clipboard
+                ) {
+                    await navigator.clipboard.writeText(
+                        shareUrl
+                    );
+
+                    window.alert(
+                        "Post link copied."
+                    );
+                } else {
+                    window.prompt(
+                        "Copy this post link:",
+                        shareUrl
+                    );
+                }
+            } catch (error) {
+                if (
+                    error?.name !== "AbortError"
+                ) {
+                    console.warn(
+                        "Share failed:",
+                        error
+                    );
+                }
+            }
+        }
+    }
+
+    function handleFeedSubmit(event) {
+        const form =
+            event.target.closest(
+                ".comment-form"
+            );
+
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
+        publishComment(form);
+    }
+
+    function handleFeedInput(event) {
+        const input =
+            event.target.closest(
+                ".comment-input"
+            );
+
+        if (!input) {
+            return;
+        }
+
+        const form =
+            input.closest(".comment-form");
+
+        const counter =
+            form?.querySelector(
+                ".comment-character-count"
+            );
+
+        if (counter) {
+            counter.textContent =
+                `${input.value.length} / 300`;
+        }
+
+        input.style.height = "auto";
+
+        input.style.height =
+            `${Math.min(
+                input.scrollHeight,
+                150
+            )}px`;
+    }
+
+    function clearDemoFeed() {
+        if (
+            !window.confirm(
+                "Reset the community feed to the demo posts?"
+            )
+        ) {
+            return;
+        }
+
+        posts = createDemoPosts();
+        openCommentPostIds.clear();
+
+        savePosts();
+        renderPosts();
+    }
+
+    function bindEvents() {
+        elements.form.addEventListener(
+            "submit",
+            publishPost
+        );
+
+        elements.postText.addEventListener(
+            "input",
+            updateCharacterCount
+        );
+
+        elements.postImageInput.addEventListener(
+            "change",
+            (event) => {
+                readImage(
+                    event.target.files?.[0]
+                );
+            }
+        );
+
+        elements.removeImageButton.addEventListener(
+            "click",
+            () => {
+                selectedImage = "";
+
+                elements.postImageInput.value = "";
+
+                elements.imagePreview.removeAttribute(
+                    "src"
+                );
+
+                elements.imagePreviewBox.hidden =
+                    true;
+            }
+        );
+
+        elements.feed.addEventListener(
+            "click",
+            handleFeedAction
+        );
+
+        elements.feed.addEventListener(
+            "submit",
+            handleFeedSubmit
+        );
+
+        elements.feed.addEventListener(
+            "input",
+            handleFeedInput
+        );
+
+        elements.clearPostsButton.addEventListener(
+            "click",
+            clearDemoFeed
+        );
+    }
+
+    function init() {
+        if (
+            !elements.form ||
+            !elements.feed
+        ) {
+            console.error(
+                "Community page markup is incomplete."
+            );
+
+            return;
+        }
+
+        loadPosts();
+        renderHeaderUser();
+        renderComposerIdentity();
+        populatePetOptions();
+        updateCharacterCount();
+        renderPosts();
+        bindEvents();
+
+        console.log(
+            "ThePetGrid Community v2 with comments loaded."
+        );
+    }
+
+    init();
+})();

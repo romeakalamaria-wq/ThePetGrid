@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Account — ThePetGrid</title>
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="stylesheet" href="../design/theme.css">
+  <link rel="stylesheet" href="../design/style.css">
+  <link rel="stylesheet" href="../design/header.css">
+  <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+  <header class="main-header">
+    <div class="header-container">
+      <a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a>
+      </nav>
+      <div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
+    </div>
+  </header>
+
+  <main class="auth-shell">
+    <section class="auth-card">
+      <div class="auth-tabs" role="tablist" aria-label="Account action">
+        <button type="button" data-auth-mode="login" class="is-active" role="tab">Log In</button>
+        <button type="button" data-auth-mode="register" role="tab">Register</button>
+      </div>
+      <h1 id="authTitle">Welcome back</h1>
+      <p id="authIntro">Log in to manage your pets and community activity.</p>
+      <form id="authForm">
+        <label class="field" id="usernameField" hidden>Username<input name="username" autocomplete="username"></label>
+        <label class="field">Email<input type="email" name="email" required autocomplete="email"></label>
+        <label class="field">Password<input type="password" name="password" required autocomplete="current-password"></label>
+        <button class="auth-submit" id="authSubmit" type="submit">Log In</button>
+      </form>
+      <div id="authMessage" class="auth-message" hidden></div>
+      <p class="auth-note">Demo version: account data is stored only in this browser.</p>
+    </section>
+  </main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/auth.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="../js/header.js"></script>
+<script src="../js/header-live.js"></script>
+</body>
+</html>

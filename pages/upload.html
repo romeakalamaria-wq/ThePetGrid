@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Upload Pet — ThePetGrid</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="../css/upload.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css"/>
+<link rel="stylesheet" href="../css/premium-map-ui.css"/>
+</head>
+
+<body>
+<!-- =========================================
+         HEADER
+    ========================================== -->
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<!-- =========================================
+         MAIN
+    ========================================== -->
+<main class="upload-page">
+<section class="upload-hero">
+<div class="upload-hero__content">
+<span class="upload-hero__badge">
+                    🐾 Join the global pet community
+                </span>
+<h1>
+                    Add Your Pet to
+                    <span>ThePetGrid</span>
+</h1>
+<p>
+                    Create a beautiful profile for your pet
+                    and give them their own place on the grid.
+                </p>
+</div>
+</section>
+<section class="upload-section">
+<div class="upload-layout">
+<!-- =========================================
+                     FORM
+                ========================================== -->
+<div class="upload-card">
+<div class="upload-card__header">
+<div>
+<span class="upload-card__eyebrow">
+                                Pet Profile
+                            </span>
+<h2>
+                                Tell us about your pet
+                            </h2>
+<p>
+                                Fields marked with * are required.
+                            </p>
+</div>
+</div>
+<form class="upload-form" id="uploadPetForm" novalidate="">
+<div class="upload-form__grid">
+<!-- PET NAME -->
+<div class="form-group">
+<label for="petName">
+                                    Pet name *
+                                </label>
+<input autocomplete="off" id="petName" maxlength="60" name="petName" placeholder="e.g. Luna" required="" type="text"/>
+<small class="form-error" id="petNameError"></small>
+</div>
+<!-- PET TYPE -->
+<div class="form-group">
+<label for="petType">
+                                    Pet type *
+                                </label>
+<select id="petType" name="petType" required="">
+<option value="">
+                                        Select a type
+                                    </option>
+<option value="Dog">
+                                        🐶 Dog
+                                    </option>
+<option value="Cat">
+                                        🐱 Cat
+                                    </option>
+<option value="Bird">
+                                        🐦 Bird
+                                    </option>
+<option value="Rabbit">
+                                        🐰 Rabbit
+                                    </option>
+<option value="Hamster">
+                                        🐹 Hamster
+                                    </option>
+<option value="Fish">
+                                        🐠 Fish
+                                    </option>
+<option value="Reptile">
+                                        🦎 Reptile
+                                    </option>
+<option value="Other">
+                                        🐾 Other
+                                    </option>
+</select>
+<small class="form-error" id="petTypeError"></small>
+</div>
+<!-- BREED -->
+<div class="form-group">
+<label for="petBreed">
+                                    Breed
+                                </label>
+<input autocomplete="off" id="petBreed" maxlength="80" name="petBreed" placeholder="e.g. Golden Retriever" type="text"/>
+</div>
+<!-- AGE -->
+<div class="form-group">
+<label for="petAge">
+                                    Age
+                                </label>
+<input autocomplete="off" id="petAge" maxlength="40" name="petAge" placeholder="e.g. 3 years" type="text"/>
+</div>
+<!-- LOCATION -->
+<div class="form-group">
+<label for="petCountry">Country *</label>
+<select id="petCountry" name="petCountry" required>
+<option value="">Select country</option>
+</select>
+<small class="form-error" id="petCountryError"></small>
+</div>
+<div class="form-group">
+<label for="petCity">City</label>
+<select id="petCity" name="petCity" disabled>
+<option value="">Select city</option>
+</select>
+</div>
+<div class="form-group form-group--full location-picker-card">
+<div class="location-picker__header">
+<div><strong>📍 Select your pet's location</strong><small>Choose a country and city, search an address, or click the exact point on the map.</small></div>
+</div>
+<div class="location-picker__search">
+<input id="locationSearch" type="search" placeholder="Search city, area or address" autocomplete="off">
+<button id="locationSearchButton" class="button button--secondary" type="button">Search</button>
+</div>
+<div id="petLocationMap" class="pet-location-map" aria-label="Pet location map"></div>
+<input id="petLatitude" name="petLatitude" type="hidden">
+<input id="petLongitude" name="petLongitude" type="hidden">
+<p id="locationStatus" class="location-picker__status">Select a country and city, search, or click on the map.</p>
+</div>
+<!-- OWNER -->
+<div class="form-group">
+<label for="petOwner">
+                                    Owner name *
+                                </label>
+<input autocomplete="name" id="petOwner" maxlength="60" name="petOwner" placeholder="e.g. Maria" required="" type="text"/>
+<small class="form-error" id="petOwnerError"></small>
+</div>
+<!-- STATUS -->
+<div class="form-group">
+<label for="petStatus">
+                                    Profile status
+                                </label>
+<select id="petStatus" name="petStatus">
+<option value="new">
+                                        New
+                                    </option>
+<option value="featured">
+                                        Featured
+                                    </option>
+<option value="adoption">
+                                        Looking for Home
+                                    </option>
+<option value="adopted">
+                                        Adopted
+                                    </option>
+<option value="lost">
+                                        Lost
+                                    </option>
+</select>
+</div>
+</div>
+<!-- BIO -->
+<div class="form-group form-group--full">
+<div class="form-label-row">
+<label for="petBio">
+                                    About your pet
+                                </label>
+<span id="bioCharacterCount">
+                                    0 / 300
+                                </span>
+</div>
+<textarea id="petBio" maxlength="300" name="petBio" placeholder="Share your pet’s personality, favorite activities or story..." rows="5"></textarea>
+</div>
+<!-- IMAGE -->
+<div class="form-group form-group--full">
+<label>
+                                Pet photo *
+                            </label>
+<div class="image-dropzone" id="imageDropzone">
+<input accept="image/jpeg,image/png,image/webp" id="petImage" name="petImage" required="" type="file"/>
+<label class="image-dropzone__label" for="petImage">
+<span aria-hidden="true" class="image-dropzone__icon">
+                                        📷
+                                    </span>
+<strong>
+                                        Choose a pet photo
+                                    </strong>
+<span>
+                                        JPG, PNG or WebP — maximum 5 MB
+                                    </span>
+</label>
+</div>
+<small class="form-error" id="petImageError"></small>
+</div>
+<!-- FORM MESSAGE -->
+<div aria-live="polite" class="upload-message" hidden="" id="uploadMessage" role="status"></div>
+<!-- ACTIONS -->
+<div class="upload-form__actions">
+<button class="button button--secondary" id="resetUploadBtn" type="reset">
+                                Reset
+                            </button>
+<button class="button button--primary" id="submitUploadBtn" type="submit">
+<span class="button__default-text">
+                                    Add Pet to the Grid
+                                </span>
+<span class="button__loading-text" hidden="">
+                                    Uploading...
+                                </span>
+</button>
+</div>
+</form>
+</div>
+<!-- =========================================
+                     LIVE PREVIEW
+                ========================================== -->
+<aside class="preview-panel">
+<div class="preview-panel__header">
+<span class="preview-panel__eyebrow">
+                            Live Preview
+                        </span>
+<h2>
+                            Your pet card
+                        </h2>
+<p>
+                            The preview updates while you complete the form.
+                        </p>
+</div>
+<article class="upload-preview-card" id="uploadPreviewCard">
+<div class="upload-preview-card__media">
+<img alt="" hidden="" id="previewImage" src=""/>
+<div class="upload-preview-card__placeholder" id="previewPlaceholder">
+<span aria-hidden="true">
+                                    🐾
+                                </span>
+<p>
+                                    Your pet photo will appear here
+                                </p>
+</div>
+<span class="upload-preview-card__verified" hidden="" id="previewVerified">
+                                ✓ Verified
+                            </span>
+</div>
+<div class="upload-preview-card__content">
+<p class="upload-preview-card__type" id="previewType">
+                                Pet type · Breed
+                            </p>
+<h3 id="previewName">
+                                Your Pet
+                            </h3>
+<p class="upload-preview-card__location" id="previewLocation">
+                                📍 City, Country
+                            </p>
+<p class="upload-preview-card__owner" id="previewOwner">
+                                👤 Owner name
+                            </p>
+<div class="upload-preview-card__stats">
+<div>
+<strong>0</strong>
+<span>Likes</span>
+</div>
+<div>
+<strong>0</strong>
+<span>Followers</span>
+</div>
+<div>
+<strong>0</strong>
+<span>Gifts</span>
+</div>
+</div>
+</div>
+</article>
+</aside>
+</div>
+</section>
+</main>
+<!-- =========================================
+         FOOTER
+    ========================================== -->
+<footer class="main-footer">
+<p>
+            © 2026 ThePetGrid — Every pet has a place.
+        </p>
+</footer>
+<!-- =========================================
+     SCRIPTS
+========================================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/header.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
+<script src="../js/map-style.js"></script>
+<script src="../js/map-core/map-manager.js"></script>
+<script src="../js/location-data.js"></script>
+<script src="../js/location-picker.js"></script>
+<script src="../js/upload.js"></script><script src="../js/header-live.js"></script>
+</body>
+</html>

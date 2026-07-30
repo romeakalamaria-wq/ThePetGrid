@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Browse Pets — ThePetGrid</title>
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design/theme.css">
+  <link rel="stylesheet" href="../design/style.css">
+  <link rel="stylesheet" href="../design/header.css">
+  <link rel="stylesheet" href="../css/pets.css">
+</head>
+<body>
+<header class="main-header">
+  <div class="header-container">
+    <a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a>
+    </nav>
+    <div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
+  </div>
+</header>
+
+<main class="browse-page">
+  <section class="browse-hero">
+    <div class="browse-hero__content">
+      <span class="browse-hero__badge">🌍 Discover the global pet community</span>
+      <h1>Find your next <span>favourite pet</span></h1>
+      <p>Explore profiles, show some love and connect with pets and owners around the world.</p>
+    </div>
+  </section>
+
+  <section class="browse-shell" aria-label="Browse pets">
+    <div class="browse-toolbar">
+      <label class="search-control" for="petSearch">
+        <span aria-hidden="true">⌕</span>
+        <input id="petSearch" type="search" autocomplete="off" placeholder="Search name, breed, owner or place…">
+      </label>
+      <label class="select-control">
+        <span class="sr-only">Sort pets</span>
+        <select id="petSort">
+          <option value="newest">Newest first</option>
+          <option value="liked">Most liked</option>
+          <option value="followed">Most followed</option>
+          <option value="az">Name A–Z</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="filter-row" id="petFilters" aria-label="Pet filters">
+      <button class="filter-chip is-active" type="button" data-filter="all">All Pets</button>
+      <button class="filter-chip" type="button" data-filter="Dog">🐶 Dogs</button>
+      <button class="filter-chip" type="button" data-filter="Cat">🐱 Cats</button>
+      <button class="filter-chip" type="button" data-filter="Bird">🐦 Birds</button>
+      <button class="filter-chip" type="button" data-filter="Rabbit">🐰 Rabbits</button>
+      <button class="filter-chip" type="button" data-filter="other">🐾 Others</button>
+      <button class="filter-chip" type="button" data-filter="favorites">⭐ Favorites</button>
+    </div>
+
+    <div class="browse-summary">
+      <div><strong id="resultCount">0</strong> pets found</div>
+      <button id="clearFilters" class="clear-filters" type="button">Clear filters</button>
+    </div>
+
+    <section id="petsGrid" class="pets-grid" aria-live="polite"></section>
+
+    <nav class="pagination" id="pagination" aria-label="Pet pages"></nav>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../store/pet-store.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/pet-likes.js"></script>
+<script src="../js/pet-favorites.js"></script>
+<script src="../js/pets.js"></script>
+<script src="../js/header.js"></script>
+<script src="../js/header-live.js"></script>
+</body>
+</html>
