@@ -1,7 +1,9 @@
 (() => {
   "use strict";
 
-  const API_URL = "/api/geoapify";
+  const PROXY_URL = "/api/geoapify";
+  const GEOAPIFY_URL = "https://api.geoapify.com/v2/places";
+  const STORAGE_KEY = "tpg:geoapify-api-key";
 
   const CATEGORY_BY_TYPE = Object.freeze({
     veterinary: "pet.veterinary",
@@ -14,6 +16,7 @@
   class ServiceClient {
     constructor(options = {}) {
       const config = window.ThePetGridGeoapify || {};
+      this.apiKey = String(options.apiKey || localStorage.getItem(STORAGE_KEY) || config.apiKey || "").trim();
       this.language = options.language || config.language || "en";
       this.resultLimit = Math.min(200, Math.max(1, Number(options.resultLimit || config.resultLimit || 150)));
       this.cacheTtl = options.cacheTtl || 30 * 60 * 1000;
@@ -24,9 +27,26 @@
       this.requestId = 0;
     }
 
+    isLocalDevelopment() {
+      return ["localhost", "127.0.0.1", "0.0.0.0"].includes(window.location.hostname);
+    }
+
     hasApiKey() {
-      // The key is kept server-side in Vercel. Visitors never need to provide one.
-      return true;
+      // Production uses the Vercel server proxy. Local Live Server needs a browser key.
+      return !this.isLocalDevelopment() || Boolean(this.apiKey && !this.apiKey.includes("PASTE_") && this.apiKey.length > 10);
+    }
+
+    setApiKey(value, { persist = true } = {}) {
+      this.apiKey = String(value || "").trim();
+      if (persist) {
+        if (this.apiKey) localStorage.setItem(STORAGE_KEY, this.apiKey);
+        else localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    getMaskedApiKey() {
+      if (!this.apiKey || this.apiKey.length <= 10) return "";
+      return `${this.apiKey.slice(0, 5)}••••${this.apiKey.slice(-4)}`;
     }
 
     abort() {
@@ -65,6 +85,21 @@
       if (!categories.length) throw new Error("No supported service category is selected.");
 
       const [south, west, north, east] = bbox.map(Number);
+      if (this.isLocalDevelopment()) {
+        if (!this.hasApiKey()) {
+          throw new Error("Local Live Server needs a Geoapify API key. Add it in js/geoapify-config.js or save it in Map settings.");
+        }
+        const params = new URLSearchParams({
+          categories: categories.join(","),
+          filter: `rect:${west},${south},${east},${north}`,
+          bias: `rect:${west},${south},${east},${north}`,
+          limit: String(this.resultLimit),
+          lang: this.language,
+          apiKey: this.apiKey
+        });
+        return `${GEOAPIFY_URL}?${params.toString()}`;
+      }
+
       const params = new URLSearchParams({
         categories: categories.join(","),
         south: String(south),
@@ -74,7 +109,7 @@
         limit: String(this.resultLimit),
         lang: this.language
       });
-      return `${API_URL}?${params.toString()}`;
+      return `${PROXY_URL}?${params.toString()}`;
     }
 
     classify(categories = [], requestedTypes = []) {
@@ -163,6 +198,7 @@
     }
   }
 
+  ServiceClient.STORAGE_KEY = STORAGE_KEY;
   ServiceClient.CATEGORY_BY_TYPE = CATEGORY_BY_TYPE;
   window.ThePetGridMapCore = window.ThePetGridMapCore || {};
   window.ThePetGridMapCore.ServiceClient = ServiceClient;

@@ -75,6 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const followButton =
         document.getElementById("followPetButton");
 
+    const reportLostButton =
+        document.getElementById("reportLostPetButton");
+
 
     // ==================================================
     // HELPERS
@@ -348,6 +351,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         imageElement.alt =
             `${pet.name || "Pet"} profile photo`;
+
+        if (reportLostButton) {
+            reportLostButton.href = `lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}`;
+        }
 
         verifiedElement.hidden =
             !pet.verified;

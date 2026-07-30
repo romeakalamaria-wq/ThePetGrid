@@ -14,7 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     petCount: document.getElementById("mapPetCount"), countryCount: document.getElementById("mapCountryCount"),
     cityCount: document.getElementById("mapCityCount"), onlineCount: document.getElementById("mapOnlineCount"),
     serviceStatus: document.getElementById("serviceStatus"), refreshServices: document.getElementById("refreshServices"),
-    layerPets: document.getElementById("layerPets"),
+    serviceExplorer: document.getElementById("serviceExplorer"), serviceExplorerCount: document.getElementById("serviceExplorerCount"),
+    serviceExplorerMessage: document.getElementById("serviceExplorerMessage"), serviceExplorerList: document.getElementById("serviceExplorerList"),
+    serviceSort: document.getElementById("serviceSort"), layerPets: document.getElementById("layerPets"),
     serviceToggles: [...document.querySelectorAll("[data-service-layer]")]
   };
 
@@ -39,13 +41,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Keep the visitor position only in memory. It is used to calculate
   // the distance shown in pet cards and is never written to storage.
+  let userLocation = null;
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      position => petLayer.setUserLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      }),
-      () => petLayer.setUserLocation(null),
+      position => {
+        userLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+        petLayer.setUserLocation(userLocation);
+        renderServiceExplorer(currentServices);
+      },
+      () => { userLocation = null; petLayer.setUserLocation(null); },
       { enableHighAccuracy: true, timeout: 9000, maximumAge: 300000 }
     );
   }
@@ -54,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let visiblePets = [];
   let serviceRefreshTimer = null;
   let serviceRefreshSequence = 0;
+  let currentServices = [];
 
   function coordinatesFor(pet) {
     const lat = Number(pet.latitude), lng = Number(pet.longitude);
@@ -127,6 +132,69 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fit) fitVisible();
   }
 
+  const serviceMeta = {
+    veterinary: ["✚", "Veterinary"], shelter: ["⌂", "Shelter"], pet_shop: ["▣", "Pet shop"],
+    groomer: ["✂", "Groomer"], dog_park: ["♧", "Dog park"]
+  };
+
+  function distanceKm(from, service) {
+    if (!from) return null;
+    const toRad = value => value * Math.PI / 180;
+    const earthRadius = 6371;
+    const lat1 = toRad(Number(from.latitude));
+    const lat2 = toRad(Number(service.lat));
+    const deltaLat = toRad(Number(service.lat) - Number(from.latitude));
+    const deltaLng = toRad(Number(service.lng) - Number(from.longitude));
+    const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2;
+    return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatDistance(km) {
+    if (!Number.isFinite(km)) return "Distance unavailable";
+    if (km < 1) return `${Math.max(1, Math.round(km * 1000))} m away`;
+    return `${km < 10 ? km.toFixed(1) : Math.round(km)} km away`;
+  }
+
+  function sortedServices(services) {
+    const mode = ui.serviceSort?.value || "nearest";
+    return services.map(service => ({ ...service, distance: distanceKm(userLocation, service) })).sort((a, b) => {
+      if (mode === "name") return String(a.tags.name || "").localeCompare(String(b.tags.name || ""));
+      if (mode === "type") return String(a.type).localeCompare(String(b.type)) || String(a.tags.name || "").localeCompare(String(b.tags.name || ""));
+      if (Number.isFinite(a.distance) && Number.isFinite(b.distance)) return a.distance - b.distance;
+      if (Number.isFinite(a.distance)) return -1;
+      if (Number.isFinite(b.distance)) return 1;
+      return String(a.tags.name || "").localeCompare(String(b.tags.name || ""));
+    });
+  }
+
+  function renderServiceExplorer(services = currentServices) {
+    if (!ui.serviceExplorer || !ui.serviceExplorerList) return;
+    const hasActiveLayers = activeServiceTypes().length > 0;
+    ui.serviceExplorer.hidden = !hasActiveLayers;
+    if (!hasActiveLayers) return;
+
+    const sorted = sortedServices(services);
+    ui.serviceExplorerCount.textContent = sorted.length;
+    ui.serviceExplorerMessage.textContent = sorted.length
+      ? `${sorted.length} places in the visible map area. Select one to open it.`
+      : "No matching services are visible here. Move the map or zoom closer.";
+
+    ui.serviceExplorerList.innerHTML = sorted.slice(0, 75).map(service => {
+      const [icon, label] = serviceMeta[service.type] || ["•", "Pet service"];
+      const name = service.tags.name || label;
+      const address = service.tags.addressLine1 || service.tags.formatted || [service.tags.city, service.tags.country].filter(Boolean).join(", ");
+      return `<button class="service-result-card is-${escapeHtml(service.type)}" type="button" data-service-id="${escapeHtml(service.id)}">
+        <span class="service-result-card__icon" aria-hidden="true">${icon}</span>
+        <span class="service-result-card__body">
+          <small>${escapeHtml(label)}</small>
+          <strong>${escapeHtml(name)}</strong>
+          <span>${escapeHtml(address || "Address unavailable")}</span>
+        </span>
+        <span class="service-result-card__distance">${escapeHtml(formatDistance(service.distance))}</span>
+      </button>`;
+    }).join("");
+  }
+
   function activeServiceTypes() { return ui.serviceToggles.filter(input => input.checked).map(input => input.dataset.serviceLayer); }
   function setServiceStatus(text, kind = "") { ui.serviceStatus.textContent = text; ui.serviceStatus.className = `service-status${kind ? ` is-${kind}` : ""}`; }
   function setServiceLoading(isLoading) {
@@ -142,6 +210,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!types.length) {
       serviceClient.abort();
       serviceLayer.clear();
+      currentServices = [];
+      renderServiceExplorer();
       setServiceLoading(false);
       setServiceStatus("Enable a service layer to show nearby places.");
       return;
@@ -171,7 +241,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await serviceClient.load(types, currentBbox(), { force });
       if (sequence !== serviceRefreshSequence) return;
       const services = result?.data || [];
+      currentServices = services;
       serviceLayer.render(services);
+      renderServiceExplorer(services);
       const suffix = result?.cached ? " (cached)" : "";
       setServiceStatus(services.length ? `${services.length} services found${suffix}.` : `No matching services found in this area${suffix}.`, services.length ? "success" : "");
     } catch (error) {
@@ -190,6 +262,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!activeServiceTypes().length) {
       serviceClient.abort();
       serviceLayer.clear();
+      currentServices = [];
+      renderServiceExplorer();
       setServiceLoading(false);
       setServiceStatus("Enable a service layer to show nearby places.");
       return;
@@ -223,8 +297,17 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.reset?.addEventListener("click", () => { ui.search.value = ""; ui.type.value = "all"; ui.onlineOnly.checked = false; applyFilters({ fit: true }); });
   ui.layerPets?.addEventListener("change", () => petLayer.setVisible(ui.layerPets.checked));
   ui.serviceToggles.forEach(input => input.addEventListener("change", () => {
+    renderServiceExplorer();
     scheduleServiceRefresh({ immediate: true });
   }));
+  ui.serviceSort?.addEventListener("change", () => renderServiceExplorer());
+  ui.serviceExplorerList?.addEventListener("click", event => {
+    const card = event.target.closest("[data-service-id]");
+    if (!card) return;
+    ui.serviceExplorerList.querySelectorAll(".is-active").forEach(item => item.classList.remove("is-active"));
+    card.classList.add("is-active");
+    serviceLayer.select(card.dataset.serviceId, { fly: true, openPopup: true });
+  });
   ui.refreshServices?.addEventListener("click", () => scheduleServiceRefresh({ immediate: true, force: true, source: "manual" }));
   map.on("movestart", () => { if (activeServiceTypes().length) serviceClient.abort(); });
   map.on("moveend", () => scheduleServiceRefresh());

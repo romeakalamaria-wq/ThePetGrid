@@ -1257,3 +1257,4 @@ a {
 .pet-gift-toast.is-visible { opacity:1; transform:none; }
 @media(max-width:760px){ .pet-gift-showcase-grid,.pet-gift-picker{grid-template-columns:repeat(2,minmax(0,1fr));}.pet-gift-center__header{flex-direction:column;} }
 @media(max-width:480px){ .pet-gift-showcase-grid,.pet-gift-picker{grid-template-columns:1fr;} .pet-gift-center{padding:20px 16px;} }
+.button--danger{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border:1px solid #fecdd3;border-radius:14px;background:linear-gradient(135deg,#fb7185,#e11d48);color:#fff;text-decoration:none;font-weight:800;box-shadow:0 12px 26px rgba(225,29,72,.22);transition:.2s ease}.button--danger:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(225,29,72,.3)}

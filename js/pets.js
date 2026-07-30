@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <p class="pet-card__breed">${escapeHtml(pet.breed || "Breed not added")} · ${escapeHtml(pet.age || "Age not added")}</p>
         <div class="pet-card__meta"><span>📍 ${escapeHtml(location)}</span><span>👤 ${escapeHtml(pet.owner || "Unknown owner")}</span></div>
         <div class="pet-card__stats"><span>👥 ${Number(pet.followers || 0).toLocaleString()}</span><span>🎁 ${Number(pet.gifts || 0).toLocaleString()}</span><span>🐾 ${escapeHtml(pet.type || "Pet")}</span></div>
-        <a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a>
+        <div class="pet-card__footer-actions"><a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a><a class="pet-card__lost" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a></div>
       </div>
     </article>`;
   }

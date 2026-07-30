@@ -20,7 +20,7 @@
     <nav class="main-nav" aria-label="Main navigation">
       <a href="../index.html">Home</a><a href="pets.html">Pets</a><a class="is-active" href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a>
     </nav>
-    <div class="header-actions"><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
+    <div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
   </div>
 </header>
 
@@ -67,6 +67,28 @@
         <label class="layer-switch"><input type="checkbox" data-service-layer="dog_park"><span>♧ Dog parks</span></label>
         <p id="serviceStatus" class="service-status">Zoom in to street level and enable a service layer.</p>
         <button id="refreshServices" class="refresh-services" type="button">↻ Refresh now</button>
+      </section>
+
+      <section id="serviceExplorer" class="service-explorer" hidden>
+        <div class="service-explorer__heading">
+          <div>
+            <span class="sidebar-eyebrow">Nearby services</span>
+            <h2>Pet Service Explorer</h2>
+          </div>
+          <span id="serviceExplorerCount" class="sidebar-count">0</span>
+        </div>
+        <div class="service-explorer__controls">
+          <label>
+            <span class="sr-only">Sort services</span>
+            <select id="serviceSort" aria-label="Sort nearby pet services">
+              <option value="nearest">Nearest first</option>
+              <option value="name">Name A–Z</option>
+              <option value="type">Category</option>
+            </select>
+          </label>
+        </div>
+        <p id="serviceExplorerMessage" class="sidebar-message">Choose a service layer to see nearby places.</p>
+        <div id="serviceExplorerList" class="service-explorer__list"></div>
       </section>
 
       <div class="sidebar-heading">

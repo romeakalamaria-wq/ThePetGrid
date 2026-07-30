@@ -20,3 +20,32 @@
 .message-live-toast span:nth-child(2){min-width:0;display:grid;gap:3px}.message-live-toast strong{font-size:.96rem}.message-live-toast small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b;font-size:.82rem}.message-live-toast b{color:#fb8500;font-size:1.6rem}
 @keyframes messagePetPop{from{transform:scale(.4) rotate(-18deg)}to{transform:none}}
 @media(max-width:900px){.message-unread-badge{position:static;display:inline-grid;margin-left:auto}.messages-nav-link.has-unread .message-pet-icon{display:inline-block}.message-live-toast{top:82px;right:16px}}
+
+/* Sprint 9.1 — prominent Lost & Found action */
+.lost-found-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:42px;
+  padding:0 15px;
+  border:1px solid rgba(190,18,60,.18);
+  border-radius:12px;
+  background:linear-gradient(135deg,#fb7185,#e11d48);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  white-space:nowrap;
+  box-shadow:0 9px 22px rgba(225,29,72,.24);
+  transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+}
+.lost-found-btn:hover,.lost-found-btn:focus-visible{
+  color:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 13px 28px rgba(225,29,72,.34);
+  filter:saturate(1.08);
+}
+.lost-found-btn[aria-current="page"]{outline:3px solid rgba(251,113,133,.24);outline-offset:2px}
+@media(max-width:1120px){.lost-found-btn{padding:0 12px}.lost-found-btn span+*{display:none}}
+@media(max-width:900px){.lost-found-btn{display:inline-flex;min-width:44px;padding:0 11px;font-size:.9rem}.header-actions{gap:8px}}
+@media(max-width:480px){.lost-found-btn{font-size:0;gap:0}.lost-found-btn span{font-size:1.15rem}}

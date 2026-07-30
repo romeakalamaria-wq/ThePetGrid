@@ -218,3 +218,28 @@ body{background:#f7f8fb;color:#152033}.map-shell{width:min(1320px,calc(100% - 32
 @keyframes tpgSelectedRing{0%{opacity:.95;transform:scale(.88)}100%{opacity:0;transform:scale(1.22)}}
 @media(max-width:700px){.tpg-pet-avatar-marker{width:52px;height:52px}.tpg-pet-avatar-marker__status{width:14px;height:14px}}
 @media(prefers-reduced-motion:reduce){.tpg-pet-avatar-marker,.tpg-pet-avatar-marker__frame,.tpg-pet-avatar-marker::before{animation:none!important;transition:none!important}}
+
+/* =============================================
+   SPRINT 8.3 — PET SERVICE EXPLORER SIDEBAR
+   ============================================= */
+.service-explorer{margin:0 -5px 22px;padding:17px;border:1px solid #e8ebf0;border-radius:19px;background:linear-gradient(145deg,#fffdf8,#fff)}
+.service-explorer[hidden]{display:none}
+.service-explorer__heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:12px;border-bottom:1px solid #edf0f4}
+.service-explorer__heading h2{margin:4px 0 0;font-size:1.22rem}
+.service-explorer__controls{padding:12px 0 4px}
+.service-explorer__controls label{display:block}
+.service-explorer__controls select{width:100%;height:42px;padding:0 38px 0 12px;border:1px solid #dde2ea;border-radius:12px;background:#fff;color:#344054;font:inherit;font-size:.86rem;font-weight:750;outline:none;cursor:pointer}
+.service-explorer__controls select:focus{border-color:#f2b544;box-shadow:0 0 0 3px rgba(245,158,11,.13)}
+.service-explorer__list{display:grid;gap:9px;max-height:430px;padding:2px 2px 2px 0;overflow:auto;scrollbar-width:thin}
+.service-result-card{--service-accent:#f59e0b;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:11px;border:1px solid #e8ebf0;border-radius:15px;background:#fff;color:#1f2937;text-align:left;font:inherit;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.service-result-card:hover,.service-result-card.is-active{transform:translateY(-1px);border-color:color-mix(in srgb,var(--service-accent) 48%,#e8ebf0);background:linear-gradient(135deg,#fff,color-mix(in srgb,var(--service-accent) 6%,#fff));box-shadow:0 8px 18px rgba(15,23,42,.08)}
+.service-result-card:focus-visible{outline:3px solid rgba(245,158,11,.22);outline-offset:2px}
+.service-result-card.is-veterinary{--service-accent:#2563eb}.service-result-card.is-shelter{--service-accent:#16a34a}.service-result-card.is-pet_shop{--service-accent:#f97316}.service-result-card.is-groomer{--service-accent:#9333ea}.service-result-card.is-dog_park{--service-accent:#0d9488}
+.service-result-card__icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:color-mix(in srgb,var(--service-accent) 12%,#fff);color:var(--service-accent);font-size:1.1rem;font-weight:900}
+.service-result-card__body{min-width:0}
+.service-result-card__body small{display:block;color:var(--service-accent);font-size:.64rem;font-weight:900;letter-spacing:.065em;text-transform:uppercase}
+.service-result-card__body strong{display:block;overflow:hidden;margin-top:2px;color:#172033;font-size:.9rem;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}
+.service-result-card__body span{display:-webkit-box;overflow:hidden;margin-top:3px;color:#7a8494;font-size:.72rem;line-height:1.28;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.service-result-card__distance{align-self:start;max-width:76px;padding:5px 7px;border-radius:999px;background:#f8fafc;color:#64748b;font-size:.66rem;font-weight:850;line-height:1.15;text-align:center;white-space:normal}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:520px){.service-result-card{grid-template-columns:40px minmax(0,1fr)}.service-result-card__distance{grid-column:2;justify-self:start;margin-top:-4px}}
