@@ -35,6 +35,9 @@
   let reportMarkers = [];
   let searchTimer = null;
   let suggestionResults = [];
+  let cloudReports = [];
+  let currentUserId = null;
+  let reportsChannel = null;
 
   const safe = value => String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
   const numberOrNull = value => {
@@ -54,8 +57,11 @@
 
   function allReports() {
     const saved = storedReports();
-    const savedIds = new Set(saved.map(item => String(item.id)));
-    return [...saved, ...demoReports.filter(item => !savedIds.has(String(item.id)))];
+    const merged = new Map();
+    demoReports.forEach(report => merged.set(String(report.id), report));
+    cloudReports.forEach(report => merged.set(String(report.id), report));
+    saved.forEach(report => merged.set(String(report.id), report));
+    return [...merged.values()].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
   }
 
   function saveOrUpdateReport(report) {
@@ -74,6 +80,67 @@
       age: row.age ?? "", gender: row.gender || "", country: row.country || "", city: row.city || "",
       owner: row.profiles?.username || "ThePetGrid Member", image: row.image_url || ""
     };
+  }
+
+  function normalizeCloudReport(row) {
+    return {
+      id:row.id, ownerId:row.reporter_id, petId:row.pet_id, status:row.status,
+      name:row.pet_name, type:row.pet_type, breed:row.breed || "", age:row.age || "",
+      gender:row.gender || "", color:row.color || "", country:row.country || "",
+      city:row.city || "", area:row.area || "", address:row.address || "",
+      latitude:row.latitude, longitude:row.longitude, date:row.event_date || "",
+      owner:row.owner_name || "", phone:row.phone || "", email:row.email || "",
+      reward:row.reward || "", description:row.description || "", image:row.image_url || PLACEHOLDER,
+      resolved:Boolean(row.resolved), resolvedAt:row.resolved_at || null,
+      createdAt:row.created_at || "", isCloudReport:true
+    };
+  }
+
+  async function loadCloudReports() {
+    const client = window.ThePetGridSupabase?.client;
+    if (!client) return;
+    try {
+      const { data, error } = await client.from("lost_pet_reports").select("*").order("created_at", { ascending:false });
+      if (error) throw error;
+      cloudReports = Array.isArray(data) ? data.map(normalizeCloudReport) : [];
+    } catch (error) {
+      console.info("ThePetGrid: shared Lost & Found reports need the Sprint 9.4 SQL setup.", error.message || error);
+      cloudReports = [];
+    }
+  }
+
+  function subscribeCloudReports() {
+    const client = window.ThePetGridSupabase?.client;
+    if (!client || reportsChannel) return;
+    reportsChannel = client.channel("lost-found-shared-reports")
+      .on("postgres_changes", { event:"*", schema:"public", table:"lost_pet_reports" }, async () => {
+        await loadCloudReports();
+        render();
+      })
+      .subscribe();
+  }
+
+  async function publishCloudReport(report) {
+    const client = window.ThePetGridSupabase?.client;
+    if (!client || !currentUserId) return report;
+    const petId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(report.petId || "")) ? report.petId : null;
+    const row = {
+      reporter_id:currentUserId, pet_id:petId, status:report.status, pet_name:report.name,
+      pet_type:report.type, breed:report.breed, age:String(report.age || ""), gender:report.gender,
+      color:report.color, country:report.country, city:form.elements.city.value.trim(), area:report.area,
+      address:report.address, latitude:report.latitude, longitude:report.longitude,
+      event_date:report.date, owner_name:report.owner, phone:report.phone, email:report.email,
+      reward:report.reward, description:report.description,
+      image_url:String(report.image || "").startsWith("data:") ? null : report.image
+    };
+    try {
+      const { data, error } = await client.from("lost_pet_reports").insert(row).select("*").single();
+      if (error) throw error;
+      return normalizeCloudReport(data);
+    } catch (error) {
+      console.warn("ThePetGrid: report saved locally; nearby alerts require the Sprint 9.4 SQL setup.", error.message || error);
+      return report;
+    }
   }
 
   function getDraftPet(id) {
@@ -262,16 +329,27 @@
     grid.innerHTML = reports.length ? reports.map(item => {
       const state = item.resolved ? "resolved" : item.status === "found" ? "found" : "lost";
       const hasLocation = numberOrNull(item.latitude) !== null && numberOrNull(item.longitude) !== null;
-      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${state.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p><div class="lf-card__footer"><span>${item.resolved ? "Alert closed" : "Community alert"}</span><span class="lf-date">${safe(item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" ? `<button class="lf-card__action lf-card__action--resolved" type="button" data-resolve-report="${safe(item.id)}" ${item.resolved ? "disabled" : ""}>${item.resolved ? "✅ Pet Found" : "✅ Mark Pet Found"}</button>` : ""}</div></div></article>`;
+      const canResolve = !item.isCloudReport || String(item.ownerId || "") === String(currentUserId || "");
+      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${state.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p><div class="lf-card__footer"><span>${item.resolved ? "Alert closed" : "Community alert"}</span><span class="lf-date">${safe(item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" && canResolve ? `<button class="lf-card__action lf-card__action--resolved" type="button" data-resolve-report="${safe(item.id)}" ${item.resolved ? "disabled" : ""}>${item.resolved ? "✅ Pet Found" : "✅ Mark Pet Found"}</button>` : ""}</div></div></article>`;
     }).join("") : '<div class="lf-empty"><strong>No reports in this category yet.</strong>New community reports will appear here.</div>';
     renderReportMarkers();
   }
 
-  function resolveReport(reportId) {
+  async function resolveReport(reportId) {
     const report = allReports().find(item => String(item.id) === String(reportId));
     if (!report || report.resolved || report.status !== "lost") return;
     if (!window.confirm(`Confirm that ${report.name || "this pet"} has been found?`)) return;
-    saveOrUpdateReport({ ...report, resolved:true, resolvedAt:new Date().toISOString() });
+    const resolvedAt = new Date().toISOString();
+    if (report.isCloudReport && String(report.ownerId) === String(currentUserId)) {
+      const client = window.ThePetGridSupabase?.client;
+      const { error } = await client.from("lost_pet_reports").update({ resolved:true, resolved_at:resolvedAt }).eq("id", report.id).eq("reporter_id", currentUserId);
+      if (error) {
+        window.alert(error.message || "The alert could not be closed.");
+        return;
+      }
+      cloudReports = cloudReports.map(item => String(item.id) === String(report.id) ? { ...item, resolved:true, resolvedAt } : item);
+    }
+    saveOrUpdateReport({ ...report, resolved:true, resolvedAt });
     render();
   }
 
@@ -351,7 +429,7 @@
     reader.readAsDataURL(file);
   });
 
-  form?.addEventListener("submit", event => {
+  form?.addEventListener("submit", async event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
     const latitude = numberOrNull(latitudeInput.value);
@@ -363,7 +441,7 @@
     }
     const data = new FormData(form);
     const cityLabel = [data.get("area"), data.get("city"), data.get("country")].filter(Boolean).join(", ");
-    const report = {
+    let report = {
       id:`lf-${Date.now()}`, petId:data.get("petId") || null,
       status:data.get("status") === "found" ? "found" : "lost", name:data.get("petName").trim() || "Unknown pet",
       type:data.get("petType"), breed:data.get("breed").trim(), age:data.get("age").trim(), color:data.get("color").trim(), gender:data.get("gender"),
@@ -372,6 +450,7 @@
       description:data.get("description").trim(), reward:data.get("reward").trim(), image:imageData || PLACEHOLDER,
       createdAt:new Date().toISOString(), resolved:false
     };
+    report = await publishCloudReport(report);
     saveOrUpdateReport(report);
     message.textContent = report.status === "lost" ? "Lost pet alert published successfully." : "Found pet report published successfully.";
     message.hidden = false;
@@ -402,6 +481,13 @@
   });
 
   async function initialize() {
+    const client = window.ThePetGridSupabase?.client;
+    if (client) {
+      const { data } = await client.auth.getSession();
+      currentUserId = data?.session?.user?.id || null;
+      await loadCloudReports();
+      subscribeCloudReports();
+    }
     ensureReportsMap();
     const requestedMode = params.get("mode");
     if (requestedMode === "lost" || requestedMode === "found") {
@@ -409,6 +495,8 @@
       await prefillPet();
     }
     render();
+    const requestedReportId = params.get("reportId");
+    if (requestedReportId) setTimeout(() => focusReportOnMap(requestedReportId), 700);
   }
 
   initialize();

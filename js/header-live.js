@@ -13,6 +13,7 @@
     user: null,
     unread: 0,
     notificationChannel: null,
+    nearbyChannel: null,
     presenceChannel: null,
     senderPetTypes: new Map(),
     senderNames: new Map()
@@ -221,6 +222,159 @@
     });
   }
 
+  function nearbyAlertLink(reportId = "") {
+    const base = getLostFoundHref();
+    return reportId ? `${base}?reportId=${encodeURIComponent(reportId)}#reports` : `${base}#reports`;
+  }
+
+  function showNearbyLostToast(notification) {
+    const payload = notification?.payload || {};
+    let toast = document.getElementById("nearbyLostToast");
+    if (!toast) {
+      toast = document.createElement("a");
+      toast.id = "nearbyLostToast";
+      toast.className = "nearby-lost-toast";
+      toast.innerHTML = '<span class="nearby-lost-toast__icon">🚨</span><span><strong></strong><small></small></span><b>View map →</b>';
+      document.body.appendChild(toast);
+    }
+    toast.href = nearbyAlertLink(payload.report_id || notification.entity_id);
+    toast.querySelector("strong").textContent = `Lost pet nearby: ${payload.pet_name || "Community alert"}`;
+    const distance = payload.distance_km !== undefined ? `${payload.distance_km} km away · ` : "";
+    toast.querySelector("small").textContent = `${distance}${payload.address || "Open the alert for the location"}`;
+    toast.classList.remove("is-visible");
+    requestAnimationFrame(() => toast.classList.add("is-visible"));
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => toast.classList.remove("is-visible"), 10000);
+
+    if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
+      const browserNotification = new Notification(`🚨 ${payload.pet_name || "Lost pet"} nearby`, {
+        body:`${distance}${payload.address || "Tap to view the Lost & Found alert."}`,
+        icon:location.pathname.includes("/pages/") ? "../assets/favicon.png" : "assets/favicon.png",
+        tag:`lost-pet-${payload.report_id || notification.id}`
+      });
+      browserNotification.onclick = () => {
+        window.focus();
+        location.href = nearbyAlertLink(payload.report_id || notification.entity_id);
+        browserNotification.close();
+      };
+    }
+  }
+
+  async function markNearbyNotificationRead(notificationId) {
+    if (!notificationId) return;
+    await state.client.from("notifications").update({ read_at:new Date().toISOString() }).eq("id", notificationId).eq("user_id", state.user.id);
+  }
+
+  async function handleNearbyNotification(notification) {
+    if (!notification || notification.type !== "nearby_lost_pet") return;
+    showNearbyLostToast(notification);
+    await markNearbyNotificationRead(notification.id);
+  }
+
+  async function subscribeNearbyLostAlerts() {
+    try {
+      state.nearbyChannel = state.client.channel(`nearby-lost-alerts-${state.user.id}`)
+        .on("postgres_changes", {
+          event:"INSERT", schema:"public", table:"notifications", filter:`user_id=eq.${state.user.id}`
+        }, payload => handleNearbyNotification(payload.new))
+        .subscribe();
+
+      const { data, error } = await state.client.from("notifications")
+        .select("id,type,entity_id,payload,created_at")
+        .eq("user_id", state.user.id)
+        .eq("type", "nearby_lost_pet")
+        .is("read_at", null)
+        .order("created_at", { ascending:false })
+        .limit(1);
+      if (error) throw error;
+      if (data?.[0]) await handleNearbyNotification(data[0]);
+    } catch (error) {
+      console.info("ThePetGrid: nearby alerts need the Sprint 9.4 SQL setup.", error.message || error);
+    }
+  }
+
+  function locationPromise() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Location is not supported by this browser."));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy:true, timeout:15000, maximumAge:300000 });
+    });
+  }
+
+  async function loadNearbyPreferences() {
+    const { data, error } = await state.client.from("nearby_alert_preferences").select("*").eq("user_id", state.user.id).maybeSingle();
+    if (error) throw error;
+    return data || null;
+  }
+
+  function installNearbyAlertSettings() {
+    const actions = document.querySelector(".header-actions");
+    if (!actions || document.getElementById("nearbyAlertSettingsButton")) return;
+    const button = document.createElement("button");
+    button.id = "nearbyAlertSettingsButton";
+    button.className = "nearby-alert-settings-button";
+    button.type = "button";
+    button.innerHTML = '<span aria-hidden="true">📍</span><span>Nearby Alerts</span>';
+    button.setAttribute("aria-label", "Nearby lost pet alert settings");
+    actions.insertBefore(button, actions.querySelector(".user-menu, .login-btn"));
+
+    const panel = document.createElement("section");
+    panel.id = "nearbyAlertPanel";
+    panel.className = "nearby-alert-panel";
+    panel.hidden = true;
+    panel.innerHTML = `
+      <div class="nearby-alert-panel__header"><div><strong>📍 Nearby Lost Pet Alerts</strong><small>Get notified when a pet is lost near you.</small></div><button type="button" data-close-nearby-alerts aria-label="Close">×</button></div>
+      <label class="nearby-alert-panel__switch"><input id="nearbyAlertsEnabled" type="checkbox" checked><span>Enable nearby alerts</span></label>
+      <label><span>Alert radius</span><select id="nearbyAlertRadius"><option value="5">5 km</option><option value="10" selected>10 km</option><option value="25">25 km</option><option value="50">50 km</option></select></label>
+      <button id="saveNearbyAlertLocation" class="nearby-alert-panel__save" type="button">Use my location &amp; save</button>
+      <p id="nearbyAlertPanelStatus">Your exact location stays private.</p>`;
+    document.body.appendChild(panel);
+
+    const enabled = panel.querySelector("#nearbyAlertsEnabled");
+    const radius = panel.querySelector("#nearbyAlertRadius");
+    const status = panel.querySelector("#nearbyAlertPanelStatus");
+    button.addEventListener("click", async () => {
+      panel.hidden = !panel.hidden;
+      if (panel.hidden) return;
+      try {
+        const preferences = await loadNearbyPreferences();
+        if (preferences) {
+          enabled.checked = preferences.enabled;
+          radius.value = String(preferences.radius_km || 10);
+          status.textContent = preferences.latitude !== null ? `Active within ${preferences.radius_km} km.` : "Choose your location to activate alerts.";
+        }
+      } catch (error) {
+        status.textContent = "Run the Sprint 9.4 Supabase SQL to activate nearby alerts.";
+      }
+    });
+    panel.querySelector("[data-close-nearby-alerts]").addEventListener("click", () => { panel.hidden = true; });
+    panel.querySelector("#saveNearbyAlertLocation").addEventListener("click", async () => {
+      const saveButton = panel.querySelector("#saveNearbyAlertLocation");
+      saveButton.disabled = true;
+      status.textContent = "Requesting your location…";
+      try {
+        let browserEnabled = false;
+        if ("Notification" in window) browserEnabled = (await Notification.requestPermission()) === "granted";
+        const position = await locationPromise();
+        const { error } = await state.client.rpc("set_nearby_alert_preferences", {
+          p_enabled:enabled.checked,
+          p_radius_km:Number(radius.value),
+          p_latitude:position.coords.latitude,
+          p_longitude:position.coords.longitude,
+          p_browser_notifications:browserEnabled
+        });
+        if (error) throw error;
+        status.textContent = `✅ Alerts active within ${radius.value} km${browserEnabled ? " · Browser notifications enabled" : ""}.`;
+      } catch (error) {
+        status.textContent = error.message || "Location permission was not granted.";
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+  }
+
   async function init() {
     installLostPetAlerts();
     installIndicator();
@@ -234,9 +388,14 @@
     }
     await refreshUnread();
     await subscribeNotifications();
+    installNearbyAlertSettings();
+    await subscribeNearbyLostAlerts();
     await startGlobalPresence();
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshUnread(); });
-    window.addEventListener('beforeunload', () => state.presenceChannel?.untrack());
+    window.addEventListener('beforeunload', () => {
+      state.presenceChannel?.untrack();
+      if (state.nearbyChannel) state.client.removeChannel(state.nearbyChannel);
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
