@@ -6,6 +6,8 @@
     reptile: "🦎", hamster: "🐹", horse: "🐴", other: "🐾"
   };
 
+  const LOST_REPORTS_STORAGE_KEY = "thepetgrid_lost_found_reports";
+
   const state = {
     client: null,
     user: null,
@@ -17,6 +19,56 @@
   };
 
   const emojiFor = type => PET_EMOJI[String(type || "other").toLowerCase()] || "🐾";
+
+  function activeLostReports() {
+    try {
+      const reports = JSON.parse(localStorage.getItem(LOST_REPORTS_STORAGE_KEY) || "[]");
+      return Array.isArray(reports)
+        ? reports.filter(report => report?.status === "lost" && !report.resolved)
+        : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function getLostFoundHref() {
+    return document.querySelector(".lost-found-btn")?.getAttribute("href") ||
+      (location.pathname.includes("/pages/") ? "lost-found.html" : "pages/lost-found.html");
+  }
+
+  function renderLostPetAlert() {
+    const reports = activeLostReports();
+    let alert = document.getElementById("globalLostPetAlert");
+    if (!reports.length) {
+      alert?.remove();
+      return;
+    }
+
+    const latest = [...reports].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0))[0];
+    if (!alert) {
+      alert = document.createElement("a");
+      alert.id = "globalLostPetAlert";
+      alert.className = "global-lost-alert";
+      alert.setAttribute("role", "alert");
+      alert.innerHTML = '<span class="global-lost-alert__signal" aria-hidden="true">SOS</span><span class="global-lost-alert__copy"><strong></strong><small></small></span><span class="global-lost-alert__action">View alert →</span>';
+      const header = document.querySelector(".main-header");
+      if (header) header.insertAdjacentElement("afterend", alert);
+      else document.body.prepend(alert);
+    }
+
+    const countText = reports.length > 1 ? ` · ${reports.length} active lost alerts` : "";
+    alert.href = `${getLostFoundHref()}#reports`;
+    alert.querySelector("strong").textContent = `🚨 LOST PET: ${latest.name || "Community alert"}`;
+    alert.querySelector("small").textContent = `${latest.address || latest.city || "Location pending"}${countText}`;
+  }
+
+  function installLostPetAlerts() {
+    renderLostPetAlert();
+    window.addEventListener("storage", event => {
+      if (event.key === LOST_REPORTS_STORAGE_KEY) renderLostPetAlert();
+    });
+    window.addEventListener("thepetgrid:lost-reports-changed", renderLostPetAlert);
+  }
 
   async function getClient() {
     for (let i = 0; i < 40; i += 1) {
@@ -170,6 +222,7 @@
   }
 
   async function init() {
+    installLostPetAlerts();
     installIndicator();
     state.client = await getClient();
     if (!state.client) return;

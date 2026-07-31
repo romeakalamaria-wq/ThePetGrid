@@ -1,125 +1,415 @@
 (() => {
-  'use strict';
+  "use strict";
 
-  const STORAGE_KEY = 'thepetgrid_lost_found_reports';
-  const PLACEHOLDER = 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=82';
+  const STORAGE_KEY = "thepetgrid_lost_found_reports";
+  const PET_DRAFT_KEY = "thepetgrid_lost_report_pet";
+  const PLACEHOLDER = "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=82";
+  const DEFAULT_CENTER = [23.7275, 37.9838];
   const demoReports = [
-    {id:'demo-lost-bella',status:'lost',name:'Bella',type:'Dog',breed:'Golden Retriever',city:'Athens, Greece',date:'2026-07-29',description:'Friendly golden retriever wearing a red collar. Last seen near the National Garden.',image:'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=82'},
-    {id:'demo-found-cat',status:'found',name:'Unknown Cat',type:'Cat',breed:'Tabby',city:'Thessaloniki, Greece',date:'2026-07-30',description:'Young tabby found safely near the waterfront.',image:'https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=82'}
+    { id:"demo-lost-bella", status:"lost", name:"Bella", type:"Dog", breed:"Golden Retriever", city:"Athens, Greece", country:"Greece", area:"National Garden", address:"National Garden, Athens, Greece", latitude:37.9737, longitude:23.7374, date:"2026-07-29", description:"Friendly golden retriever wearing a red collar. Last seen near the National Garden.", image:"https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=82", resolved:false },
+    { id:"demo-found-cat", status:"found", name:"Unknown Cat", type:"Cat", breed:"Tabby", city:"Thessaloniki, Greece", country:"Greece", area:"Waterfront", address:"Thessaloniki Waterfront, Greece", latitude:40.6264, longitude:22.9484, date:"2026-07-30", description:"Young tabby found safely near the waterfront.", image:"https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=82", resolved:false }
   ];
 
-  const grid = document.querySelector('#lostFoundGrid');
-  const filters = [...document.querySelectorAll('[data-lf-filter]')];
-  const formSection = document.querySelector('#reportFormSection');
-  const form = document.querySelector('#lostFoundForm');
-  const formTitle = document.querySelector('#reportFormTitle');
-  const statusInput = document.querySelector('#reportStatus');
-  const imageInput = document.querySelector('#reportImage');
-  const imagePreview = document.querySelector('#reportImagePreview');
-  const message = document.querySelector('#reportMessage');
+  const grid = document.querySelector("#lostFoundGrid");
+  const filters = [...document.querySelectorAll("[data-lf-filter]")];
+  const formSection = document.querySelector("#reportFormSection");
+  const form = document.querySelector("#lostFoundForm");
+  const formTitle = document.querySelector("#reportFormTitle");
+  const statusInput = document.querySelector("#reportStatus");
+  const imageInput = document.querySelector("#reportImage");
+  const imagePreview = document.querySelector("#reportImagePreview");
+  const message = document.querySelector("#reportMessage");
+  const latitudeInput = document.querySelector("#reportLatitude");
+  const longitudeInput = document.querySelector("#reportLongitude");
+  const addressInput = document.querySelector("#reportAddress");
+  const locationSearch = document.querySelector("#reportLocationSearch");
+  const suggestions = document.querySelector("#reportLocationSuggestions");
+  const locationStatus = document.querySelector("#reportLocationStatus");
   const params = new URLSearchParams(location.search);
-  let imageData = '';
 
-  const safe = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+  let imageData = "";
+  let currentFilter = "all";
+  let pickerMap = null;
+  let pickerMarker = null;
+  let reportsMap = null;
+  let reportMarkers = [];
+  let searchTimer = null;
+  let suggestionResults = [];
 
-  function savedReports() {
-    try { const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(value) ? value : []; }
-    catch (_) { return []; }
+  const safe = value => String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
+  const numberOrNull = value => {
+    if (value === "" || value === null || value === undefined) return null;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  };
+
+  function storedReports() {
+    try {
+      const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch (_) {
+      return [];
+    }
   }
-  function allReports() { const saved = savedReports(); return saved.length ? saved : demoReports; }
-  function saveReport(report) { const reports = savedReports(); reports.unshift(report); localStorage.setItem(STORAGE_KEY, JSON.stringify(reports)); }
 
-  function findPet(id) {
+  function allReports() {
+    const saved = storedReports();
+    const savedIds = new Set(saved.map(item => String(item.id)));
+    return [...saved, ...demoReports.filter(item => !savedIds.has(String(item.id)))];
+  }
+
+  function saveOrUpdateReport(report) {
+    const reports = storedReports();
+    const index = reports.findIndex(item => String(item.id) === String(report.id));
+    if (index >= 0) reports[index] = report;
+    else reports.unshift(report);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    window.dispatchEvent(new CustomEvent("thepetgrid:lost-reports-changed", { detail:{ reports } }));
+  }
+
+  function normalizeCloudPet(row) {
+    if (!row) return null;
+    return {
+      id: row.id, name: row.name || "", type: row.type || "Other", breed: row.breed || "",
+      age: row.age ?? "", gender: row.gender || "", country: row.country || "", city: row.city || "",
+      owner: row.profiles?.username || "ThePetGrid Member", image: row.image_url || ""
+    };
+  }
+
+  function getDraftPet(id) {
+    try {
+      const pet = JSON.parse(sessionStorage.getItem(PET_DRAFT_KEY) || "null");
+      return pet && String(pet.id) === String(id) ? pet : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function findPet(id) {
     if (!id) return null;
+    const draftPet = getDraftPet(id);
+    if (draftPet) return draftPet;
     const localPet = window.PetStore?.getById?.(id);
     if (localPet) return localPet;
-    return null;
+    const client = window.ThePetGridSupabase?.client;
+    if (!client) return null;
+    try {
+      const { data, error } = await client.from("pets").select("*, profiles:owner_id(username)").eq("id", String(id)).maybeSingle();
+      if (error) throw error;
+      return normalizeCloudPet(data);
+    } catch (error) {
+      console.error("ThePetGrid: could not prefill the lost pet report.", error);
+      return null;
+    }
+  }
+
+  function setLocationStatus(text, kind = "") {
+    locationStatus.textContent = text;
+    locationStatus.className = `lf-location-status${kind ? ` is-${kind}` : ""}`;
+  }
+
+  function markerElement(className, content) {
+    const element = document.createElement("div");
+    element.className = className;
+    element.innerHTML = content;
+    return element;
+  }
+
+  function ensurePickerMap() {
+    if (pickerMap || !window.ThePetGridMapCore?.MapManager) {
+      pickerMap?.resize();
+      return;
+    }
+    const manager = new window.ThePetGridMapCore.MapManager({ container:"reportLocationMap", center:DEFAULT_CENTER, zoom:5, minZoom:2, maxZoom:18, navigation:true });
+    pickerMap = manager.map;
+    pickerMap.on("click", event => selectMapPoint(event.lngLat.lat, event.lngLat.lng, true));
+    pickerMap.on("load", () => setTimeout(() => pickerMap.resize(), 80));
+  }
+
+  function setPickerMarker(lat, lng, zoom = 15) {
+    ensurePickerMap();
+    const latitude = Number(lat);
+    const longitude = Number(lng);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !pickerMap) return;
+    latitudeInput.value = latitude.toFixed(6);
+    longitudeInput.value = longitude.toFixed(6);
+    if (!pickerMarker) {
+      pickerMarker = new maplibregl.Marker({ element:markerElement("lf-location-marker", "<span>🐾</span>"), draggable:true, anchor:"bottom" }).setLngLat([longitude, latitude]).addTo(pickerMap);
+      pickerMarker.on("dragend", () => {
+        const point = pickerMarker.getLngLat();
+        selectMapPoint(point.lat, point.lng, true, false);
+      });
+    } else pickerMarker.setLngLat([longitude, latitude]);
+    pickerMap.easeTo({ center:[longitude, latitude], zoom:Math.max(pickerMap.getZoom(), zoom), duration:500 });
+  }
+
+  function addressParts(result) {
+    const address = result?.address || {};
+    return {
+      country: address.country || "",
+      city: address.city || address.town || address.village || address.municipality || address.county || "",
+      area: address.road || address.neighbourhood || address.suburb || address.quarter || address.city_district || result?.name || "",
+      full: result?.display_name || ""
+    };
+  }
+
+  function applyAddress(result) {
+    const parts = addressParts(result);
+    if (parts.country) document.querySelector("#reportCountry").value = parts.country;
+    if (parts.city) document.querySelector("#reportCity").value = parts.city;
+    if (parts.area) form.elements.area.value = parts.area;
+    addressInput.value = parts.full;
+    locationSearch.value = parts.full;
+    suggestions.hidden = true;
+    setPickerMarker(result.lat, result.lon);
+    setLocationStatus(`Selected: ${parts.full || `${result.lat}, ${result.lon}`}`, "success");
+  }
+
+  async function reverseGeocode(lat, lng) {
+    try {
+      setLocationStatus("Finding the selected address…");
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
+      const response = await fetch(url, { headers:{ "Accept-Language":"en" } });
+      if (!response.ok) throw new Error();
+      const result = await response.json();
+      applyAddress({ ...result, lat, lon:lng });
+    } catch (_) {
+      addressInput.value = `${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`;
+      setLocationStatus("Exact map point selected. Complete the country, city and area fields.", "success");
+    }
+  }
+
+  function selectMapPoint(lat, lng, reverse = false, moveMarker = true) {
+    if (moveMarker) setPickerMarker(lat, lng);
+    else {
+      latitudeInput.value = Number(lat).toFixed(6);
+      longitudeInput.value = Number(lng).toFixed(6);
+    }
+    if (reverse) reverseGeocode(lat, lng);
+  }
+
+  async function searchAddresses(query) {
+    if (query.length < 3) {
+      suggestions.hidden = true;
+      return;
+    }
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&addressdetails=1&q=${encodeURIComponent(query)}`;
+      const response = await fetch(url, { headers:{ "Accept-Language":"en" } });
+      if (!response.ok) throw new Error();
+      suggestionResults = await response.json();
+      suggestions.innerHTML = suggestionResults.length
+        ? suggestionResults.map((item, index) => `<button class="lf-location-suggestion" type="button" data-location-index="${index}">${safe(item.display_name)}</button>`).join("")
+        : '<div class="lf-location-suggestion">No matching addresses found. Click directly on the map.</div>';
+      suggestions.hidden = false;
+    } catch (_) {
+      suggestions.innerHTML = '<div class="lf-location-suggestion">Address search is unavailable. Click directly on the map.</div>';
+      suggestions.hidden = false;
+    }
+  }
+
+  function ensureReportsMap() {
+    if (reportsMap || !window.ThePetGridMapCore?.MapManager) return;
+    const manager = new window.ThePetGridMapCore.MapManager({ container:"lostFoundReportsMap", center:DEFAULT_CENTER, zoom:4.5, minZoom:2, maxZoom:18, navigation:true });
+    reportsMap = manager.map;
+    reportsMap.on("load", renderReportMarkers);
+  }
+
+  function renderReportMarkers() {
+    if (!reportsMap || !reportsMap.loaded()) return;
+    reportMarkers.forEach(marker => marker.remove());
+    reportMarkers = [];
+    const bounds = new maplibregl.LngLatBounds();
+    allReports().forEach(report => {
+      const lat = numberOrNull(report.latitude);
+      const lng = numberOrNull(report.longitude);
+      if (lat === null || lng === null) return;
+      const state = report.resolved ? "resolved" : report.status === "found" ? "found" : "lost";
+      const element = markerElement(`lf-report-map-marker is-${state}`, report.resolved ? "✓" : report.status === "found" ? "🐾" : "!"
+      );
+      const popup = new maplibregl.Popup({ offset:20 }).setHTML(`<div class="lf-map-popup"><strong>${safe(report.name || "Pet report")}</strong><span>${safe(report.address || report.city || "Selected map point")}</span><span>${report.resolved ? "✅ Resolved" : report.status === "found" ? "🟢 Found" : "🔴 Lost"}</span></div>`);
+      const marker = new maplibregl.Marker({ element, anchor:"center" }).setLngLat([lng, lat]).setPopup(popup).addTo(reportsMap);
+      reportMarkers.push(marker);
+      bounds.extend([lng, lat]);
+    });
+    if (!bounds.isEmpty()) reportsMap.fitBounds(bounds, { padding:60, maxZoom:12, duration:500 });
+  }
+
+  function focusReportOnMap(reportId) {
+    const report = allReports().find(item => String(item.id) === String(reportId));
+    const lat = numberOrNull(report?.latitude);
+    const lng = numberOrNull(report?.longitude);
+    if (!report || lat === null || lng === null || !reportsMap) return;
+    document.querySelector("#lostFoundReportsMap")?.scrollIntoView({ behavior:"smooth", block:"center" });
+    reportsMap.easeTo({ center:[lng, lat], zoom:15, duration:700 });
+    const index = allReports().filter(item => numberOrNull(item.latitude) !== null && numberOrNull(item.longitude) !== null).findIndex(item => String(item.id) === String(reportId));
+    reportMarkers[index]?.togglePopup();
+  }
+
+  function filteredReports() {
+    return allReports().filter(item => {
+      if (currentFilter === "all") return true;
+      if (currentFilter === "resolved") return Boolean(item.resolved);
+      if (currentFilter === "lost") return item.status === "lost" && !item.resolved;
+      if (currentFilter === "found") return item.status === "found" && !item.resolved;
+      return true;
+    });
+  }
+
+  function render() {
+    if (!grid) return;
+    const reports = filteredReports();
+    grid.innerHTML = reports.length ? reports.map(item => {
+      const state = item.resolved ? "resolved" : item.status === "found" ? "found" : "lost";
+      const hasLocation = numberOrNull(item.latitude) !== null && numberOrNull(item.longitude) !== null;
+      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${state.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p><div class="lf-card__footer"><span>${item.resolved ? "Alert closed" : "Community alert"}</span><span class="lf-date">${safe(item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" ? `<button class="lf-card__action lf-card__action--resolved" type="button" data-resolve-report="${safe(item.id)}" ${item.resolved ? "disabled" : ""}>${item.resolved ? "✅ Pet Found" : "✅ Mark Pet Found"}</button>` : ""}</div></div></article>`;
+    }).join("") : '<div class="lf-empty"><strong>No reports in this category yet.</strong>New community reports will appear here.</div>';
+    renderReportMarkers();
+  }
+
+  function resolveReport(reportId) {
+    const report = allReports().find(item => String(item.id) === String(reportId));
+    if (!report || report.resolved || report.status !== "lost") return;
+    if (!window.confirm(`Confirm that ${report.name || "this pet"} has been found?`)) return;
+    saveOrUpdateReport({ ...report, resolved:true, resolvedAt:new Date().toISOString() });
+    render();
   }
 
   function setMode(mode) {
-    const status = mode === 'found' ? 'found' : 'lost';
+    const status = mode === "found" ? "found" : "lost";
     statusInput.value = status;
-    formTitle.textContent = status === 'lost' ? '🆘 Report a Lost Pet' : '🐾 Report a Found Pet';
-    document.querySelectorAll('[data-open-report]').forEach(btn => btn.classList.toggle('is-active', btn.dataset.openReport === status));
+    formTitle.textContent = status === "lost" ? "🆘 Report a Lost Pet" : "🐾 Report a Found Pet";
+    document.querySelectorAll("[data-open-report]").forEach(button => button.classList.toggle("is-active", button.dataset.openReport === status));
   }
 
-  function openForm(mode = 'lost') {
+  function openForm(mode = "lost") {
     setMode(mode);
     formSection.hidden = false;
-    formSection.scrollIntoView({behavior:'smooth', block:'start'});
-    setTimeout(() => document.querySelector('#reportPetName')?.focus(), 350);
+    formSection.scrollIntoView({ behavior:"smooth", block:"start" });
+    setTimeout(() => {
+      ensurePickerMap();
+      pickerMap?.resize();
+      document.querySelector("#reportPetName")?.focus();
+    }, 350);
   }
 
-  function prefillPet() {
-    const pet = findPet(params.get('petId'));
-    if (!pet) return;
-    document.querySelector('#reportPetName').value = pet.name || '';
-    document.querySelector('#reportPetType').value = pet.type || 'Other';
-    document.querySelector('#reportBreed').value = pet.breed || '';
-    document.querySelector('#reportCountry').value = pet.country || '';
-    document.querySelector('#reportCity').value = pet.city || '';
-    document.querySelector('#reportOwner').value = pet.owner || '';
-    document.querySelector('#reportPetId').value = pet.id || '';
-    imageData = pet.image || '';
+  async function prefillPet() {
+    const pet = await findPet(params.get("petId"));
+    if (!pet) {
+      message.textContent = "The pet profile could not be loaded automatically. You can still complete the report manually.";
+      message.hidden = false;
+      return;
+    }
+    document.querySelector("#reportPetName").value = pet.name || "";
+    const typeInput = document.querySelector("#reportPetType");
+    const supportedTypes = [...typeInput.options].map(option => option.value);
+    typeInput.value = supportedTypes.includes(pet.type) ? pet.type : "Other";
+    document.querySelector("#reportBreed").value = pet.breed || "";
+    document.querySelector("#reportAge").value = pet.age ?? "";
+    document.querySelector("#reportGender").value = ["Male", "Female"].includes(pet.gender) ? pet.gender : "";
+    document.querySelector("#reportCountry").value = pet.country || "";
+    document.querySelector("#reportCity").value = pet.city || "";
+    document.querySelector("#reportOwner").value = pet.owner || "";
+    document.querySelector("#reportPetId").value = pet.id || "";
+    imageData = pet.image || pet.image_url || "";
     imagePreview.src = imageData || PLACEHOLDER;
     imagePreview.hidden = false;
+    message.textContent = `${pet.name || "Pet"} profile details were added automatically. Now select where and when the pet was lost.`;
+    message.hidden = false;
   }
 
-  function render(filter = 'all') {
-    if (!grid) return;
-    const reports = allReports().filter(item => filter === 'all' || item.status === filter);
-    grid.innerHTML = reports.length ? reports.map(item => {
-      const status = item.status === 'found' ? 'found' : 'lost';
-      return `<article class="lf-card" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || 'Pet report')}" loading="lazy"><span class="lf-status lf-status--${status}">${status.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || 'Unknown pet')}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || 'Pet')}</span><span>📍 ${safe(item.city || 'Location unavailable')}</span></div><p class="lf-description">${safe(item.description || 'Community report')}</p><div class="lf-card__footer"><a href="map.html">View on map →</a><span class="lf-date">${safe(item.date || '')}</span></div></div></article>`;
-    }).join('') : '<div class="lf-empty"><strong>No reports in this category yet.</strong>New community reports will appear here.</div>';
-  }
-
-  document.querySelectorAll('[data-open-report]').forEach(button => button.addEventListener('click', event => {
-    event.preventDefault(); openForm(button.dataset.openReport);
+  document.querySelectorAll("[data-open-report]").forEach(button => button.addEventListener("click", event => {
+    event.preventDefault();
+    openForm(button.dataset.openReport);
   }));
 
-  document.querySelector('#closeReportForm')?.addEventListener('click', () => { formSection.hidden = true; });
+  document.querySelector("#closeReportForm")?.addEventListener("click", () => { formSection.hidden = true; });
 
-  imageInput?.addEventListener('change', () => {
+  locationSearch?.addEventListener("input", () => {
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => searchAddresses(locationSearch.value.trim()), 450);
+  });
+
+  suggestions?.addEventListener("click", event => {
+    const button = event.target.closest("[data-location-index]");
+    if (!button) return;
+    const result = suggestionResults[Number(button.dataset.locationIndex)];
+    if (result) applyAddress(result);
+  });
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".lf-location-search-wrap")) suggestions.hidden = true;
+  });
+
+  imageInput?.addEventListener("change", () => {
     const file = imageInput.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); imageInput.value=''; return; }
-    if (file.size > 4 * 1024 * 1024) { alert('The image must be smaller than 4 MB.'); imageInput.value=''; return; }
+    if (!file.type.startsWith("image/")) { alert("Please choose an image file."); imageInput.value = ""; return; }
+    if (file.size > 4 * 1024 * 1024) { alert("The image must be smaller than 4 MB."); imageInput.value = ""; return; }
     const reader = new FileReader();
-    reader.onload = () => { imageData = String(reader.result || ''); imagePreview.src = imageData; imagePreview.hidden = false; };
+    reader.onload = () => { imageData = String(reader.result || ""); imagePreview.src = imageData; imagePreview.hidden = false; };
     reader.readAsDataURL(file);
   });
 
-  form?.addEventListener('submit', event => {
+  form?.addEventListener("submit", event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
+    const latitude = numberOrNull(latitudeInput.value);
+    const longitude = numberOrNull(longitudeInput.value);
+    if (latitude === null || longitude === null) {
+      setLocationStatus("Choose an address from the list or click the exact point on the map.", "error");
+      document.querySelector("#reportLocationMap")?.scrollIntoView({ behavior:"smooth", block:"center" });
+      return;
+    }
     const data = new FormData(form);
-    const city = [data.get('area'), data.get('city'), data.get('country')].filter(Boolean).join(', ');
+    const cityLabel = [data.get("area"), data.get("city"), data.get("country")].filter(Boolean).join(", ");
     const report = {
-      id: `lf-${Date.now()}`,
-      petId: data.get('petId') || null,
-      status: data.get('status') === 'found' ? 'found' : 'lost',
-      name: data.get('petName').trim() || 'Unknown pet',
-      type: data.get('petType'), breed: data.get('breed').trim(), color: data.get('color').trim(), gender: data.get('gender'),
-      date: data.get('date'), country: data.get('country').trim(), city, area: data.get('area').trim(),
-      phone: data.get('phone').trim(), email: data.get('email').trim(), owner: data.get('owner').trim(),
-      description: data.get('description').trim(), reward: data.get('reward').trim(), image: imageData || PLACEHOLDER,
-      createdAt: new Date().toISOString(), resolved: false
+      id:`lf-${Date.now()}`, petId:data.get("petId") || null,
+      status:data.get("status") === "found" ? "found" : "lost", name:data.get("petName").trim() || "Unknown pet",
+      type:data.get("petType"), breed:data.get("breed").trim(), age:data.get("age").trim(), color:data.get("color").trim(), gender:data.get("gender"),
+      date:data.get("date"), country:data.get("country").trim(), city:cityLabel, area:data.get("area").trim(), address:data.get("address").trim(),
+      latitude, longitude, phone:data.get("phone").trim(), email:data.get("email").trim(), owner:data.get("owner").trim(),
+      description:data.get("description").trim(), reward:data.get("reward").trim(), image:imageData || PLACEHOLDER,
+      createdAt:new Date().toISOString(), resolved:false
     };
-    saveReport(report);
-    message.textContent = report.status === 'lost' ? 'Lost pet alert published successfully.' : 'Found pet report published successfully.';
+    saveOrUpdateReport(report);
+    message.textContent = report.status === "lost" ? "Lost pet alert published successfully." : "Found pet report published successfully.";
     message.hidden = false;
-    render(report.status);
-    filters.forEach(item => item.classList.toggle('is-active', item.dataset.lfFilter === report.status));
-    form.reset(); imageData=''; imagePreview.hidden=true;
-    setTimeout(() => document.querySelector('#reports')?.scrollIntoView({behavior:'smooth'}), 500);
+    currentFilter = report.status;
+    filters.forEach(item => item.classList.toggle("is-active", item.dataset.lfFilter === currentFilter));
+    form.reset();
+    imageData = "";
+    imagePreview.hidden = true;
+    latitudeInput.value = "";
+    longitudeInput.value = "";
+    addressInput.value = "";
+    if (pickerMarker) { pickerMarker.remove(); pickerMarker = null; }
+    render();
+    setTimeout(() => document.querySelector("#reports")?.scrollIntoView({ behavior:"smooth" }), 500);
   });
 
-  filters.forEach(button => button.addEventListener('click', () => {
-    filters.forEach(item => item.classList.remove('is-active')); button.classList.add('is-active'); render(button.dataset.lfFilter || 'all');
+  filters.forEach(button => button.addEventListener("click", () => {
+    currentFilter = button.dataset.lfFilter || "all";
+    filters.forEach(item => item.classList.toggle("is-active", item === button));
+    render();
   }));
 
-  const requestedMode = params.get('mode');
-  if (requestedMode === 'lost' || requestedMode === 'found') { openForm(requestedMode); prefillPet(); }
-  render();
+  grid?.addEventListener("click", event => {
+    const mapButton = event.target.closest("[data-view-report-map]");
+    const resolveButton = event.target.closest("[data-resolve-report]");
+    if (mapButton) focusReportOnMap(mapButton.dataset.viewReportMap);
+    if (resolveButton) resolveReport(resolveButton.dataset.resolveReport);
+  });
+
+  async function initialize() {
+    ensureReportsMap();
+    const requestedMode = params.get("mode");
+    if (requestedMode === "lost" || requestedMode === "found") {
+      openForm(requestedMode);
+      await prefillPet();
+    }
+    render();
+  }
+
+  initialize();
 })();

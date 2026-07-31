@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const count = document.getElementById("resultCount");
   const clearButton = document.getElementById("clearFilters");
   const pagination = document.getElementById("pagination");
+  const lostReportDraftKey = "thepetgrid_lost_report_pet";
 
   if (!grid || !window.PetStore) return;
 
@@ -148,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <p class="pet-card__breed">${escapeHtml(pet.breed || "Breed not added")} · ${escapeHtml(pet.age || "Age not added")}</p>
         <div class="pet-card__meta"><span>📍 ${escapeHtml(location)}</span><span>👤 ${escapeHtml(pet.owner || "Unknown owner")}</span></div>
         <div class="pet-card__stats"><span>👥 ${Number(pet.followers || 0).toLocaleString()}</span><span>🎁 ${Number(pet.gifts || 0).toLocaleString()}</span><span>🐾 ${escapeHtml(pet.type || "Pet")}</span></div>
-        <div class="pet-card__footer-actions"><a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a><a class="pet-card__lost" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a></div>
+        <div class="pet-card__footer-actions"><a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a><a class="pet-card__lost" data-report-lost="${escapeHtml(pet.id)}" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a></div>
       </div>
     </article>`;
   }
@@ -173,8 +174,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   grid.addEventListener("click", async event => {
+    const reportLostLink = event.target.closest("[data-report-lost]");
     const likeButton = event.target.closest("[data-like]");
     const favoriteButton = event.target.closest("[data-favorite]");
+
+    if (reportLostLink) {
+      const pet = state.pets.find(item => String(item.id) === String(reportLostLink.dataset.reportLost));
+      if (pet) {
+        try {
+          sessionStorage.setItem(lostReportDraftKey, JSON.stringify(pet));
+        } catch (_) {
+          // The petId in the URL still lets Lost & Found load the pet.
+        }
+      }
+      return;
+    }
 
     if (likeButton) {
       event.preventDefault();

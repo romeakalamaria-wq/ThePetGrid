@@ -709,6 +709,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // INITIALIZE
     // ==================================================
 
+    reportLostButton?.addEventListener("click", () => {
+        if (!currentPet) {
+            return;
+        }
+
+        try {
+            sessionStorage.setItem(
+                "thepetgrid_lost_report_pet",
+                JSON.stringify(currentPet)
+            );
+        } catch (_) {
+            // Lost & Found can still load the profile by petId.
+        }
+    });
+
     async function initializePetProfile() {
 
         showLoading();

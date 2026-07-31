@@ -12,7 +12,9 @@
   <link rel="stylesheet" href="../design/theme.css">
   <link rel="stylesheet" href="../design/style.css">
   <link rel="stylesheet" href="../design/header.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
   <link rel="stylesheet" href="../css/lost-found.css">
+  <link rel="stylesheet" href="../css/lost-found-sprint93.css">
 </head>
 <body>
 <header class="main-header">
@@ -58,16 +60,29 @@
         <form id="lostFoundForm" class="lf-report-form">
           <input type="hidden" name="status" id="reportStatus" value="lost">
           <input type="hidden" name="petId" id="reportPetId">
+          <input type="hidden" name="latitude" id="reportLatitude">
+          <input type="hidden" name="longitude" id="reportLongitude">
+          <input type="hidden" name="address" id="reportAddress">
           <div class="lf-form-grid">
             <label><span>Pet name *</span><input id="reportPetName" name="petName" required maxlength="60" placeholder="e.g. Luna"></label>
             <label><span>Animal type *</span><select id="reportPetType" name="petType" required><option value="">Choose type</option><option>Dog</option><option>Cat</option><option>Bird</option><option>Rabbit</option><option>Reptile</option><option>Fish</option><option>Other</option></select></label>
             <label><span>Breed</span><input id="reportBreed" name="breed" maxlength="80" placeholder="Breed, if known"></label>
+            <label><span>Age</span><input id="reportAge" name="age" maxlength="40" placeholder="Age, if known"></label>
             <label><span>Color</span><input name="color" maxlength="60" placeholder="Main colors or markings"></label>
-            <label><span>Gender</span><select name="gender"><option value="">Unknown</option><option>Male</option><option>Female</option></select></label>
+            <label><span>Gender</span><select id="reportGender" name="gender"><option value="">Unknown</option><option>Male</option><option>Female</option></select></label>
             <label><span>Date *</span><input name="date" type="date" required></label>
             <label><span>Country *</span><input id="reportCountry" name="country" required maxlength="80" placeholder="Country"></label>
             <label><span>City *</span><input id="reportCity" name="city" required maxlength="80" placeholder="City"></label>
             <label class="lf-field-wide"><span>Area / last seen location *</span><input name="area" required maxlength="140" placeholder="Street, neighborhood or landmark"></label>
+            <div class="lf-field-wide lf-location-picker">
+              <div class="lf-location-picker__header"><div><strong>📍 Exact lost/found location *</strong><small>Choose an address from the list or click directly on the map.</small></div></div>
+              <div class="lf-location-search-wrap">
+                <input id="reportLocationSearch" type="search" placeholder="Start typing an address…" autocomplete="off">
+                <div id="reportLocationSuggestions" class="lf-location-suggestions" hidden></div>
+              </div>
+              <div id="reportLocationMap" class="lf-location-map" aria-label="Choose the exact lost or found location"></div>
+              <p id="reportLocationStatus" class="lf-location-status">Search for an address or click on the map to place the marker.</p>
+            </div>
             <label><span>Owner / reporter</span><input id="reportOwner" name="owner" maxlength="80" placeholder="Your name"></label>
             <label><span>Phone *</span><input name="phone" type="tel" required maxlength="30" placeholder="Contact phone"></label>
             <label><span>Email</span><input name="email" type="email" maxlength="120" placeholder="name@example.com"></label>
@@ -84,25 +99,33 @@
 
   <section class="lf-main" id="reports">
     <div class="lf-shell">
+      <section class="lf-reports-map-card" aria-labelledby="reportsMapTitle">
+        <div><span class="lf-eyebrow">Live community map</span><h2 id="reportsMapTitle">Lost &amp; Found locations</h2><p>Select a marker to see the report or use “View on map” from a card.</p></div>
+        <div id="lostFoundReportsMap" class="lf-reports-map" aria-label="Lost and found reports map"></div>
+      </section>
       <div class="lf-toolbar">
         <div class="lf-title"><small>Latest alerts</small><h2>Community reports</h2><p>Browse current lost and found pet alerts.</p></div>
         <div class="lf-filters" role="group" aria-label="Filter reports">
           <button class="lf-filter is-active" type="button" data-lf-filter="all">All</button>
           <button class="lf-filter" type="button" data-lf-filter="lost">🔴 Lost</button>
           <button class="lf-filter" type="button" data-lf-filter="found">🟢 Found</button>
+          <button class="lf-filter" type="button" data-lf-filter="resolved">✅ Resolved</button>
         </div>
       </div>
       <div class="lf-grid" id="lostFoundGrid" aria-live="polite"></div>
-      <div class="lf-note"><strong>Sprint 9.2:</strong> reports can now be created, saved locally and prefilled directly from a pet card or pet profile.</div>
+      <div class="lf-note"><strong>Sprint 9.3:</strong> choose an exact map point, browse address suggestions and close a Lost alert when the pet is found.</div>
     </div>
   </section>
 </main>
 
-<script src="../store/pet-store.js"></script>
-<script src="../js/lost-found.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 <script src="../js/supabase-client.js"></script>
+<script src="../store/pet-store.js"></script>
+<script src="../js/map-style.js"></script>
+<script src="../js/map-core/map-manager.js"></script>
+<script src="../js/lost-found.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/header.js"></script>
 <script src="../js/header-live.js"></script>
