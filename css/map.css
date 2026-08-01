@@ -98,10 +98,10 @@ body{background:#f7f8fb;color:#152033}.map-shell{width:min(1320px,calc(100% - 32
 .tpg-premium-popup .maplibregl-popup-close-button:hover{transform:rotate(6deg) scale(1.04);background:#fff;color:#101828}
 .tpg-premium-popup .maplibregl-popup-tip{border-top-color:#fff!important}
 .tpg-map-popup--premium{display:block!important;width:100%;min-width:0;max-height:min(52vh,380px);overflow-x:hidden;overflow-y:auto;color:#172033;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
-.tpg-map-popup__media{position:relative;height:132px;overflow:hidden;background:linear-gradient(135deg,#f1f5f9,#e2e8f0)}
-.tpg-map-popup__media:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(to bottom,transparent,rgba(15,23,42,.33));pointer-events:none}
-.tpg-map-popup__media img{display:block;width:100%;height:100%;border-radius:0!important;object-fit:cover;object-position:center;transition:transform .42s ease}
-.tpg-map-popup--premium:hover .tpg-map-popup__media img{transform:scale(1.025)}
+.tpg-map-popup__media{position:relative;height:190px;overflow:hidden;background:linear-gradient(135deg,#e2e8f0,#f8fafc)}
+.tpg-map-popup__media:after{display:none}
+.tpg-map-popup__media img{display:block;width:100%;height:100%;border-radius:0!important;object-fit:contain;object-position:center;background:rgba(15,23,42,.06);transition:transform .42s ease}
+.tpg-map-popup--premium:hover .tpg-map-popup__media img{transform:none}
 .tpg-map-popup__badges{position:absolute;z-index:2;left:14px;right:58px;bottom:13px;display:flex!important;align-items:center;gap:8px;flex-wrap:wrap}
 .tpg-map-popup__verified,.tpg-map-popup__online,.tpg-map-popup__offline{position:static!important;display:inline-flex!important;align-items:center;gap:6px;padding:7px 10px;border:1px solid rgba(255,255,255,.76);border-radius:999px;color:#fff!important;font-size:.72rem!important;font-weight:900!important;line-height:1;letter-spacing:.01em;box-shadow:0 7px 18px rgba(15,23,42,.18);backdrop-filter:blur(12px)}
 .tpg-map-popup__verified{background:rgba(37,99,235,.88)!important}
