@@ -874,10 +874,51 @@ a {
     margin-top: auto;
     padding-top: 34px;
 
-    display: flex;
-    align-items: center;
+    display: grid;
 
+    gap: 14px;
+
+    width: 100%;
+
+}
+
+.pet-profile__primary-actions,
+.pet-profile__secondary-actions {
+
+    display: grid;
     gap: 13px;
+
+}
+
+.pet-profile__primary-actions {
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+}
+
+.pet-profile__secondary-actions {
+
+    grid-template-columns:
+        minmax(150px, 0.72fr) minmax(230px, 1.28fr);
+
+    padding-top: 14px;
+
+    border-top:
+        1px solid var(--color-border);
+
+}
+
+.pet-profile__actions .button {
+
+    width: 100%;
+    min-width: 0;
+
+    padding:
+        0 16px;
+
+    text-align: center;
+    line-height: 1.2;
 
 }
 
@@ -1169,6 +1210,14 @@ a {
     .pet-profile__actions {
 
         flex-direction: column;
+
+    }
+
+    .pet-profile__primary-actions,
+    .pet-profile__secondary-actions {
+
+        grid-template-columns:
+            1fr;
 
     }
 

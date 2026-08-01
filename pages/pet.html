@@ -6,6 +6,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="View a pet profile on ThePetGrid." name="description"/>
 <title>Pet Profile — ThePetGrid</title>
+<link href="../assets/favicon.png" rel="icon" type="image/png"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
@@ -160,6 +161,7 @@
 </div>
 <!-- ACTIONS -->
 <div class="pet-profile__actions">
+<div class="pet-profile__primary-actions">
 <button aria-pressed="false" class="button button--primary" id="likePetButton" type="button">
 <span aria-hidden="true">
                                     ♡
@@ -174,8 +176,11 @@
 <button class="button button--secondary" id="sendPetGiftButton" type="button">
                                 🎁 Send Gift
                             </button>
-<a class="button button--danger" id="reportLostPetButton" href="lost-found.html?mode=lost">🆘 Report This Pet as Lost</a>
+</div>
+<div class="pet-profile__secondary-actions">
 <button class="button button--secondary" type="button" data-share-current-page>📤 Share Pet</button>
+<a class="button button--danger" id="reportLostPetButton" href="lost-found.html?mode=lost">🆘 Report This Pet as Lost</a>
+</div>
 </div>
 </div>
 </article>

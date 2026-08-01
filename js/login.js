@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const submitButton = document.querySelector("#authSubmit");
   const modeButtons = document.querySelectorAll("[data-auth-mode]");
   const usernameField = document.querySelector("#usernameField");
+  const emailField = document.querySelector("#emailField");
   const authNote = document.querySelector(".auth-note");
   const forgotButton = document.querySelector("#forgotPasswordButton");
   const forgotForm = document.querySelector("#forgotPasswordForm");
@@ -62,8 +63,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? "Join ThePetGrid and create a profile for your pets."
       : "Log in to manage your pets and community activity.";
     submitButton.textContent = registering ? "Create Account" : "Log In";
-    usernameField.hidden = !registering;
-    form.elements.username.required = registering;
+    usernameField.hidden = false;
+    emailField.hidden = !registering;
+    form.elements.username.required = true;
+    form.elements.email.required = registering;
     form.elements.password.autocomplete = registering
       ? "new-password"
       : "current-password";
@@ -90,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function friendlyError(error) {
     const raw = String(error?.message || "").toLowerCase();
     if (raw.includes("invalid login credentials")) {
-      return "Incorrect email or password. Make sure you registered with this exact email.";
+      return "Incorrect username or password.";
     }
     if (raw.includes("email not confirmed")) {
       return "Your email is not confirmed yet. Open the Supabase confirmation email first.";
@@ -163,7 +166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const password = form.elements.password.value;
     const username = form.elements.username.value.trim();
 
-    if (!email) {
+    if (mode === "register" && !email) {
       showMessage("Enter your email.", "error");
       return;
     }
@@ -171,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showMessage("Password must contain at least 6 characters.", "error");
       return;
     }
-    if (mode === "register" && username.length < 2) {
+    if (username.length < 2) {
       showMessage("Username must contain at least 2 characters.", "error");
       return;
     }
@@ -201,7 +204,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      const response = await fetch("/api/username-login", {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const loginData = await response.json().catch(() => ({}));
+      if (!response.ok || !loginData.access_token || !loginData.refresh_token) {
+        throw new Error(loginData.message || "Invalid login credentials");
+      }
+      const { data, error } = await client.auth.setSession({
+        access_token: loginData.access_token,
+        refresh_token: loginData.refresh_token
+      });
       if (error) throw error;
       if (!data.user || !data.session) {
         throw new Error("Login did not create a session.");

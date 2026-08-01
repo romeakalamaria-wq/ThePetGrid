@@ -66,7 +66,9 @@
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
           "text-size": 13,
-          "text-font": ["Open Sans Bold"],
+          // The MapLibre demo glyph server no longer serves Open Sans Bold.
+          // Noto Sans Regular is available and keeps cluster counters working.
+          "text-font": ["Noto Sans Regular"],
           "text-allow-overlap": true
         },
         paint: { "text-color": "#ffffff" }
