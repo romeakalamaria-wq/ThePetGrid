@@ -47,6 +47,12 @@
     <label class="map-online-filter"><input id="mapOnlineOnly" type="checkbox"><span>🟢 Active only</span></label>
     <button id="mapReset" type="button">Reset</button>
   </section>
+  <section class="local-map-controls" aria-label="Local map area">
+    <div><strong>📍 Your local area</strong><small id="localMapStatus">Allow location to start within 50 km.</small></div>
+    <label><span>Radius</span><select id="localMapRadius"><option value="5">5 km</option><option value="10">10 km</option><option value="25">25 km</option><option value="50" selected>50 km</option><option value="100">100 km</option></select></label>
+    <button id="showMyArea" type="button">📍 My Area</button>
+    <button id="showWorld" type="button">🌍 View World</button>
+  </section>
 
   <div class="map-layout">
     <section class="map-panel">

@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     serviceExplorer: document.getElementById("serviceExplorer"), serviceExplorerCount: document.getElementById("serviceExplorerCount"),
     serviceExplorerMessage: document.getElementById("serviceExplorerMessage"), serviceExplorerList: document.getElementById("serviceExplorerList"),
     serviceSort: document.getElementById("serviceSort"), layerPets: document.getElementById("layerPets"),
+    localRadius: document.getElementById("localMapRadius"), localStatus: document.getElementById("localMapStatus"),
+    showMyArea: document.getElementById("showMyArea"), showWorld: document.getElementById("showWorld"),
     serviceToggles: [...document.querySelectorAll("[data-service-layer]")]
   };
 
@@ -35,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const manager = new Core.MapManager({ container: mapElement, center: [8,25], zoom: 1.6, minZoom: 1.2, fullscreen: true, geolocate: true });
   const map = manager.map;
+  window.ThePetGridWorldMap = { map, manager };
   const petLayer = new Core.PetLayer(map, { onSelect: pet => renderSidebar([pet], pet.name, "Selected pet") });
   const serviceClient = new Core.ServiceClient();
   const serviceLayer = new Core.ServiceLayer(map);
@@ -42,14 +45,57 @@ document.addEventListener("DOMContentLoaded", () => {
   // Keep the visitor position only in memory. It is used to calculate
   // the distance shown in pet cards and is never written to storage.
   let userLocation = null;
+  let localMode = true;
+  let localRadiusKm = Number(localStorage.getItem("thepetgrid_map_radius_km") || 50);
+  if (![5,10,25,50,100].includes(localRadiusKm)) localRadiusKm = 50;
+  if (ui.localRadius) ui.localRadius.value = String(localRadiusKm);
+
+  function localCircleGeoJson(latitude, longitude, radiusKm) {
+    const points = [];
+    const earth = 6371;
+    const lat1 = latitude * Math.PI / 180;
+    const lon1 = longitude * Math.PI / 180;
+    const angular = radiusKm / earth;
+    for (let bearing = 0; bearing <= 360; bearing += 6) {
+      const angle = bearing * Math.PI / 180;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(angular) + Math.cos(lat1) * Math.sin(angular) * Math.cos(angle));
+      const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(angular) * Math.cos(lat1), Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2));
+      points.push([lon2 * 180 / Math.PI, lat2 * 180 / Math.PI]);
+    }
+    return { type:"Feature", geometry:{ type:"Polygon", coordinates:[points] }, properties:{} };
+  }
+
+  function renderLocalCircle() {
+    if (!map.loaded() || !userLocation) return;
+    const data = localCircleGeoJson(userLocation.latitude, userLocation.longitude, localRadiusKm);
+    if (!map.getSource("tpg-local-area")) {
+      map.addSource("tpg-local-area", { type:"geojson", data });
+      map.addLayer({ id:"tpg-local-area-fill", type:"fill", source:"tpg-local-area", paint:{ "fill-color":"#2563eb", "fill-opacity":.09 } });
+      map.addLayer({ id:"tpg-local-area-line", type:"line", source:"tpg-local-area", paint:{ "line-color":"#2563eb", "line-width":2, "line-dasharray":[2,2] } });
+    } else map.getSource("tpg-local-area").setData(data);
+    map.setLayoutProperty("tpg-local-area-fill", "visibility", localMode ? "visible" : "none");
+    map.setLayoutProperty("tpg-local-area-line", "visibility", localMode ? "visible" : "none");
+  }
+
+  function focusLocalArea() {
+    if (!userLocation) return;
+    localMode = true;
+    renderLocalCircle();
+    const latDelta = localRadiusKm / 111;
+    const lngDelta = localRadiusKm / Math.max(25, 111 * Math.cos(userLocation.latitude * Math.PI / 180));
+    map.fitBounds([[userLocation.longitude-lngDelta,userLocation.latitude-latDelta],[userLocation.longitude+lngDelta,userLocation.latitude+latDelta]], { padding:55, duration:650 });
+    if (ui.localStatus) ui.localStatus.textContent = `Showing pets and services within ${localRadiusKm} km. Zoom out whenever you want.`;
+    applyFilters();
+  }
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       position => {
         userLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
         petLayer.setUserLocation(userLocation);
         renderServiceExplorer(currentServices);
+        if (map.loaded()) focusLocalArea(); else map.once("load", focusLocalArea);
       },
-      () => { userLocation = null; petLayer.setUserLocation(null); },
+      () => { userLocation = null; petLayer.setUserLocation(null); localMode = false; if (ui.localStatus) ui.localStatus.textContent = "Location unavailable. Use the world map or allow location in your browser."; },
       { enableHighAccuracy: true, timeout: 9000, maximumAge: 300000 }
     );
   }
@@ -125,10 +171,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const query = normalize(ui.search.value), type = ui.type.value;
     visiblePets = pets.filter(pet => {
       const text = normalize([pet.name, pet.type, pet.breed, pet.city, pet.country].join(" "));
-      return (!query || text.includes(query)) && (type === "all" || pet.type === type) && (!ui.onlineOnly.checked || pet.online);
+      const localDistance = userLocation ? distanceKm(userLocation, { lat:pet.latitude, lng:pet.longitude }) : null;
+      return (!query || text.includes(query)) && (type === "all" || pet.type === type) && (!ui.onlineOnly.checked || pet.online) && (!localMode || !Number.isFinite(localDistance) || localDistance <= localRadiusKm);
     });
     petLayer.setPets(visiblePets);
-    renderSidebar(visiblePets, query ? `Results for “${ui.search.value.trim()}”` : "Pets around the world", visiblePets.length ? "Choose a pet to open its profile." : "No pets matched these filters.");
+    renderSidebar(visiblePets, query ? `Results for “${ui.search.value.trim()}”` : localMode ? `Pets within ${localRadiusKm} km` : "Pets around the world", visiblePets.length ? "Choose a pet to open its profile." : "No pets matched these filters.");
     if (fit) fitVisible();
   }
 
@@ -277,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       petLayer.add();
       pets = await loadPets(); visiblePets = [...pets]; petLayer.setPets(visiblePets);
-      renderTypes(); renderStats(); renderTopCountries(); renderSidebar(visiblePets); fitVisible();
+      renderTypes(); renderStats(); renderTopCountries(); renderSidebar(visiblePets); if (userLocation) focusLocalArea(); else fitVisible();
       new Core.PresenceBridge(onlineIds => {
         pets.forEach(p => { p.online = onlineIds.has(String(p.ownerId)); });
         renderStats(); applyFilters();
@@ -295,6 +342,12 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.type?.addEventListener("change", () => applyFilters({ fit: true }));
   ui.onlineOnly?.addEventListener("change", () => applyFilters({ fit: true }));
   ui.reset?.addEventListener("click", () => { ui.search.value = ""; ui.type.value = "all"; ui.onlineOnly.checked = false; applyFilters({ fit: true }); });
+  ui.localRadius?.addEventListener("change", () => { localRadiusKm = Number(ui.localRadius.value); localStorage.setItem("thepetgrid_map_radius_km", String(localRadiusKm)); if (userLocation) focusLocalArea(); });
+  ui.showMyArea?.addEventListener("click", () => {
+    if (userLocation) focusLocalArea();
+    else navigator.geolocation?.getCurrentPosition(position => { userLocation = { latitude:position.coords.latitude, longitude:position.coords.longitude }; petLayer.setUserLocation(userLocation); focusLocalArea(); }, () => { if (ui.localStatus) ui.localStatus.textContent = "Location permission was not granted."; });
+  });
+  ui.showWorld?.addEventListener("click", () => { localMode = false; renderLocalCircle(); applyFilters(); map.easeTo({ center:[8,25], zoom:1.6, duration:650 }); if (ui.localStatus) ui.localStatus.textContent = "World view active. Select My Area to return."; });
   ui.layerPets?.addEventListener("change", () => petLayer.setVisible(ui.layerPets.checked));
   ui.serviceToggles.forEach(input => input.addEventListener("change", () => {
     renderServiceExplorer();
