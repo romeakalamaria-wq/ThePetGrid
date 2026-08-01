@@ -93,11 +93,11 @@ body{background:#f7f8fb;color:#152033}.map-shell{width:min(1320px,calc(100% - 32
    SPRINT 7.8 — REFINED PREMIUM PET POPUP
    ============================================= */
 .tpg-premium-popup{animation:tpgPopupEnter .24s cubic-bezier(.2,.8,.2,1)}
-.tpg-premium-popup .maplibregl-popup-content{width:min(420px,calc(100vw - 30px));max-height:min(52vh,380px);padding:0!important;overflow-x:hidden;overflow-y:auto;border:1px solid rgba(255,255,255,.82);border-radius:24px!important;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.25),0 5px 18px rgba(15,23,42,.12);scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.tpg-premium-popup .maplibregl-popup-content{width:min(420px,calc(100vw - 30px));padding:0!important;overflow:hidden;border:1px solid rgba(255,255,255,.82);border-radius:24px!important;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.25),0 5px 18px rgba(15,23,42,.12)}
 .tpg-premium-popup .maplibregl-popup-close-button{z-index:5;top:12px;right:12px;width:38px;height:38px;border:1px solid rgba(226,232,240,.9);border-radius:50%;background:rgba(255,255,255,.94);color:#64748b;font-size:25px;line-height:34px;backdrop-filter:blur(10px);box-shadow:0 5px 16px rgba(15,23,42,.14);transition:.18s ease}
 .tpg-premium-popup .maplibregl-popup-close-button:hover{transform:rotate(6deg) scale(1.04);background:#fff;color:#101828}
 .tpg-premium-popup .maplibregl-popup-tip{border-top-color:#fff!important}
-.tpg-map-popup--premium{display:block!important;width:100%;min-width:0;color:#172033}
+.tpg-map-popup--premium{display:block!important;width:100%;min-width:0;max-height:min(52vh,380px);overflow-x:hidden;overflow-y:auto;color:#172033;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
 .tpg-map-popup__media{position:relative;height:132px;overflow:hidden;background:linear-gradient(135deg,#f1f5f9,#e2e8f0)}
 .tpg-map-popup__media:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(to bottom,transparent,rgba(15,23,42,.33));pointer-events:none}
 .tpg-map-popup__media img{display:block;width:100%;height:100%;border-radius:0!important;object-fit:cover;object-position:center;transition:transform .42s ease}
