@@ -14,7 +14,10 @@
     unread: 0,
     notificationChannel: null,
     nearbyChannel: null,
+    reportStatusChannel: null,
     presenceChannel: null,
+    nearbyNotifications: [],
+    reportStatuses: new Map(),
     senderPetTypes: new Map(),
     senderNames: new Map()
   };
@@ -262,13 +265,136 @@
 
   async function markNearbyNotificationRead(notificationId) {
     if (!notificationId) return;
-    await state.client.from("notifications").update({ read_at:new Date().toISOString() }).eq("id", notificationId).eq("user_id", state.user.id);
+    const readAt = new Date().toISOString();
+    const { error } = await state.client.from("notifications").update({ read_at:readAt }).eq("id", notificationId).eq("user_id", state.user.id);
+    if (!error) {
+      const item = state.nearbyNotifications.find(entry => entry.id === notificationId);
+      if (item) item.read_at = readAt;
+      renderNotificationCenter();
+    }
   }
 
   async function handleNearbyNotification(notification) {
     if (!notification || notification.type !== "nearby_lost_pet") return;
+    const existing = state.nearbyNotifications.findIndex(item => item.id === notification.id);
+    if (existing >= 0) state.nearbyNotifications[existing] = notification;
+    else state.nearbyNotifications.unshift(notification);
+    state.nearbyNotifications = state.nearbyNotifications.slice(0, 50);
+    await loadReportStatuses();
+    renderNotificationCenter();
     showNearbyLostToast(notification);
-    await markNearbyNotificationRead(notification.id);
+  }
+
+  function formatNotificationTime(value) {
+    const date = new Date(value || 0);
+    if (Number.isNaN(date.getTime())) return "";
+    const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+    if (seconds < 60) return "Just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  }
+
+  async function loadReportStatuses() {
+    const ids = [...new Set(state.nearbyNotifications.map(item => item.payload?.report_id || item.entity_id).filter(Boolean))];
+    if (!ids.length) return;
+    const { data } = await state.client.from("lost_pet_reports").select("id,status,resolved,resolved_at").in("id", ids);
+    (data || []).forEach(report => state.reportStatuses.set(String(report.id), report));
+  }
+
+  function renderNotificationCenter() {
+    const button = document.getElementById("notificationCenterButton");
+    const panel = document.getElementById("notificationCenterPanel");
+    if (!button || !panel) return;
+    const unread = state.nearbyNotifications.filter(item => !item.read_at).length;
+    const badge = button.querySelector(".notification-center-button__badge");
+    badge.textContent = unread > 99 ? "99+" : String(unread);
+    badge.hidden = unread === 0;
+    button.classList.toggle("has-unread", unread > 0);
+    button.setAttribute("aria-label", unread ? `${unread} unread lost pet notifications` : "Lost pet notifications");
+
+    const list = panel.querySelector(".notification-center__list");
+    const empty = panel.querySelector(".notification-center__empty");
+    const markAll = panel.querySelector("[data-mark-all-notifications-read]");
+    markAll.disabled = unread === 0;
+    empty.hidden = state.nearbyNotifications.length > 0;
+    list.innerHTML = state.nearbyNotifications.map(notification => {
+      const payload = notification.payload || {};
+      const reportId = payload.report_id || notification.entity_id || "";
+      const report = state.reportStatuses.get(String(reportId));
+      const resolved = Boolean(report?.resolved || report?.status === "found");
+      const distance = payload.distance_km !== undefined ? `${payload.distance_km} km away` : "Nearby alert";
+      return `<a class="notification-center__item${notification.read_at ? "" : " is-unread"}${resolved ? " is-resolved" : ""}" href="${nearbyAlertLink(reportId)}" data-notification-id="${notification.id}"><span class="notification-center__icon">${resolved ? "✅" : "🚨"}</span><span class="notification-center__copy"><strong>${resolved ? "Pet found: " : "Lost pet nearby: "}${escapeNotificationText(payload.pet_name || "Community alert")}</strong><small>${escapeNotificationText(payload.address || distance)}</small><em>${distance} · ${formatNotificationTime(notification.created_at)}${resolved ? " · Resolved" : ""}</em></span>${notification.read_at ? "" : '<span class="notification-center__dot" aria-label="Unread"></span>'}</a>`;
+    }).join("");
+  }
+
+  function escapeNotificationText(value) {
+    return String(value || "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[character]));
+  }
+
+  async function loadNotificationCenter() {
+    const { data, error } = await state.client.from("notifications")
+      .select("id,type,entity_id,payload,read_at,created_at")
+      .eq("user_id", state.user.id)
+      .eq("type", "nearby_lost_pet")
+      .order("created_at", { ascending:false })
+      .limit(50);
+    if (error) throw error;
+    state.nearbyNotifications = data || [];
+    await loadReportStatuses();
+    renderNotificationCenter();
+  }
+
+  function installNotificationCenter() {
+    const actions = document.querySelector(".header-actions");
+    if (!actions || document.getElementById("notificationCenterButton")) return;
+    const button = document.createElement("button");
+    button.id = "notificationCenterButton";
+    button.className = "notification-center-button";
+    button.type = "button";
+    button.setAttribute("aria-expanded", "false");
+    button.innerHTML = '<span aria-hidden="true">🔔</span><span class="notification-center-button__badge" hidden>0</span>';
+    actions.insertBefore(button, actions.querySelector(".user-menu, .login-btn"));
+
+    const panel = document.createElement("section");
+    panel.id = "notificationCenterPanel";
+    panel.className = "notification-center";
+    panel.hidden = true;
+    panel.innerHTML = `<div class="notification-center__header"><div><strong>🔔 Lost Pet Notifications</strong><small>Your nearby alerts stay here.</small></div><button type="button" data-close-notification-center aria-label="Close">×</button></div><div class="notification-center__toolbar"><span>Recent alerts</span><button type="button" data-mark-all-notifications-read>Mark all as read</button></div><div class="notification-center__list"></div><p class="notification-center__empty">No lost pet notifications yet.</p>`;
+    document.body.appendChild(panel);
+
+    button.addEventListener("click", async event => {
+      event.stopPropagation();
+      panel.hidden = !panel.hidden;
+      button.setAttribute("aria-expanded", String(!panel.hidden));
+      if (!panel.hidden) await loadNotificationCenter().catch(error => console.info("ThePetGrid notification center:", error.message || error));
+    });
+    panel.querySelector("[data-close-notification-center]").addEventListener("click", () => {
+      panel.hidden = true;
+      button.setAttribute("aria-expanded", "false");
+    });
+    panel.querySelector("[data-mark-all-notifications-read]").addEventListener("click", async () => {
+      const unreadIds = state.nearbyNotifications.filter(item => !item.read_at).map(item => item.id);
+      if (!unreadIds.length) return;
+      const readAt = new Date().toISOString();
+      const { error } = await state.client.from("notifications").update({ read_at:readAt }).eq("user_id", state.user.id).in("id", unreadIds);
+      if (!error) {
+        state.nearbyNotifications.forEach(item => { if (unreadIds.includes(item.id)) item.read_at = readAt; });
+        renderNotificationCenter();
+      }
+    });
+    panel.addEventListener("click", event => {
+      const link = event.target.closest("[data-notification-id]");
+      if (link) markNearbyNotificationRead(link.dataset.notificationId);
+    });
+    document.addEventListener("click", event => {
+      if (!panel.hidden && !panel.contains(event.target) && !button.contains(event.target)) {
+        panel.hidden = true;
+        button.setAttribute("aria-expanded", "false");
+      }
+    });
+    renderNotificationCenter();
   }
 
   async function subscribeNearbyLostAlerts() {
@@ -277,17 +403,20 @@
         .on("postgres_changes", {
           event:"INSERT", schema:"public", table:"notifications", filter:`user_id=eq.${state.user.id}`
         }, payload => handleNearbyNotification(payload.new))
+        .on("postgres_changes", {
+          event:"UPDATE", schema:"public", table:"notifications", filter:`user_id=eq.${state.user.id}`
+        }, payload => {
+          const index = state.nearbyNotifications.findIndex(item => item.id === payload.new.id);
+          if (index >= 0) state.nearbyNotifications[index] = payload.new;
+          renderNotificationCenter();
+        })
         .subscribe();
-
-      const { data, error } = await state.client.from("notifications")
-        .select("id,type,entity_id,payload,created_at")
-        .eq("user_id", state.user.id)
-        .eq("type", "nearby_lost_pet")
-        .is("read_at", null)
-        .order("created_at", { ascending:false })
-        .limit(1);
-      if (error) throw error;
-      if (data?.[0]) await handleNearbyNotification(data[0]);
+      state.reportStatusChannel = state.client.channel(`lost-report-status-${state.user.id}`)
+        .on("postgres_changes", { event:"UPDATE", schema:"public", table:"lost_pet_reports" }, async () => {
+          await loadReportStatuses();
+          renderNotificationCenter();
+        }).subscribe();
+      await loadNotificationCenter();
     } catch (error) {
       console.info("ThePetGrid: nearby alerts need the Sprint 9.4 SQL setup.", error.message || error);
     }
@@ -389,12 +518,14 @@
     await refreshUnread();
     await subscribeNotifications();
     installNearbyAlertSettings();
+    installNotificationCenter();
     await subscribeNearbyLostAlerts();
     await startGlobalPresence();
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshUnread(); });
     window.addEventListener('beforeunload', () => {
       state.presenceChannel?.untrack();
       if (state.nearbyChannel) state.client.removeChannel(state.nearbyChannel);
+      if (state.reportStatusChannel) state.client.removeChannel(state.reportStatusChannel);
     });
   }
 
