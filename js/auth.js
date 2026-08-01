@@ -208,13 +208,6 @@
         </a>
 
         <a
-          class="add-pet-btn"
-          href="${addPetLink}"
-        >
-          + Add Pet
-        </a>
-
-        <a
           class="login-btn"
           href="${loginLink}"
         >
@@ -236,13 +229,6 @@
       >
         <span aria-hidden="true">🆘</span>
         <span>Lost &amp; Found</span>
-      </a>
-
-      <a
-        class="add-pet-btn"
-        href="${addPetLink}"
-      >
-        + Add Pet
       </a>
 
       <div class="user-menu">
@@ -270,6 +256,11 @@
           class="user-menu__dropdown"
           hidden
         >
+          <a class="user-menu__add-pet" href="${addPetLink}">
+            <span aria-hidden="true">🐾</span>
+            Add New Pet
+          </a>
+
           <a href="${profileLink}">
             My Profile
           </a>

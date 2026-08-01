@@ -9,6 +9,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modeButtons = document.querySelectorAll("[data-auth-mode]");
   const usernameField = document.querySelector("#usernameField");
   const authNote = document.querySelector(".auth-note");
+  const forgotButton = document.querySelector("#forgotPasswordButton");
+  const forgotForm = document.querySelector("#forgotPasswordForm");
+  const forgotSubmit = document.querySelector("#forgotPasswordSubmit");
+  const backToLogin = document.querySelector("#backToLoginButton");
 
   if (!form || !message || !submitButton || !window.ThePetGridAuth) {
     console.error("ThePetGrid: login page is missing required elements.");
@@ -48,6 +52,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   function setMode(nextMode) {
     if (busy) return;
     mode = nextMode === "register" ? "register" : "login";
+    form.hidden = false;
+    forgotForm.hidden = true;
+    document.querySelector(".auth-tabs").hidden = false;
     const registering = mode === "register";
 
     title.textContent = registering ? "Create your account" : "Welcome back";
@@ -100,6 +107,46 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   modeButtons.forEach((button) => {
     button.addEventListener("click", () => setMode(button.dataset.authMode));
+  });
+
+  forgotButton?.addEventListener("click", () => {
+    if (busy) return;
+    hideMessage();
+    form.hidden = true;
+    forgotForm.hidden = false;
+    document.querySelector(".auth-tabs").hidden = true;
+    title.textContent = "Reset your password";
+    intro.textContent = "Enter your account email and we will send you a secure reset link.";
+    forgotForm.elements.resetEmail.value = form.elements.email.value.trim();
+    forgotForm.elements.resetEmail.focus();
+  });
+
+  backToLogin?.addEventListener("click", () => setMode("login"));
+
+  forgotForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy || !client) return;
+    hideMessage();
+    const email = forgotForm.elements.resetEmail.value.trim().toLowerCase();
+    if (!email) {
+      showMessage("Enter the email used for your account.", "error");
+      return;
+    }
+    busy = true;
+    forgotSubmit.disabled = true;
+    forgotSubmit.textContent = "Sending…";
+    try {
+      const redirectTo = new URL("reset-password.html", window.location.href).href;
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw error;
+      showMessage("Reset email sent. Open the link in your email to choose a new password.");
+    } catch (error) {
+      showMessage(friendlyError(error), "error");
+    } finally {
+      busy = false;
+      forgotSubmit.disabled = false;
+      forgotSubmit.textContent = "Send reset link";
+    }
   });
 
   form.addEventListener("submit", async (event) => {
@@ -177,4 +224,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   setMode("login");
+  if (new URLSearchParams(window.location.search).get("passwordReset") === "success") {
+    showMessage("Your password was changed successfully. You can now log in.");
+  }
 });

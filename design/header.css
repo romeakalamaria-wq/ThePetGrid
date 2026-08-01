@@ -90,3 +90,4 @@
 .notification-center__dot{width:9px;height:9px;margin-top:5px;border-radius:50%;background:#e11d48;box-shadow:0 0 0 4px rgba(225,29,72,.12)}
 .notification-center__empty{margin:0;padding:38px 20px;color:#64748b;text-align:center}.notification-center__empty[hidden]{display:none}
 @media(max-width:640px){.notification-center{top:76px;right:16px;max-height:calc(100vh - 92px)}.notification-center__list{max-height:calc(100vh - 230px)}}
+.user-menu__dropdown .user-menu__add-pet{align-items:center;gap:8px;margin-bottom:5px;background:linear-gradient(135deg,#fff3d6,#ffedd5);color:#b45309;font-weight:850}

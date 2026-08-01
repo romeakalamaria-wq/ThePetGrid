@@ -68,6 +68,43 @@ body {
     cursor: wait;
 }
 
+.auth-password-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: -8px 0 16px;
+}
+
+.auth-password-actions button,
+.auth-secondary-action {
+    border: 0;
+    background: transparent;
+    color: #c2410c;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.auth-password-actions button:hover,
+.auth-secondary-action:hover {
+    color: #9a3412;
+    text-decoration: underline;
+}
+
+.auth-secondary-action {
+    display: block;
+    margin: 16px auto 0;
+}
+
+#forgotPasswordForm[hidden] {
+    display: none;
+}
+
+.reset-password-strength {
+    margin: -8px 0 18px;
+    color: #64748b;
+    font-size: .82rem;
+}
+
 .auth-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -153,3 +190,5 @@ body {
 .auth-message {
     word-break: break-word;
 }
+
+.auth-reset-icon{display:grid;width:54px;height:54px;margin-bottom:18px;place-items:center;border-radius:17px;background:#fff3d6;font-size:1.45rem}.auth-back-link{display:block;margin-top:20px;color:#c2410c;font-weight:750;text-align:center;text-decoration:none}.auth-back-link:hover{text-decoration:underline}

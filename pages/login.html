@@ -18,7 +18,7 @@
       <nav class="main-nav" aria-label="Main navigation">
         <a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a>
       </nav>
-      <div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
+      <div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="login-btn" href="login.html">Log In</a></div>
     </div>
   </header>
 
@@ -34,7 +34,13 @@
         <label class="field" id="usernameField" hidden>Username<input name="username" autocomplete="username"></label>
         <label class="field">Email<input type="email" name="email" required autocomplete="email"></label>
         <label class="field">Password<input type="password" name="password" required autocomplete="current-password"></label>
+        <div class="auth-password-actions"><button id="forgotPasswordButton" type="button">Forgot your password?</button></div>
         <button class="auth-submit" id="authSubmit" type="submit">Log In</button>
+      </form>
+      <form id="forgotPasswordForm" hidden>
+        <label class="field">Account email<input type="email" name="resetEmail" required autocomplete="email" placeholder="you@example.com"></label>
+        <button class="auth-submit" id="forgotPasswordSubmit" type="submit">Send reset link</button>
+        <button class="auth-secondary-action" id="backToLoginButton" type="button">← Back to Log In</button>
       </form>
       <div id="authMessage" class="auth-message" hidden></div>
       <p class="auth-note">Demo version: account data is stored only in this browser.</p>
