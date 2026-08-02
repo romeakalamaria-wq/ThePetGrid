@@ -50,3 +50,20 @@
 .memory-portrait__inscription i{color:#817665;font-size:.62rem}
 .memory-portrait__inscription em{color:#756d62;font-size:.88rem}
 @media(max-width:650px){.memory-portrait{padding:8px}.memory-portrait__frame{min-height:460px;padding:28px 22px 25px;border-radius:20px}.memory-portrait__photo{height:300px}.memory-portrait__photo img{width:94%;height:94%}}
+
+/* Sprint 10.2.3 — free-standing monochrome pet imprint, no monument */
+.memory-portrait{padding:0;background:transparent}
+.memory-portrait__frame{display:grid;width:min(470px,100%);min-height:0;overflow:visible;padding:0;border:0;border-radius:0;background:none;box-shadow:none;isolation:isolate}
+.memory-portrait__frame:before,.memory-portrait__frame:after{display:none}
+.memory-portrait__photo{height:390px;overflow:hidden;border:0;border-radius:0;background:transparent;-webkit-mask-image:radial-gradient(ellipse 78% 78% at 50% 50%,#000 43%,rgba(0,0,0,.9) 62%,transparent 94%);mask-image:radial-gradient(ellipse 78% 78% at 50% 50%,#000 43%,rgba(0,0,0,.9) 62%,transparent 94%)}
+.memory-portrait__photo:after{background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(42,47,55,.065) 4px 5px);opacity:.7}
+.memory-portrait__photo img{width:100%;height:100%;opacity:.5;filter:grayscale(1) contrast(1.65) brightness(1.24) saturate(0);mix-blend-mode:multiply}
+.memory-portrait__inscription{display:grid;gap:11px;margin:4px 0 0;padding:0 20px;color:#4d5158;text-shadow:none}
+.memory-portrait__inscription:before{width:70px;margin-bottom:4px;background:rgba(50,54,61,.28)}
+.memory-portrait__inscription>span{position:static;right:auto;bottom:auto;display:block;padding:0;border:0;border-radius:0;background:transparent;color:#343941;font-family:Georgia,serif;font-size:1.75rem;font-style:normal;font-weight:600;line-height:1.2;box-shadow:none;text-shadow:none}
+.memory-portrait__inscription>div{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;width:max-content;max-width:100%;margin:auto;text-align:left}
+.memory-portrait__inscription small{align-self:center;color:#81858c;font-size:.62rem}
+.memory-portrait__inscription strong{color:#42464d;font-size:.88rem;text-shadow:none}
+.memory-portrait__inscription i{display:none}
+.memory-portrait__inscription em{position:static;right:auto;bottom:auto;display:block;margin-top:3px;padding:0;border:0;border-radius:0;background:transparent;color:#777b82;font-family:Georgia,serif;font-size:.9rem;font-style:italic;box-shadow:none}
+@media(max-width:650px){.memory-portrait__frame{min-height:0;padding:0}.memory-portrait__photo{height:330px}.memory-portrait__photo img{width:100%;height:100%}.memory-portrait__inscription{padding:0 10px}}
