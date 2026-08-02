@@ -23,6 +23,8 @@
       name: pet.name || "Beloved Pet",
       type: [pet.type, pet.breed].filter(Boolean).join(" · ") || "Companion",
       years: [birthYear, passedYear].filter(Boolean).join(" — ") || "Forever remembered",
+      birthDate: formatMemorialDate(row.birth_date) || birthYear || "—",
+      deathDate: formatMemorialDate(row.passed_date) || passedYear || "—",
       image: pet.image_url || "../assets/avatar.png",
       message: row.farewell_message || "Forever in our hearts.",
       story: row.story || pet.bio || "A beautiful life, remembered with love.",
@@ -33,6 +35,21 @@
       candles: Number(row.candles?.[0]?.count || 0),
       flowers: Number(row.flowers?.[0]?.count || 0),
       isCloud: true
+    };
+  }
+
+  function formatMemorialDate(value) {
+    if (!value) return "";
+    const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+  }
+
+  function memorialDates(item) {
+    const years = String(item.years || "").split("—").map(value => value.trim());
+    return {
+      birth: item.birthDate || years[0] || "—",
+      death: item.deathDate || years[1] || "—"
     };
   }
 
@@ -95,6 +112,10 @@
     document.getElementById("memoryDates").textContent = item.years;
     document.getElementById("memoryPortrait").src = item.image;
     document.getElementById("memoryPortrait").alt = `${item.name} memorial portrait`;
+    document.getElementById("memoryPortraitName").textContent = item.name;
+    const portraitDates = memorialDates(item);
+    document.getElementById("memoryBirthDate").textContent = portraitDates.birth;
+    document.getElementById("memoryDeathDate").textContent = portraitDates.death;
     document.getElementById("memoryCover").style.backgroundImage = `url("${item.image}")`;
     document.getElementById("memoryStoryTitle").textContent = item.storyTitle;
     document.getElementById("memoryMessagesTitle").textContent = `Messages for ${item.name}`;
