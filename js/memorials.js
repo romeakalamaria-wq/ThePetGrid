@@ -2,9 +2,9 @@
   "use strict";
 
   let memorials = [
-    { id: "luna", name: "Luna", type: "Golden Retriever", years: "2011 — 2025", image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=85", message: "Our forever sunshine and the gentlest soul.", storyTitle: "A lifetime of sunshine", candles: 64, flowers: 41 },
-    { id: "milo", name: "Milo", type: "Tabby Cat", years: "2013 — 2024", image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=1000&q=85", message: "The smallest paws left the biggest mark.", storyTitle: "The quiet heart of our home", candles: 47, flowers: 29 },
-    { id: "coco", name: "Coco", type: "Netherland Dwarf Rabbit", years: "2017 — 2025", image: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=1000&q=85", message: "Forever hopping through our happiest memories.", storyTitle: "Small paws, endless joy", candles: 37, flowers: 23 }
+    { id: "luna", name: "Luna", type: "Golden Retriever", years: "2011 — 2025", image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=85", message: "Our forever sunshine and the gentlest soul.", storyTitle: "A lifetime of sunshine", story: ["Luna arrived as a tiny ball of golden fur and, without anyone noticing when it happened, became the heart of her family. She was there for the ordinary mornings, the difficult days and every celebration in between.", "She loved long walks near the sea, afternoon naps in warm sunlight and greeting every visitor with her favourite toy. The house is quieter now, but the love she filled it with has never left.", "She taught everyone around her that the smallest moments can hold the greatest happiness. Her gentle nature, joyful spirit and the sound of her paws coming home will always be remembered."], caption: "Our forever sunshine", signature: "Your family will carry you in every step, always. 🤍", gallery: ["https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=85", "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=85", "https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=900&q=85"], candles: 64, flowers: 41 },
+    { id: "milo", name: "Milo", type: "Tabby Cat", years: "2013 — 2024", image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=1000&q=85", message: "The smallest paws left the biggest mark.", storyTitle: "The quiet heart of our home", story: ["Milo chose his family in the quiet way cats often do. At first he watched from a distance, and then one evening he curled up beside them as if he had always belonged there.", "He loved sunny windows, the rustle of a treat bag and sleeping close enough to touch. His soft purr became the sound of home and comfort.", "The rooms feel different without him, but every warm patch of sunlight still brings him back for a moment."], caption: "Our gentle little shadow", signature: "You will always have a place beside us. 🤍", gallery: ["https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=85", "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=75", "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=65"], candles: 47, flowers: 29 },
+    { id: "coco", name: "Coco", type: "Netherland Dwarf Rabbit", years: "2017 — 2025", image: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=1000&q=85", message: "Forever hopping through our happiest memories.", storyTitle: "Small paws, endless joy", story: ["Coco was small enough to fit in two hands, yet somehow filled an entire home with personality. Every curious hop and twitch of the nose made the family smile.", "Fresh greens, soft blankets and gentle head rubs were the happiest parts of each day. Coco made quiet moments feel special.", "Those tiny paws left behind a lifetime of enormous love, and that love will always remain."], caption: "Our smallest, sweetest joy", signature: "Keep hopping through the gardens of our memories. 🤍", gallery: ["https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=900&q=85", "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=900&q=75", "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=900&q=65"], candles: 37, flowers: 23 }
   ];
 
   const countsKey = "tpg:memorial-demo-counts";
@@ -27,6 +27,9 @@
       message: row.farewell_message || "Forever in our hearts.",
       story: row.story || pet.bio || "A beautiful life, remembered with love.",
       storyTitle: "A life filled with love",
+      caption: `Forever loved, ${pet.name || "beautiful soul"}`,
+      signature: "Your family will carry you with them, always. 🤍",
+      gallery: [pet.image_url || "../assets/avatar.png", pet.image_url || "../assets/avatar.png", pet.image_url || "../assets/avatar.png"],
       candles: Number(row.candles?.[0]?.count || 0),
       flowers: Number(row.flowers?.[0]?.count || 0),
       isCloud: true
@@ -54,11 +57,11 @@
     const filtered = memorials.filter(item => `${item.name} ${item.type}`.toLowerCase().includes(normalized));
     grid.innerHTML = filtered.length ? filtered.map((item, index) => `
       <article class="memorial-card" style="--delay:${index * 80}ms">
-        <a class="memorial-card__image" href="memorial.html?id=${item.id}"><img src="${item.image}" alt="${item.name}"><span>✦ In loving memory</span></a>
+        <a class="memorial-card__image" href="memorial.html?${item.isCloud ? "memorialId" : "id"}=${item.id}"><img src="${item.image}" alt="${item.name}"><span>✦ In loving memory</span></a>
         <div class="memorial-card__content">
           <p>${item.years}</p><h3>${item.name}</h3><small>${item.type}</small><blockquote>“${item.message}”</blockquote>
           <div class="memorial-card__counts"><span>🕯️ ${countFor(item.id, "candle", item.candles)}</span><span>🌸 ${countFor(item.id, "flower", item.flowers)}</span></div>
-          <a href="memorial.html?id=${item.id}">Visit Memorial <span>→</span></a>
+          <a href="memorial.html?${item.isCloud ? "memorialId" : "id"}=${item.id}">Visit Memorial <span>→</span></a>
         </div>
       </article>`).join("") : '<p class="memorial-empty">No memorials match your search.</p>';
   }
@@ -91,9 +94,21 @@
     document.getElementById("memoryName").textContent = item.name;
     document.getElementById("memoryDates").textContent = item.years;
     document.getElementById("memoryPortrait").src = item.image;
+    document.getElementById("memoryPortrait").alt = `${item.name} memorial portrait`;
     document.getElementById("memoryCover").style.backgroundImage = `url("${item.image}")`;
     document.getElementById("memoryStoryTitle").textContent = item.storyTitle;
     document.getElementById("memoryMessagesTitle").textContent = `Messages for ${item.name}`;
+    document.getElementById("memoryCoverNote").textContent = `${item.name} was part of every ordinary day — and made each one extraordinary.`;
+    const storyParts = Array.isArray(item.story) ? item.story : [item.story || item.message];
+    document.getElementById("memoryStoryText").innerHTML = storyParts.filter(Boolean).map(text => `<p>${escapeText(text)}</p>`).join("");
+    document.getElementById("memorySignatureText").textContent = item.signature || `You will remain in our hearts, ${item.name}. 🤍`;
+    document.getElementById("memoryPortraitCaption").textContent = item.caption || `Forever loved, ${item.name}`;
+    const gallery = item.gallery?.length ? item.gallery : [item.image, item.image, item.image];
+    [1, 2, 3].forEach((number, index) => {
+      const image = document.getElementById(`memoryGalleryImage${number}`);
+      image.src = gallery[index] || item.image;
+      image.alt = `${item.name} — treasured memory ${number}`;
+    });
     const candleEl = document.getElementById("detailCandleCount");
     const flowerEl = document.getElementById("detailFlowerCount");
     candleEl.textContent = countFor(item.id, "candle", item.candles);
@@ -135,6 +150,10 @@
   function messageMarkup(entry) {
     const escape = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
     return `<article><div>💛</div><p><strong>${escape(entry.author)}</strong><span>${escape(entry.message)}</span><small>Just now</small></p></article>`;
+  }
+
+  function escapeText(value) {
+    return String(value || "").replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[character]);
   }
 
   setupGarden(); setupDetail();

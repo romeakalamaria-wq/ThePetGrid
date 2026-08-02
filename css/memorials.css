@@ -30,3 +30,4 @@
 @keyframes memorialBreathe{0%,100%{transform:scale(1);box-shadow:0 0 38px rgba(235,179,82,.26),0 25px 65px rgba(81,70,95,.17)}50%{transform:scale(1.025);box-shadow:0 0 62px rgba(235,179,82,.4),0 25px 65px rgba(81,70,95,.17)}}
 @keyframes memorialFloat{0%,100%{transform:translateY(0);opacity:.32}50%{transform:translateY(-12px);opacity:.65}}
 @media(prefers-reduced-motion:reduce){.memorial-heart,.memory-final-tribute:before,.memory-final-tribute:after{animation:none}}
+.memory-story #memoryStoryText p{color:#5e6572;font-family:Georgia,serif;font-size:1.08rem;line-height:1.9}
