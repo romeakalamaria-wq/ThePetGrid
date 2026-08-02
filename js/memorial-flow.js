@@ -12,6 +12,12 @@
     return {
       create: document.getElementById("createPetMemorialButton"),
       visit: document.getElementById("visitPetMemorialButton"),
+      follow: document.getElementById("followPetButton"),
+      gift: document.getElementById("sendPetGiftButton"),
+      giftSecondary: document.getElementById("sendPetGiftButtonSecondary"),
+      giftCenter: document.getElementById("petGiftCenter"),
+      lost: document.getElementById("reportLostPetButton"),
+      actions: document.querySelector(".pet-profile__actions"),
       modal: document.getElementById("petMemorialModal"),
       form: document.getElementById("petMemorialForm"),
       name: document.getElementById("memorialPetName"),
@@ -29,6 +35,23 @@
     ui.visit.href = state.memorialId
       ? `memorial.html?memorialId=${encodeURIComponent(state.memorialId)}`
       : `memorial.html?petId=${encodeURIComponent(state.pet.id)}`;
+    document.body.classList.toggle("is-memorial-profile", isMemorial);
+    [ui.follow, ui.gift, ui.giftSecondary, ui.lost].forEach(control => {
+      if (!control) return;
+      control.hidden = isMemorial;
+      control.disabled = isMemorial;
+      control.setAttribute("aria-disabled", String(isMemorial));
+    });
+    if (ui.giftCenter) ui.giftCenter.hidden = isMemorial;
+    let notice = document.getElementById("petMemorialActionNotice");
+    if (isMemorial && !notice && ui.actions) {
+      notice = document.createElement("div");
+      notice.id = "petMemorialActionNotice";
+      notice.className = "pet-memorial-action-notice";
+      notice.innerHTML = '<span aria-hidden="true">🤍</span><div><strong>In Loving Memory</strong><p>This profile is preserved with love. Following, gifts and Lost &amp; Found reports are no longer available.</p></div>';
+      ui.actions.before(notice);
+    }
+    if (notice) notice.hidden = !isMemorial;
   }
 
   async function findMemorial() {

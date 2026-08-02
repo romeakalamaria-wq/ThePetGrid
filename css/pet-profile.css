@@ -1316,3 +1316,14 @@ a {
 .pet-memorial-modal__card{position:relative;width:min(700px,100%);max-height:calc(100vh - 36px);overflow:auto;padding:36px;border:1px solid rgba(255,255,255,.7);border-radius:26px;background:#fffdf9;box-shadow:0 34px 100px rgba(0,0,0,.3)}.pet-memorial-modal__card h2{margin:8px 0;font-size:clamp(1.8rem,4vw,2.6rem)}.pet-memorial-modal__card>p{color:#667085;line-height:1.55}.pet-memorial-modal__close{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:#f1eaf5;color:#51465f;font-size:1.35rem;cursor:pointer}
 .pet-memorial-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:24px 0}.pet-memorial-form-grid label{display:grid;gap:7px;color:#51465f;font-weight:750}.pet-memorial-form-grid input,.pet-memorial-form-grid textarea,.pet-memorial-form-grid select{width:100%;border:1px solid #e1d5c3;border-radius:12px;padding:12px;background:#fff;font:inherit;resize:vertical}.pet-memorial-form-wide{grid-column:1/-1}.pet-memorial-notify{display:flex!important;align-items:center;align-self:end;grid-template-columns:auto 1fr;padding:12px;border:1px solid #e5dcef;border-radius:12px;background:#faf7fd}.pet-memorial-notify input,.pet-memorial-confirm input{width:18px;height:18px}.pet-memorial-confirm{margin:17px 0;padding:14px;border-radius:12px;background:#fff6e6;color:#79591e}.pet-memorial-confirm label{display:flex;align-items:center;gap:10px;font-weight:700}.pet-memorial-status{padding:12px;border-radius:12px;background:#f3ecf7;color:#51465f}.pet-memorial-status.is-success{background:#f0fdf4;color:#166534}.pet-memorial-status.is-error{background:#fff1f2;color:#be123c}
 @media(max-width:640px){.pet-memorial-modal__card{padding:30px 20px}.pet-memorial-form-grid{grid-template-columns:1fr}.pet-memorial-form-wide{grid-column:auto}}
+
+/* Sprint 10.3 — respectful locked state for Memorial profiles */
+.pet-memorial-action-notice{display:flex;align-items:flex-start;gap:14px;margin:24px 0 18px;padding:18px 20px;border:1px solid #e2d8e8;border-radius:18px;background:linear-gradient(135deg,#faf7fc,#fffaf1);color:#51465f}
+.pet-memorial-action-notice[hidden]{display:none}
+.pet-memorial-action-notice>span{display:grid;flex:0 0 42px;width:42px;height:42px;place-items:center;border-radius:50%;background:#75658f;color:#fff;font-size:1.25rem;box-shadow:0 8px 20px rgba(81,70,95,.18)}
+.pet-memorial-action-notice strong{font-family:Georgia,serif;font-size:1.08rem}
+.pet-memorial-action-notice p{margin:5px 0 0;color:#756f7c;font-size:.9rem;line-height:1.5}
+.is-memorial-profile .pet-profile__card{border-color:#e2d8e8;box-shadow:0 24px 70px rgba(81,70,95,.1)}
+.is-memorial-profile #visitPetMemorialButton{display:inline-flex;align-items:center;justify-content:center}
+.is-memorial-profile #petGiftCenter[hidden]{display:none!important}
+@media(max-width:560px){.pet-memorial-action-notice{padding:16px}.pet-memorial-action-notice>span{flex-basis:38px;width:38px;height:38px}}
