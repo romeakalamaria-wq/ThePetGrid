@@ -36,12 +36,24 @@
       ? `memorial.html?memorialId=${encodeURIComponent(state.memorialId)}`
       : `memorial.html?petId=${encodeURIComponent(state.pet.id)}`;
     document.body.classList.toggle("is-memorial-profile", isMemorial);
-    [ui.follow, ui.gift, ui.giftSecondary, ui.lost].forEach(control => {
+    [ui.follow, ui.gift, ui.giftSecondary].forEach(control => {
       if (!control) return;
       control.hidden = isMemorial;
       control.disabled = isMemorial;
       control.setAttribute("aria-disabled", String(isMemorial));
     });
+    if (ui.lost) {
+      ui.lost.hidden = isMemorial;
+      ui.lost.classList.toggle("is-memorial-locked", isMemorial);
+      ui.lost.setAttribute("aria-disabled", String(isMemorial));
+      ui.lost.tabIndex = isMemorial ? -1 : 0;
+      if (isMemorial) {
+        ui.lost.dataset.memorialLockedHref = ui.lost.getAttribute("href") || "";
+        ui.lost.removeAttribute("href");
+      } else if (!ui.lost.hasAttribute("href") && ui.lost.dataset.memorialLockedHref) {
+        ui.lost.setAttribute("href", ui.lost.dataset.memorialLockedHref);
+      }
+    }
     if (ui.giftCenter) ui.giftCenter.hidden = isMemorial;
     let notice = document.getElementById("petMemorialActionNotice");
     if (isMemorial && !notice && ui.actions) {
@@ -120,6 +132,12 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const ui = elements();
+    ui.lost?.addEventListener("click", event => {
+      if (ui.lost.classList.contains("is-memorial-locked")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, true);
     ui.create?.addEventListener("click", open);
     ui.modal?.querySelectorAll("[data-close-pet-memorial]").forEach(node => node.addEventListener("click", close));
     ui.form?.addEventListener("submit", submit);
