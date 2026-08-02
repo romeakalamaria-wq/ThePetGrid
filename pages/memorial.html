@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A pet memorial on ThePetGrid.">
+  <title>Remembering Luna — ThePetGrid</title>
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design/theme.css"><link rel="stylesheet" href="../design/style.css"><link rel="stylesheet" href="../design/header.css"><link rel="stylesheet" href="../css/memorials.css">
+</head>
+<body class="memorial-detail-body">
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav class="main-nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a><a href="memorials.html" aria-current="page">Memorials</a></nav><div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span>🆘</span> Lost &amp; Found</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+
+<main class="memory-page" id="memoryPage">
+  <section class="memory-cover" id="memoryCover">
+    <div class="memory-cover__shade"></div>
+    <a class="memory-back" href="memorials.html">← Memorial Garden</a>
+    <div class="memory-cover__content"><span>In loving memory of</span><h1 id="memoryName">Luna</h1><p id="memoryDates">2011 — 2025</p><blockquote>“If love could have saved you, you would have lived forever.”</blockquote><small>You were our hello every morning and our safe place every night.</small></div>
+  </section>
+
+  <section class="memory-actions-wrap">
+    <div class="memorial-shell memory-actions">
+      <button type="button" data-memory-action="candle"><span>🕯️</span><strong>Light a Candle</strong><small><b id="detailCandleCount">64</b> glowing</small></button>
+      <button type="button" data-memory-action="flower"><span>🌸</span><strong>Leave a Flower</strong><small><b id="detailFlowerCount">41</b> flowers</small></button>
+      <button type="button" id="writeMemoryButton"><span>💌</span><strong>Write a Memory</strong><small>Share a kind message</small></button>
+      <button type="button" data-share-current-page><span>↗</span><strong>Share Memorial</strong><small>Keep the story alive</small></button>
+    </div>
+  </section>
+
+  <section class="memory-story">
+    <div class="memorial-shell memory-story__grid">
+      <article>
+        <span class="memorial-eyebrow">A beautiful story</span><h2 id="memoryStoryTitle">A lifetime of sunshine</h2>
+        <p>Luna arrived as a tiny ball of golden fur and, without anyone noticing when it happened, became the heart of her family. She was there for the ordinary mornings, the difficult days and every celebration in between.</p>
+        <p>She loved long walks near the sea, afternoon naps in warm sunlight and greeting every visitor with her favourite toy. The house is quieter now, but the love she filled it with has never left.</p>
+        <p>She taught everyone around her that the smallest moments can hold the greatest happiness. Her gentle nature, joyful spirit and the sound of her paws coming home will always be remembered.</p>
+        <div class="memory-signature"><span>Sleep peacefully, beautiful soul.</span><strong>Your family will carry you in every step, always. 🤍</strong></div>
+      </article>
+      <aside class="memory-portrait"><img id="memoryPortrait" src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=85" alt="Luna, a golden retriever"><span>Our forever sunshine</span></aside>
+    </div>
+  </section>
+
+  <section class="memory-gallery-section"><div class="memorial-shell"><div class="memorial-section-heading"><div><span class="memorial-eyebrow">The moments we keep</span><h2>Every photograph holds a heartbeat</h2></div></div><div class="memory-gallery"><img src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=85" alt="Golden retriever portrait"><img src="https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=85" alt="Dog outdoors"><img src="https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=900&q=85" alt="Happy dog"><div class="memory-gallery__quote">“How lucky we were to have something that makes saying goodbye so hard.”</div></div></div></section>
+
+  <section class="memory-final-tribute"><div class="memorial-shell"><div class="memory-final-tribute__glow">🕯️</div><span class="memorial-eyebrow">Forever part of our story</span><h2>Gone from our sight,<br>but never from our love.</h2><p>Thank you for every day, every quiet moment and every memory. Until we meet again.</p><div class="memory-final-tribute__stars" aria-hidden="true">✦ &nbsp; ✧ &nbsp; ✦</div></div></section>
+
+  <section class="memory-messages"><div class="memorial-shell"><div class="memorial-section-heading"><div><span class="memorial-eyebrow">Community remembrance</span><h2 id="memoryMessagesTitle">Messages for Luna</h2></div></div><div id="memoryMessageList" class="memory-message-list"><article><div>💛</div><p><strong>Maria</strong><span>A gentle companion who made every day brighter. Always remembered.</span><small>2 days ago</small></p></article><article><div>🌸</div><p><strong>Nikos</strong><span>Run free, beautiful soul. You were deeply loved.</span><small>5 days ago</small></p></article></div></div></section>
+</main>
+
+<div class="memorial-modal" id="memoryMessageModal" hidden><div class="memorial-modal__backdrop" data-close-memory></div><form class="memorial-modal__card" id="memoryMessageForm"><button class="memorial-modal__close" type="button" data-close-memory aria-label="Close">×</button><span class="memorial-eyebrow">A message from the heart</span><h2>Write a Memory</h2><label>Your name<input name="author" maxlength="40" required placeholder="Your name"></label><label>Your memory<textarea name="message" maxlength="280" rows="5" required placeholder="Share a kind memory…"></textarea></label><button class="memorial-button memorial-button--primary" type="submit">Leave this Memory</button></form></div>
+<div class="memory-toast" id="memoryToast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/memorials.js"></script><script src="../js/share.js"></script><script src="../js/auth.js"></script><script src="../js/header.js"></script><script src="../js/header-live.js"></script>
+</body>
+</html>

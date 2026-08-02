@@ -180,6 +180,8 @@
 <div class="pet-profile__secondary-actions">
 <button class="button button--secondary" type="button" data-share-current-page>📤 Share Pet</button>
 <a class="button button--danger" id="reportLostPetButton" href="lost-found.html?mode=lost">🆘 Report This Pet as Lost</a>
+<button class="button memorial-create-button" id="createPetMemorialButton" type="button" hidden>🤍 Create Memorial</button>
+<a class="button memorial-visit-button" id="visitPetMemorialButton" href="memorial.html" hidden>🕯️ Visit Memorial</a>
 </div>
 </div>
 </div>
@@ -217,6 +219,27 @@
 </section>
 </div>
 
+<div class="pet-memorial-modal" id="petMemorialModal" hidden>
+<div class="pet-memorial-modal__overlay" data-close-pet-memorial></div>
+<form class="pet-memorial-modal__card" id="petMemorialForm">
+<button class="pet-memorial-modal__close" type="button" data-close-pet-memorial aria-label="Close">×</button>
+<span class="pet-profile__eyebrow">A gentle, permanent tribute</span>
+<h2>Create a Memorial for <span id="memorialPetName">this pet</span></h2>
+<p>This will change the profile status to <strong>In Memory</strong>. The pet and its story will not be deleted.</p>
+<div class="pet-memorial-form-grid">
+<label><span>Date of birth</span><input name="birthDate" type="date"></label>
+<label><span>Date of passing *</span><input name="passedDate" type="date" required></label>
+<label class="pet-memorial-form-wide"><span>Farewell message *</span><textarea name="farewellMessage" rows="3" maxlength="1200" required placeholder="Write a few words from the heart…"></textarea></label>
+<label class="pet-memorial-form-wide"><span>Life story</span><textarea name="story" rows="5" maxlength="4000" placeholder="Share the moments and memories you want to keep forever…"></textarea></label>
+<label><span>Visibility</span><select name="visibility"><option value="public">Public memorial</option><option value="private">Private memorial</option></select></label>
+<label class="pet-memorial-notify"><input name="notifyFollowers" type="checkbox" checked><span>🤍 Notify this pet's followers</span></label>
+</div>
+<div class="pet-memorial-confirm"><label><input name="confirmed" type="checkbox" required><span>I understand this profile will become an In Memory profile.</span></label></div>
+<p class="pet-memorial-status" id="petMemorialStatus" hidden></p>
+<button class="button memorial-create-button" type="submit">Create Memorial with Love</button>
+</form>
+</div>
+
 <!-- =========================================
          FOOTER
     ========================================== -->
@@ -238,6 +261,7 @@
 <script src="../js/share.js"></script>
 <script src="../js/pet-follows.js"></script>
 <script src="../js/pet-gifts.js"></script>
+<script src="../js/memorial-flow.js"></script>
 <script src="../js/pet-profile.js"></script>
 <script src="../js/header.js"></script><script src="../js/header-live.js"></script>
 </body>

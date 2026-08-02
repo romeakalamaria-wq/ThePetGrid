@@ -230,21 +230,31 @@
     return reportId ? `${base}?reportId=${encodeURIComponent(reportId)}#reports` : `${base}#reports`;
   }
 
+  function memorialLink(notification) {
+    const payload = notification?.payload || {};
+    const page = location.pathname.includes("/pages/") ? "memorial.html" : "pages/memorial.html";
+    return payload.memorial_id
+      ? `${page}?memorialId=${encodeURIComponent(payload.memorial_id)}`
+      : `${page}?petId=${encodeURIComponent(payload.pet_id || "")}`;
+  }
+
   function showNearbyLostToast(notification) {
     const payload = notification?.payload || {};
+    const isMemorial = notification?.type === "memorial_created";
     const isSighting = notification?.type === "lost_pet_sighting";
     let toast = document.getElementById("nearbyLostToast");
     if (!toast) {
       toast = document.createElement("a");
       toast.id = "nearbyLostToast";
       toast.className = "nearby-lost-toast";
-      toast.innerHTML = '<span class="nearby-lost-toast__icon">🚨</span><span><strong></strong><small></small></span><b>View map →</b>';
+      toast.innerHTML = '<span class="nearby-lost-toast__icon">🚨</span><span><strong></strong><small></small></span><b>Open →</b>';
       document.body.appendChild(toast);
     }
-    toast.href = nearbyAlertLink(payload.report_id || notification.entity_id);
-    toast.querySelector("strong").textContent = isSighting ? `Possible sighting: ${payload.pet_name || "Your lost pet"}` : `Lost pet nearby: ${payload.pet_name || "Community alert"}`;
+    toast.href = isMemorial ? memorialLink(notification) : nearbyAlertLink(payload.report_id || notification.entity_id);
+    toast.querySelector(".nearby-lost-toast__icon").textContent = isMemorial ? "🤍" : "🚨";
+    toast.querySelector("strong").textContent = isMemorial ? `${payload.pet_name || "A beloved pet"} is now remembered` : isSighting ? `Possible sighting: ${payload.pet_name || "Your lost pet"}` : `Lost pet nearby: ${payload.pet_name || "Community alert"}`;
     const distance = payload.distance_km !== undefined ? `${payload.distance_km} km away · ` : "";
-    toast.querySelector("small").textContent = `${distance}${payload.address || "Open the alert for the location"}`;
+    toast.querySelector("small").textContent = isMemorial ? "Visit the Memorial Garden to leave a flower or light a candle." : `${distance}${payload.address || "Open the alert for the location"}`;
     toast.classList.remove("is-visible");
     requestAnimationFrame(() => toast.classList.add("is-visible"));
     clearTimeout(toast._hideTimer);
@@ -276,7 +286,7 @@
   }
 
   async function handleNearbyNotification(notification) {
-    if (!notification || !["nearby_lost_pet", "lost_pet_sighting"].includes(notification.type)) return;
+    if (!notification || !["nearby_lost_pet", "lost_pet_sighting", "memorial_created"].includes(notification.type)) return;
     const existing = state.nearbyNotifications.findIndex(item => item.id === notification.id);
     if (existing >= 0) state.nearbyNotifications[existing] = notification;
     else state.nearbyNotifications.unshift(notification);
@@ -298,7 +308,7 @@
   }
 
   async function loadReportStatuses() {
-    const ids = [...new Set(state.nearbyNotifications.map(item => item.payload?.report_id || item.entity_id).filter(Boolean))];
+    const ids = [...new Set(state.nearbyNotifications.filter(item => item.type !== "memorial_created").map(item => item.payload?.report_id || item.entity_id).filter(Boolean))];
     if (!ids.length) return;
     const { data } = await state.client.from("lost_pet_reports").select("id,status,resolved,resolved_at").in("id", ids);
     (data || []).forEach(report => state.reportStatuses.set(String(report.id), report));
@@ -313,7 +323,7 @@
     badge.textContent = unread > 99 ? "99+" : String(unread);
     badge.hidden = unread === 0;
     button.classList.toggle("has-unread", unread > 0);
-    button.setAttribute("aria-label", unread ? `${unread} unread lost pet notifications` : "Lost pet notifications");
+    button.setAttribute("aria-label", unread ? `${unread} unread notifications` : "Notifications");
 
     const list = panel.querySelector(".notification-center__list");
     const empty = panel.querySelector(".notification-center__empty");
@@ -322,11 +332,15 @@
     empty.hidden = state.nearbyNotifications.length > 0;
     list.innerHTML = state.nearbyNotifications.map(notification => {
       const payload = notification.payload || {};
+      const isMemorial = notification.type === "memorial_created";
       const reportId = payload.report_id || notification.entity_id || "";
       const report = state.reportStatuses.get(String(reportId));
       const resolved = Boolean(report?.resolved || report?.status === "found");
       const isSighting = notification.type === "lost_pet_sighting";
       const distance = payload.distance_km !== undefined ? `${payload.distance_km} km away` : "Nearby alert";
+      if (isMemorial) {
+        return `<a class="notification-center__item notification-center__item--memorial${notification.read_at ? "" : " is-unread"}" href="${memorialLink(notification)}" data-notification-id="${notification.id}"><span class="notification-center__icon">🤍</span><span class="notification-center__copy"><strong>${escapeNotificationText(payload.pet_name || "A beloved pet")} is now remembered</strong><small>Visit their story, leave a flower or light a candle.</small><em>Memorial Garden · ${formatNotificationTime(notification.created_at)}</em></span>${notification.read_at ? "" : '<span class="notification-center__dot" aria-label="Unread"></span>'}</a>`;
+      }
       return `<a class="notification-center__item${notification.read_at ? "" : " is-unread"}${resolved ? " is-resolved" : ""}" href="${nearbyAlertLink(reportId)}" data-notification-id="${notification.id}"><span class="notification-center__icon">${resolved ? "✅" : isSighting ? "👁" : "🚨"}</span><span class="notification-center__copy"><strong>${resolved ? "Pet found: " : isSighting ? "Possible sighting: " : "Lost pet nearby: "}${escapeNotificationText(payload.pet_name || "Community alert")}</strong><small>${escapeNotificationText(payload.address || payload.note || distance)}</small><em>${isSighting ? "Sighting report" : distance} · ${formatNotificationTime(notification.created_at)}${resolved ? " · Resolved" : ""}</em></span>${notification.read_at ? "" : '<span class="notification-center__dot" aria-label="Unread"></span>'}</a>`;
     }).join("");
   }
@@ -339,7 +353,7 @@
     const { data, error } = await state.client.from("notifications")
       .select("id,type,entity_id,payload,read_at,created_at")
       .eq("user_id", state.user.id)
-      .in("type", ["nearby_lost_pet", "lost_pet_sighting"])
+      .in("type", ["nearby_lost_pet", "lost_pet_sighting", "memorial_created"])
       .order("created_at", { ascending:false })
       .limit(50);
     if (error) throw error;
@@ -363,7 +377,7 @@
     panel.id = "notificationCenterPanel";
     panel.className = "notification-center";
     panel.hidden = true;
-    panel.innerHTML = `<div class="notification-center__header"><div><strong>🔔 Lost Pet Notifications</strong><small>Your nearby alerts stay here.</small></div><button type="button" data-close-notification-center aria-label="Close">×</button></div><div class="notification-center__toolbar"><span>Recent alerts</span><button type="button" data-mark-all-notifications-read>Mark all as read</button></div><div class="notification-center__list"></div><p class="notification-center__empty">No lost pet notifications yet.</p>`;
+    panel.innerHTML = `<div class="notification-center__header"><div><strong>🔔 Notifications</strong><small>Lost pet alerts and meaningful community updates stay here.</small></div><button type="button" data-close-notification-center aria-label="Close">×</button></div><div class="notification-center__toolbar"><span>Recent updates</span><button type="button" data-mark-all-notifications-read>Mark all as read</button></div><div class="notification-center__list"></div><p class="notification-center__empty">No notifications yet.</p>`;
     document.body.appendChild(panel);
 
     button.addEventListener("click", async event => {

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A peaceful place to remember beloved pets on ThePetGrid.">
+  <title>Pet Memorials — ThePetGrid</title>
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design/theme.css">
+  <link rel="stylesheet" href="../design/style.css">
+  <link rel="stylesheet" href="../design/header.css">
+  <link rel="stylesheet" href="../css/memorials.css">
+</head>
+<body>
+<header class="main-header">
+  <div class="header-container">
+    <a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a><a href="memorials.html" aria-current="page">Memorials</a>
+    </nav>
+    <div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
+  </div>
+</header>
+
+<main class="memorial-page">
+  <section class="memorial-hero">
+    <div class="memorial-shell memorial-hero__grid">
+      <div>
+        <span class="memorial-eyebrow">✦ ThePetGrid Memorial Garden</span>
+        <h1>They may leave our side.<br><span>Never our hearts.</span></h1>
+        <p>For the companions who gave us their whole lives, their unconditional love and memories that time can never take away.</p>
+        <div class="memorial-hero__actions">
+          <a class="memorial-button memorial-button--primary" href="#memorialGarden">Visit the Garden</a>
+          <button class="memorial-button memorial-button--soft" type="button" id="openCreateMemorial">＋ Create a Memorial</button>
+        </div>
+      </div>
+      <aside class="memorial-hero__symbol" aria-hidden="true">
+        <div class="memorial-halo"></div><div class="memorial-heart">🐾</div>
+        <span>Until we meet again,<br>you are forever with us.</span>
+      </aside>
+    </div>
+  </section>
+
+  <section class="memorial-tribute" aria-label="A message of remembrance">
+    <div class="memorial-shell memorial-tribute__inner">
+      <span aria-hidden="true">“</span>
+      <blockquote>Some souls come into our lives, leave paw prints on our hearts, and we are never the same again.</blockquote>
+      <small>In memory of every beloved companion</small>
+    </div>
+  </section>
+
+  <section class="memorial-intro">
+    <div class="memorial-shell memorial-intro__grid">
+      <div><strong id="memorialCount">3</strong><span>Beloved companions remembered</span></div>
+      <div><strong id="candleCount">148</strong><span>Candles glowing with love</span></div>
+      <div><strong id="flowerCount">93</strong><span>Flowers left by the community</span></div>
+    </div>
+  </section>
+
+  <section class="memorial-garden" id="memorialGarden">
+    <div class="memorial-shell">
+      <div class="memorial-section-heading">
+        <div><span class="memorial-eyebrow">A garden of memories</span><h2>Lives that changed ours forever</h2><p>Pause for a moment, visit their story and leave a little light behind.</p></div>
+        <label class="memorial-search"><span aria-hidden="true">⌕</span><input id="memorialSearch" type="search" placeholder="Search by pet name…"></label>
+      </div>
+      <div class="memorial-grid" id="memorialGrid"></div>
+    </div>
+  </section>
+
+  <section class="memorial-promise">
+    <div class="memorial-shell memorial-promise__card">
+      <span aria-hidden="true">🕯️</span>
+      <div><h2>Love does not end when a life does</h2><p>A gentle, protected place where every memory can remain safe and every beloved companion can continue to be remembered.</p></div>
+    </div>
+  </section>
+</main>
+
+<div class="memorial-modal" id="createMemorialModal" hidden>
+  <div class="memorial-modal__backdrop" data-close-create></div>
+  <section class="memorial-modal__card" role="dialog" aria-modal="true" aria-labelledby="createMemorialTitle">
+    <button class="memorial-modal__close" type="button" data-close-create aria-label="Close">×</button>
+    <span class="memorial-eyebrow">Coming in the next step</span>
+    <h2 id="createMemorialTitle">Create a Memorial</h2>
+    <p>The final flow will let the owner select one of their pets, add dates, photographs and a farewell message.</p>
+    <a class="memorial-button memorial-button--primary" href="my-profile.html">Go to My Profile</a>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script>
+<script src="../js/memorials.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/header.js"></script>
+<script src="../js/header-live.js"></script>
+</body>
+</html>

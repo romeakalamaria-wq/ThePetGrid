@@ -241,7 +241,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Adopted",
 
             lost:
-                "Lost"
+                "Lost",
+
+            memorial:
+                "In Memory"
 
         };
 
@@ -363,6 +366,10 @@ document.addEventListener("DOMContentLoaded", () => {
             formatStatus(
                 pet.status
             );
+        statusElement.classList.toggle("is-memorial", pet.status === "memorial");
+        if (reportLostButton) {
+            reportLostButton.hidden = pet.status === "memorial";
+        }
 
         typeElement.textContent =
             `${type} · ${breed}`;
@@ -759,6 +766,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         renderPetProfile(currentPet);
+        if (window.ThePetGridMemorialFlow) {
+            await window.ThePetGridMemorialFlow.setPet(currentPet);
+        }
         showProfile();
     }
 
