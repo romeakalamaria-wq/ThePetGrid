@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function card(pet) {
     const liked = isPetLiked(pet);
     const favorite = isPetFavorite(pet);
+    const isMemorial = pet.status === "memorial";
     const location = [pet.city, pet.country].filter(Boolean).join(", ") || "Location not added";
     const image = pet.image || "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=80";
     return `<article class="pet-card">
@@ -149,7 +150,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <p class="pet-card__breed">${escapeHtml(pet.breed || "Breed not added")} · ${escapeHtml(pet.age || "Age not added")}</p>
         <div class="pet-card__meta"><span>📍 ${escapeHtml(location)}</span><span>👤 ${escapeHtml(pet.owner || "Unknown owner")}</span></div>
         <div class="pet-card__stats"><span>👥 ${Number(pet.followers || 0).toLocaleString()}</span><span>🎁 ${Number(pet.gifts || 0).toLocaleString()}</span><span>🐾 ${escapeHtml(pet.type || "Pet")}</span></div>
-        <div class="pet-card__footer-actions"><a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a><a class="pet-card__lost" data-report-lost="${escapeHtml(pet.id)}" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a></div>
+        <div class="pet-card__footer-actions"><a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a>${isMemorial
+          ? `<a class="pet-card__memorial" href="memorial.html?petId=${encodeURIComponent(pet.id)}">🕯️ Visit Memorial</a>`
+          : `<a class="pet-card__lost" data-report-lost="${escapeHtml(pet.id)}" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a>`}</div>
       </div>
     </article>`;
   }
@@ -180,6 +183,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (reportLostLink) {
       const pet = state.pets.find(item => String(item.id) === String(reportLostLink.dataset.reportLost));
+      if (pet?.status === "memorial") {
+        event.preventDefault();
+        location.href = `memorial.html?petId=${encodeURIComponent(pet.id)}`;
+        return;
+      }
       if (pet) {
         try {
           sessionStorage.setItem(lostReportDraftKey, JSON.stringify(pet));
