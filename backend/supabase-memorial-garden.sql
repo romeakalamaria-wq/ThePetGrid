@@ -31,6 +31,20 @@ create table if not exists public.memorial_tributes (
 
 create index if not exists pet_memorials_owner_idx on public.pet_memorials(owner_id, created_at desc);
 create index if not exists memorial_tributes_memorial_idx on public.memorial_tributes(memorial_id, created_at desc);
+with duplicate_memorial_notifications as (
+  select id, row_number() over (
+    partition by user_id, type, entity_id
+    order by created_at asc, id asc
+  ) as duplicate_number
+  from public.notifications
+  where type = 'memorial_created'
+)
+delete from public.notifications n
+using duplicate_memorial_notifications d
+where n.id = d.id and d.duplicate_number > 1;
+create unique index if not exists notifications_one_memorial_per_follower_idx
+  on public.notifications(user_id, type, entity_id)
+  where type = 'memorial_created';
 
 alter table public.pet_memorials enable row level security;
 alter table public.memorial_tributes enable row level security;
@@ -77,9 +91,10 @@ as $$
 declare
   current_owner uuid;
   pet_name text;
+  pet_image text;
   result public.pet_memorials;
 begin
-  select owner_id, name into current_owner, pet_name from public.pets where id = p_pet_id;
+  select owner_id, name, image_url into current_owner, pet_name, pet_image from public.pets where id = p_pet_id;
   if current_owner is null or current_owner <> auth.uid() then
     raise exception 'Only the pet owner can create this memorial.';
   end if;
@@ -108,13 +123,14 @@ begin
       auth.uid(),
       'memorial_created',
       result.id,
-      jsonb_build_object('memorial_id', result.id, 'pet_id', p_pet_id, 'pet_name', pet_name)
+      jsonb_build_object('memorial_id', result.id, 'pet_id', p_pet_id, 'pet_name', pet_name, 'pet_image', pet_image)
     from public.pet_follows follow
     where follow.pet_id = p_pet_id and follow.user_id <> auth.uid()
       and not exists (
         select 1 from public.notifications n
         where n.user_id = follow.user_id and n.type = 'memorial_created' and n.entity_id = result.id
-      );
+      )
+    on conflict do nothing;
   end if;
 
   return result;
@@ -122,6 +138,19 @@ end;
 $$;
 
 grant execute on function public.create_pet_memorial(uuid,date,date,text,text,text,boolean) to authenticated;
+
+-- Enrich older Memorial notifications so existing followers also see the pet photo.
+update public.notifications n
+set payload = coalesce(n.payload, '{}'::jsonb) || jsonb_build_object(
+  'memorial_id', m.id,
+  'pet_id', m.pet_id,
+  'pet_name', p.name,
+  'pet_image', p.image_url
+)
+from public.pet_memorials m
+join public.pets p on p.id = m.pet_id
+where n.type = 'memorial_created'
+  and n.entity_id = m.id;
 
 drop trigger if exists pet_memorials_set_updated_at on public.pet_memorials;
 create trigger pet_memorials_set_updated_at before update on public.pet_memorials
@@ -132,4 +161,3 @@ begin
   alter publication supabase_realtime add table public.pet_memorials;
 exception when duplicate_object then null;
 end $$;
-
