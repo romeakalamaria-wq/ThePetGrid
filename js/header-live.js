@@ -129,8 +129,8 @@
 
     const missingNames = ids.filter(id => !state.senderNames.has(id));
     if (missingNames.length) {
-      const { data } = await state.client.from('profiles').select('id,username').in('id', missingNames);
-      (data || []).forEach(row => state.senderNames.set(row.id, row.username || 'A member'));
+      const { data } = await state.client.from('profiles').select('id,username,display_name').in('id', missingNames);
+      (data || []).forEach(row => state.senderNames.set(row.id, row.display_name || row.username || 'A member'));
       missingNames.forEach(id => { if (!state.senderNames.has(id)) state.senderNames.set(id, 'A member'); });
     }
   }

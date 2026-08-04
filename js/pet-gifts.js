@@ -125,7 +125,7 @@
     if (recent) {
       const rows = state.gifts.slice(0, 20);
       recent.innerHTML = rows.length ? rows.map(gift => {
-        const sender = gift.profiles?.username || "ThePetGrid member";
+        const sender = gift.profiles?.display_name || gift.profiles?.username || "ThePetGrid member";
         const message = gift.message ? `<small>“${escapeHtml(gift.message)}”</small>` : "";
         const date = new Intl.DateTimeFormat("en", { day:"2-digit", month:"short", year:"numeric" }).format(new Date(gift.created_at));
         return `<div class="pet-gift-recent"><span>${escapeHtml(gift.gift_emoji)}</span><div><strong>${escapeHtml(sender)} sent ${escapeHtml(gift.gift_name)}</strong>${message}</div><time datetime="${escapeHtml(gift.created_at)}">${date}</time></div>`;
@@ -144,7 +144,7 @@
 
   async function load() {
     const { data, error } = await client().from("pet_gifts")
-      .select("id,sender_id,pet_id,gift_code,gift_emoji,gift_name,message,is_demo,created_at,profiles:sender_id(username)")
+      .select("id,sender_id,pet_id,gift_code,gift_emoji,gift_name,message,is_demo,created_at,profiles:sender_id(username,display_name)")
       .eq("pet_id", state.petId).order("created_at", { ascending:false }).limit(100);
     if (error) throw error;
     state.gifts = data || [];

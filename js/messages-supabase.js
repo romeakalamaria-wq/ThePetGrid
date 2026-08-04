@@ -69,7 +69,7 @@
   }
 
   async function loadProfiles(client) {
-    const { data, error } = await client.from('profiles').select('id, username, avatar_url, country').order('username');
+    const { data, error } = await client.from('profiles').select('id, username, display_name, avatar_url, country').order('username');
     if (error) throw error;
     const profiles = data || [];
     state.allProfiles = profiles.filter((profile) => profile.id !== state.user.id);
@@ -116,7 +116,7 @@
       const online = isOnline(c.peerId);
       return `<button type="button" class="conversation-item ${c.peerId === state.peerId ? 'active is-active' : ''}" data-peer-id="${c.peerId}">
         <span class="conversation-avatar-wrapper"><img src="${escapeHtml(p.avatar_url || avatarFallback)}" alt="" class="conversation-avatar"><span class="presence-dot ${online ? 'online' : ''}"></span></span>
-        <span class="conversation-main"><strong>${escapeHtml(p.username || 'Member')}</strong><small>${escapeHtml(previewText(c.last).slice(0, 72))}</small></span>
+        <span class="conversation-main"><strong>${escapeHtml(p.display_name || p.username || 'Member')}</strong><small>${escapeHtml(previewText(c.last).slice(0, 72))}</small></span>
         <span class="conversation-meta"><time>${formatDate(c.last.created_at)}</time>${c.unread ? `<b class="unread-count">${c.unread}</b>` : ''}</span>
       </button>`;
     }).join('');
@@ -160,7 +160,7 @@
     const p = state.profiles.get(state.peerId) || { username: 'Member' };
     if (els.activeChat) els.activeChat.hidden = false;
     if (els.emptyChat) els.emptyChat.hidden = true;
-    if (els.name) els.name.textContent = p.username || 'Member';
+    if (els.name) els.name.textContent = p.display_name || p.username || 'Member';
     if (els.avatar) els.avatar.src = p.avatar_url || avatarFallback;
     updatePresenceUI();
     const messages = state.messages.filter((m) => peerOf(m) === state.peerId);
@@ -267,8 +267,8 @@
   function renderUsers() {
     if (!els.usersList) return;
     const term = (els.userSearch?.value || '').trim().toLowerCase();
-    const users = state.allProfiles.filter((p) => !term || (p.username || '').toLowerCase().includes(term));
-    els.usersList.innerHTML = users.map((p) => `<button type="button" class="new-conversation-user" data-user-id="${p.id}"><span class="conversation-avatar-wrapper"><img src="${escapeHtml(p.avatar_url || avatarFallback)}" alt=""><span class="presence-dot ${isOnline(p.id) ? 'online' : ''}"></span></span><span><strong>${escapeHtml(p.username || 'Member')}</strong><small>${isOnline(p.id) ? 'Online' : escapeHtml(p.country || 'Offline')}</small></span></button>`).join('');
+    const users = state.allProfiles.filter((p) => !term || [p.display_name, p.username].some((value) => (value || '').toLowerCase().includes(term)));
+    els.usersList.innerHTML = users.map((p) => `<button type="button" class="new-conversation-user" data-user-id="${p.id}"><span class="conversation-avatar-wrapper"><img src="${escapeHtml(p.avatar_url || avatarFallback)}" alt=""><span class="presence-dot ${isOnline(p.id) ? 'online' : ''}"></span></span><span><strong>${escapeHtml(p.display_name || p.username || 'Member')}</strong><small>@${escapeHtml(p.username || 'member')} · ${isOnline(p.id) ? 'Online' : escapeHtml(p.country || 'Offline')}</small></span></button>`).join('');
     els.usersList.querySelectorAll('[data-user-id]').forEach((b) => b.addEventListener('click', async () => { closeModal(); await openPeer(b.dataset.userId); }));
   }
   function openModal() { if (!els.modal) return; els.modal.hidden = false; els.modal.classList.add('is-open'); renderUsers(); els.userSearch?.focus(); }
@@ -284,7 +284,10 @@
         if (!state.messages.some((m) => m.id === message.id)) state.messages.push(message);
         renderConversations(); renderChat();
         if (message.recipient_id === state.user.id && message.sender_id === state.peerId) { await markRead(client); renderConversations(); }
-        else if (message.recipient_id === state.user.id) showToast(`New message from ${state.profiles.get(message.sender_id)?.username || 'a member'}`);
+        else if (message.recipient_id === state.user.id) {
+          const sender = state.profiles.get(message.sender_id);
+          showToast(`New message from ${sender?.display_name || sender?.username || 'a member'}`);
+        }
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, ({ new: message }) => {
         const index = state.messages.findIndex((m) => m.id === message.id); if (index >= 0) state.messages[index] = message; renderConversations();

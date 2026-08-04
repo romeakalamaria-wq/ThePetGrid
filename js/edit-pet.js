@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const { data, error } = await client
             .from("pets")
-            .select("*, profiles:owner_id(username), pet_likes(count)")
+            .select("*, profiles:owner_id(username, display_name), pet_likes(count)")
             .eq("id", petId)
             .maybeSingle();
 

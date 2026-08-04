@@ -33,7 +33,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       gender: row.gender || "",
       country: row.country || "",
       city: row.city || "",
-      owner: row.profiles?.username || "ThePetGrid Member",
+      owner: row.profiles?.display_name || row.profiles?.username || "ThePetGrid Member",
+      ownerUsername: row.profiles?.username || "",
       bio: row.bio || "",
       image: row.image_url || "",
       verified: Boolean(row.verified),
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const { data, error } = await client
         .from("pets")
-        .select("*, profiles:owner_id(username), pet_likes(count)")
+        .select("*, profiles:owner_id(username, display_name), pet_likes(count)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;

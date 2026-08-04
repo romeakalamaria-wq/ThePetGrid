@@ -78,7 +78,7 @@
     return {
       id: row.id, name: row.name || "", type: row.type || "Other", breed: row.breed || "",
       age: row.age ?? "", gender: row.gender || "", country: row.country || "", city: row.city || "",
-      owner: row.profiles?.username || "ThePetGrid Member", image: row.image_url || ""
+      owner: row.profiles?.display_name || row.profiles?.username || "ThePetGrid Member", image: row.image_url || ""
     };
   }
 
@@ -164,7 +164,7 @@
     const client = window.ThePetGridSupabase?.client;
     if (!client) return null;
     try {
-      const { data, error } = await client.from("pets").select("*, profiles:owner_id(username)").eq("id", String(id)).maybeSingle();
+      const { data, error } = await client.from("pets").select("*, profiles:owner_id(username, display_name)").eq("id", String(id)).maybeSingle();
       if (error) throw error;
       return normalizeCloudPet(data);
     } catch (error) {

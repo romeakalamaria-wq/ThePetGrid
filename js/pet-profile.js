@@ -182,7 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
             gender: row.gender || "",
             country: row.country || "Unknown country",
             city: row.city || "",
-            owner: row.profiles?.username || "ThePetGrid Member",
+            owner: row.profiles?.display_name || row.profiles?.username || "ThePetGrid Member",
+            ownerUsername: row.profiles?.username || "",
             bio: row.bio || "No story has been added yet.",
             image: row.image_url || "",
             verified: Boolean(row.verified),
@@ -204,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const { data, error } = await client
                     .from("pets")
-                    .select("*, profiles:owner_id(username), pet_likes(count)")
+                    .select("*, profiles:owner_id(username, display_name), pet_likes(count)")
                     .eq("id", String(petId))
                     .maybeSingle();
 
