@@ -30,6 +30,50 @@
     const openCommentPostIds = new Set();
     const currentUser = getLoggedUser();
 
+    async function hydrateCurrentUserProfile() {
+        try {
+            if (window.ThePetGridAuth?.ready) {
+                await window.ThePetGridAuth.ready;
+            }
+
+            const authUser = window.ThePetGridAuth?.getCurrentUser?.() || null;
+            const client = window.ThePetGridSupabase?.client;
+            const userId = authUser?.id || currentUser.id || currentUser.userId;
+            if (!client || !userId) return;
+
+            const { data, error } = await client
+                .from("profiles")
+                .select("username, display_name, avatar_url")
+                .eq("id", userId)
+                .maybeSingle();
+            if (error || !data) return;
+
+            const oldUsername = String(currentUser.username || "").toLowerCase();
+            currentUser.username = data.username || currentUser.username;
+            currentUser.displayName = data.display_name || data.username || currentUser.displayName;
+            currentUser.avatar = data.avatar_url || currentUser.avatar || DEFAULT_AVATAR;
+
+            let changed = false;
+            posts.forEach(post => {
+                if (String(post.authorUsername || "").toLowerCase() === oldUsername) {
+                    post.authorName = currentUser.displayName;
+                    post.authorAvatar = currentUser.avatar;
+                    changed = true;
+                }
+                (post.comments || []).forEach(comment => {
+                    if (String(comment.authorUsername || "").toLowerCase() === oldUsername) {
+                        comment.authorName = currentUser.displayName;
+                        comment.authorAvatar = currentUser.avatar;
+                        changed = true;
+                    }
+                });
+            });
+            if (changed) savePosts();
+        } catch (error) {
+            console.warn("Community profile name could not be refreshed.", error);
+        }
+    }
+
     function safeJsonParse(value, fallback) {
         try {
             return value ? JSON.parse(value) : fallback;
@@ -1494,7 +1538,7 @@
         );
     }
 
-    function init() {
+    async function init() {
         if (
             !elements.form ||
             !elements.feed
@@ -1507,6 +1551,7 @@
         }
 
         loadPosts();
+        await hydrateCurrentUserProfile();
         renderHeaderUser();
         renderComposerIdentity();
         populatePetOptions();

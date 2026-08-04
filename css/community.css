@@ -218,6 +218,28 @@
     object-position: center;
 }
 
+/* Post avatars need their own fixed frame. Without it, width/height 100%
+   can expand against the full post column. */
+.post-author > a {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: block;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #fff5e6;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px rgba(247, 148, 0, .18);
+}
+
+.post-author > a .community-avatar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: none;
+}
+
 .community-avatar-frame {
     width: 56px;
     height: 56px;
