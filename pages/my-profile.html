@@ -55,6 +55,59 @@
 <p>Gifts</p>
 </div>
 </section>
+<!-- PROFILE & PRIVACY SETTINGS -->
+<section class="profile-settings" aria-labelledby="profileSettingsTitle">
+<div class="section-title profile-settings__heading">
+<div>
+<span class="profile-settings__eyebrow">Your account</span>
+<h2 id="profileSettingsTitle">Profile &amp; Privacy</h2>
+<p>Choose what other members can see and how they can contact you.</p>
+</div>
+<span class="profile-settings__shield" aria-hidden="true">🛡️</span>
+</div>
+<form class="profile-settings__form" id="profileSettingsForm">
+<div class="profile-settings__fields">
+<label>
+<span>Display name</span>
+<input id="profileDisplayNameInput" maxlength="60" placeholder="Your display name" type="text"/>
+</label>
+<label>
+<span>Bio</span>
+<textarea id="profileBioInput" maxlength="300" placeholder="Tell the community a little about you" rows="4"></textarea>
+</label>
+<label>
+<span>Country</span>
+<input id="profileCountryInput" maxlength="80" placeholder="Country" type="text"/>
+</label>
+<label>
+<span>City</span>
+<input id="profileCityInput" maxlength="80" placeholder="City" type="text"/>
+</label>
+</div>
+<div class="profile-settings__privacy">
+<label class="privacy-control">
+<span><strong>Private profile</strong><small>Only followers can view your full profile and pets.</small></span>
+<input id="profilePrivateInput" type="checkbox"/>
+</label>
+<label class="privacy-control">
+<span><strong>Show my location</strong><small>Display your city and country on your public profile.</small></span>
+<input id="profileShowLocationInput" type="checkbox"/>
+</label>
+<label class="privacy-control privacy-control--select">
+<span><strong>Who can message me?</strong><small>Control new conversations from other members.</small></span>
+<select id="profileMessagePrivacyInput">
+<option value="everyone">Everyone</option>
+<option value="followers">Followers only</option>
+<option value="nobody">Nobody</option>
+</select>
+</label>
+</div>
+<div class="profile-settings__footer">
+<p aria-live="polite" id="profileSettingsStatus"></p>
+<button id="saveProfileSettingsButton" type="submit">Save settings</button>
+</div>
+</form>
+</section>
 <!-- MY PETS -->
 <section class="my-pets">
 <div class="section-title">
@@ -73,6 +126,8 @@
 <script src="../js/auth.js"></script>
 <script src="../js/header.js"></script>
 <script src="../js/pet-favorites.js"></script>
-<script src="../js/my-profile.js?v=5"></script><script src="../js/header-live.js"></script>
+<script src="../js/my-profile.js?v=5"></script>
+<script src="../js/profile-privacy.js?v=1"></script>
+<script src="../js/header-live.js"></script>
 </body>
 </html>
