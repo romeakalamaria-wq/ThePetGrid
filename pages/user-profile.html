@@ -92,6 +92,12 @@
 <button class="profile-action-btn share-btn" id="shareProfileButton" type="button">
                                 ↗ Share
                             </button>
+<button class="profile-action-btn" id="reportUserButton" type="button">
+                                ⚑ Report
+                            </button>
+<button class="profile-action-btn" id="blockUserButton" type="button">
+                                ⛔ Block
+                            </button>
 </div>
 </div>
 <!-- PROFILE STATS -->
@@ -401,10 +407,25 @@
 <script src="../js/supabase-config.js"></script>
 <script src="../js/supabase-client.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/community-safety.js?v=1"></script>
 <script src="../js/user-profile.js?v=4"></script>
 <script src="../js/profile-privacy.js?v=1"></script>
 <script src="../js/profile-follows.js?v=1"></script>
 <script src="../js/header.js"></script>
 <script src="../js/header-live.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  await window.ThePetGridSafety?.ready;
+  const username = new URLSearchParams(location.search).get("username");
+  const report = document.getElementById("reportUserButton");
+  const block = document.getElementById("blockUserButton");
+  if (!username) { if (report) report.hidden = true; if (block) block.hidden = true; return; }
+  report?.addEventListener("click", () => window.ThePetGridSafety.reportUser(username).catch(error => alert(error.message)));
+  block?.addEventListener("click", async () => {
+    try { if (await window.ThePetGridSafety.blockByUsername(username)) location.href = "community.html"; }
+    catch (error) { alert(error.message); }
+  });
+});
+</script>
 </body>
 </html>

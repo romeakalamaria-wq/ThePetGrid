@@ -92,6 +92,27 @@
                 fields.save.disabled = false;
             }
         });
+
+        const blockedList = $("blockedMembersList");
+        async function renderBlockedMembers() {
+            if (!blockedList || !window.ThePetGridSafety) return;
+            await window.ThePetGridSafety.ready;
+            const members = window.ThePetGridSafety.blockedProfiles();
+            blockedList.innerHTML = members.length ? members.map(member => `
+                <div class="blocked-member">
+                    <span>@${String(member.username).replace(/[<>&"']/g, "")}</span>
+                    <button type="button" data-unblock-id="${member.id}">Unblock</button>
+                </div>`).join("") : `<span class="blocked-members__empty">No blocked members.</span>`;
+        }
+        blockedList?.addEventListener("click", async event => {
+            const button = event.target.closest("[data-unblock-id]");
+            if (!button) return;
+            button.disabled = true;
+            try { await window.ThePetGridSafety.unblock(button.dataset.unblockId); await renderBlockedMembers(); }
+            catch (error) { window.alert(error.message || "This member could not be unblocked."); button.disabled = false; }
+        });
+        window.addEventListener("thepetgrid:safety-change", renderBlockedMembers);
+        await renderBlockedMembers();
     }
 
     function showPrivateState(profile) {

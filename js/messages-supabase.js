@@ -17,7 +17,8 @@
     attachmentInput: $('#attachmentInput'), attachmentPreview: $('#attachmentPreview'),
     attachmentPreviewImage: $('#attachmentPreviewImage'), attachmentPreviewName: $('#attachmentPreviewName'),
     attachmentPreviewSize: $('#attachmentPreviewSize'), removeAttachment: $('#removeAttachmentButton'),
-    giftButton: $('#giftButton'), giftModal: $('#giftModal'), closeGiftModal: $('#closeGiftModal'), giftGrid: $('#giftGrid')
+    giftButton: $('#giftButton'), giftModal: $('#giftModal'), closeGiftModal: $('#closeGiftModal'), giftGrid: $('#giftGrid'),
+    blockUserButton: $('#blockUserButton')
   };
 
   const state = {
@@ -72,8 +73,10 @@
     const { data, error } = await client.from('profiles').select('id, username, display_name, avatar_url, country').order('username');
     if (error) throw error;
     const profiles = data || [];
-    state.allProfiles = profiles.filter((profile) => profile.id !== state.user.id);
-    state.profiles = new Map(profiles.map((profile) => [profile.id, profile]));
+    await window.ThePetGridSafety?.ready;
+    const visibleProfiles = profiles.filter((profile) => !window.ThePetGridSafety?.isBlockedId?.(profile.id));
+    state.allProfiles = visibleProfiles.filter((profile) => profile.id !== state.user.id);
+    state.profiles = new Map(visibleProfiles.map((profile) => [profile.id, profile]));
   }
 
   const messageColumns = 'id, sender_id, recipient_id, body, read_at, created_at, message_type, attachment_url, attachment_name, attachment_type, attachment_size, gift_code, gift_emoji, gift_name';
@@ -326,6 +329,19 @@
     els.removeAttachment?.addEventListener('click', clearAttachment);
     els.giftButton?.addEventListener('click', openGiftModal); els.closeGiftModal?.addEventListener('click', closeGiftModal);
     els.giftGrid?.addEventListener('click', (event) => { const b = event.target.closest('[data-gift-code]'); if (b) sendGift(b); });
+    els.blockUserButton?.addEventListener('click', async () => {
+      const peer = state.profiles.get(state.peerId);
+      if (!peer?.username || !window.ThePetGridSafety) return;
+      try {
+        if (await window.ThePetGridSafety.blockByUsername(peer.username)) {
+          state.profiles.delete(state.peerId);
+          state.allProfiles = state.allProfiles.filter(profile => profile.id !== state.peerId);
+          state.peerId = null;
+          history.replaceState({}, '', location.pathname);
+          renderConversations(); renderChat(); showToast('Member blocked.');
+        }
+      } catch (error) { showToast(error.message || 'The member could not be blocked.'); }
+    });
     els.giftModal?.addEventListener('click', (event) => { if (event.target.matches('[data-close-gift-modal]')) closeGiftModal(); });
     els.modal?.addEventListener('click', (event) => { if (event.target === els.modal || event.target.matches('[data-close-new-conversation-modal]')) closeModal(); });
     window.addEventListener('beforeunload', () => { state.presenceChannel?.untrack(); clearAttachment(); });

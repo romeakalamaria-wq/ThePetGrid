@@ -542,7 +542,9 @@
         elements.emptyFeed.hidden =
             posts.length !== 0;
 
+        const blocked = window.ThePetGridSafety?.blockedUsernames?.() || new Set();
         posts
+            .filter(post => !blocked.has(String(post.authorUsername || "").toLowerCase()))
             .slice()
             .sort(
                 (a, b) =>
@@ -728,6 +730,14 @@
                     data-action="share"
                 >
                     🔗 Share
+                </button>
+
+                <button
+                    type="button"
+                    class="post-action"
+                    data-action="report"
+                >
+                    ⚑ Report
                 </button>
 
             </div>
@@ -1328,6 +1338,15 @@
             return;
         }
 
+        if (action === "report") {
+            try {
+                await window.ThePetGridSafety?.reportPost?.(post.id, post.authorUsername);
+            } catch (error) {
+                window.alert(error.message || "The report could not be submitted.");
+            }
+            return;
+        }
+
         if (action === "delete") {
             if (
                 !window.confirm(
@@ -1551,6 +1570,7 @@
         }
 
         loadPosts();
+        await window.ThePetGridSafety?.ready;
         await hydrateCurrentUserProfile();
         renderHeaderUser();
         renderComposerIdentity();
