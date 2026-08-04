@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moderation Center - ThePetGrid</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design/theme.css">
+  <link rel="stylesheet" href="../design/style.css">
+  <link rel="stylesheet" href="../design/header.css">
+  <link rel="stylesheet" href="../css/admin-moderation.css">
+</head>
+<body>
+<header class="main-header">
+  <div class="header-container">
+    <a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a>
+    </nav>
+    <div class="header-actions"><a class="login-btn" href="login.html">Log In</a></div>
+  </div>
+</header>
+
+<main class="moderation-page">
+  <section id="moderationGate" class="moderation-gate" aria-live="polite">
+    <div class="gate-spinner" aria-hidden="true"></div>
+    <h1>Checking administrator access…</h1>
+    <p>The Moderation Center is protected.</p>
+  </section>
+
+  <div id="moderationApp" hidden>
+    <section class="moderation-hero">
+      <div>
+        <span class="moderation-eyebrow">🛡️ ADMIN ONLY</span>
+        <h1>Moderation Center</h1>
+        <p>Review community reports, record decisions and keep ThePetGrid safe.</p>
+      </div>
+      <button id="refreshReportsButton" class="refresh-button" type="button">↻ Refresh reports</button>
+    </section>
+
+    <section class="moderation-stats" aria-label="Report counters">
+      <article><span>Open</span><strong id="openCount">0</strong></article>
+      <article><span>Reviewing</span><strong id="reviewingCount">0</strong></article>
+      <article><span>Resolved</span><strong id="resolvedCount">0</strong></article>
+      <article><span>Dismissed</span><strong id="dismissedCount">0</strong></article>
+      <article class="total-stat"><span>Total</span><strong id="totalCount">0</strong></article>
+    </section>
+
+    <section class="moderation-toolbar" aria-label="Report filters">
+      <label>Search<input id="reportSearch" type="search" placeholder="User, content ID or details…"></label>
+      <label>Status<select id="statusFilter"><option value="all">All statuses</option><option value="open">Open</option><option value="reviewing">Reviewing</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></label>
+      <label>Type<select id="typeFilter"><option value="all">All content</option><option value="user">User</option><option value="post">Post</option><option value="comment">Comment</option><option value="message">Message</option></select></label>
+      <label>Reason<select id="reasonFilter"><option value="all">All reasons</option><option value="spam">Spam</option><option value="harassment">Harassment</option><option value="scam">Scam</option><option value="unsafe">Unsafe</option><option value="other">Other</option></select></label>
+      <label>Sort<select id="sortFilter"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="priority">Priority</option></select></label>
+      <button id="clearFiltersButton" class="clear-filters" type="button">Clear</button>
+    </section>
+
+    <div class="moderation-meta"><p id="resultsSummary">Loading reports…</p><p id="moderationStatus" role="status" aria-live="polite"></p></div>
+    <section id="reportsList" class="reports-list" aria-live="polite"></section>
+    <section id="reportsEmpty" class="reports-empty" hidden><span>✅</span><h2>No reports match these filters</h2><p>Try clearing the filters or refresh the queue.</p></section>
+  </div>
+</main>
+
+<div id="reportModal" class="report-modal" hidden>
+  <div class="report-modal__backdrop" data-close-report-modal></div>
+  <section class="report-modal__card" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+    <button class="report-modal__close" type="button" data-close-report-modal aria-label="Close">×</button>
+    <span class="moderation-eyebrow">REPORT REVIEW</span>
+    <h2 id="reportModalTitle">Review report</h2>
+    <div id="reportModalDetails" class="report-modal__details"></div>
+    <form id="reportDecisionForm">
+      <input id="decisionReportId" type="hidden">
+      <label>Decision<select id="decisionStatus" required><option value="reviewing">Mark as reviewing</option><option value="resolved">Resolve report</option><option value="dismissed">Dismiss report</option><option value="open">Return to open</option></select></label>
+      <label>Moderator notes<textarea id="moderatorNotes" maxlength="2000" rows="5" placeholder="Record what was reviewed and why this decision was made."></textarea><small><span id="notesCounter">0</span> / 2000</small></label>
+      <div class="report-modal__actions"><button type="button" class="secondary-button" data-close-report-modal>Cancel</button><button id="saveDecisionButton" type="submit" class="decision-button">Save decision</button></div>
+    </form>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/header.js"></script>
+<script src="../js/admin-moderation.js"></script>
+</body>
+</html>
