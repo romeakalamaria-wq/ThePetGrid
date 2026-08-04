@@ -189,12 +189,12 @@
 <!-- GIFT CENTER -->
 <section class="pet-gift-center" id="petGiftCenter" aria-labelledby="petGiftCenterTitle">
 <div class="pet-gift-center__header">
-<div><span class="pet-profile__eyebrow">Community support</span><h2 id="petGiftCenterTitle">🎁 Gift Showcase</h2><p>Demo gifts are free and remain visible on this pet's profile.</p></div>
+<div><span class="pet-profile__eyebrow">Community kindness</span><h2 id="petGiftCenterTitle">🎁 Gift Showcase</h2><p>Send a small free gift and make this pet's day.</p><p class="pet-gift-availability" id="petGiftAvailability">One free gift per pet every 24 hours.</p></div>
 <button class="button button--primary" id="sendPetGiftButtonSecondary" type="button">Send a Gift</button>
 </div>
 <div class="pet-gift-showcase-grid" id="petGiftShowcaseGrid"></div>
 <div class="pet-gift-badges" id="petGiftBadges"></div>
-<h3>Recent gifts</h3>
+<h3>Gift history</h3>
 <div class="pet-gift-recent-list" id="petGiftRecentList"><p class="pet-gift-empty">Loading gifts...</p></div>
 </section>
 
@@ -205,16 +205,14 @@
 <div class="pet-gift-modal" id="petGiftModal" hidden>
 <div class="pet-gift-modal__overlay" data-close-pet-gift-modal></div>
 <section class="pet-gift-modal__card" role="dialog" aria-modal="true" aria-labelledby="petGiftModalTitle">
-<div class="pet-gift-modal__header"><div><h2 id="petGiftModalTitle">Send a gift to this pet</h2><p>All gifts are free in demo mode.</p></div><button id="closePetGiftModal" type="button" aria-label="Close">×</button></div>
+<div class="pet-gift-modal__header"><div><h2 id="petGiftModalTitle">Send a gift to this pet</h2><p>Choose one free gift. The owner will receive a notification.</p></div><button id="closePetGiftModal" type="button" aria-label="Close">×</button></div>
 <label class="pet-gift-message-label" for="petGiftMessage">Optional message</label>
 <textarea id="petGiftMessage" maxlength="280" rows="3" placeholder="Write a kind message..."></textarea>
 <div class="pet-gift-picker" id="petGiftGrid">
-<button type="button" data-gift-code="bone"><span>🦴</span><strong>Bone</strong><small>For a very good pet</small><b>Free demo</b></button>
-<button type="button" data-gift-code="food"><span>🥫</span><strong>Pet Food</strong><small>A tasty surprise</small><b>Free demo</b></button>
-<button type="button" data-gift-code="toy"><span>🧸</span><strong>Toy</strong><small>For playtime</small><b>Free demo</b></button>
-<button type="button" data-gift-code="heart"><span>❤️</span><strong>Heart</strong><small>Send some love</small><b>Free demo</b></button>
-<button type="button" data-gift-code="flowers"><span>🌹</span><strong>Flowers</strong><small>A caring gesture</small><b>Free demo</b></button>
-<button type="button" data-gift-code="candle"><span>🕯️</span><strong>Candle</strong><small>For remembrance</small><b>Free demo</b></button>
+<button type="button" data-gift-code="bone"><span>🦴</span><strong>Bone</strong><small>For a very good pet</small><b>Free</b></button>
+<button type="button" data-gift-code="food"><span>🥫</span><strong>Pet Food</strong><small>A tasty surprise</small><b>Free</b></button>
+<button type="button" data-gift-code="toy"><span>🧸</span><strong>Toy</strong><small>For playtime</small><b>Free</b></button>
+<button type="button" data-gift-code="heart"><span>❤️</span><strong>Heart</strong><small>Send some love</small><b>Free</b></button>
 </div>
 </section>
 </div>

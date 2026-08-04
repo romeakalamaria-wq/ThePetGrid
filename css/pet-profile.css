@@ -1272,6 +1272,9 @@ a {
 .pet-gift-center__header { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; margin-bottom:22px; }
 .pet-gift-center__header h2 { margin:4px 0 6px; }
 .pet-gift-center__header p { margin:0; color:var(--color-text-muted, #68707d); }
+.pet-gift-center__header .pet-gift-availability{display:inline-flex;margin-top:10px;padding:7px 11px;border-radius:999px;background:#ecfdf3;color:#18794e;font-size:.82rem;font-weight:750}
+.pet-gift-center__header .pet-gift-availability.is-locked{background:#fff4e5;color:#9a5b00}
+.pet-gift-center button:disabled,.pet-gift-picker button:disabled{cursor:not-allowed;filter:grayscale(.25);opacity:.58;transform:none!important}
 .pet-gift-showcase-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
 .pet-gift-item { display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center; padding:14px; border:1px solid var(--color-border); border-radius:16px; background:var(--color-background-soft, #fffaf2); }
 .pet-gift-item__emoji { font-size:2rem; }
@@ -1296,7 +1299,7 @@ a {
 .pet-gift-modal__header button { border:0; background:transparent; font-size:2rem; cursor:pointer; }
 .pet-gift-message-label { display:block; margin-top:20px; font-weight:700; }
 #petGiftMessage { width:100%; margin-top:7px; padding:12px; border:1px solid #d8dce2; border-radius:14px; font:inherit; resize:vertical; }
-.pet-gift-picker { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:18px; }
+.pet-gift-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:18px; }
 .pet-gift-picker button { display:flex; flex-direction:column; align-items:center; gap:5px; padding:18px 12px; border:1px solid #e2e5e9; border-radius:16px; background:#fffaf2; cursor:pointer; font:inherit; }
 .pet-gift-picker button:hover { transform:translateY(-2px); border-color:#f6a800; }
 .pet-gift-picker button>span { font-size:2.2rem; }

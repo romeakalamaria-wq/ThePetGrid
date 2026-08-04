@@ -238,9 +238,16 @@
       : `${page}?petId=${encodeURIComponent(payload.pet_id || "")}`;
   }
 
+  function petGiftLink(notification) {
+    const payload = notification?.payload || {};
+    const page = location.pathname.includes("/pages/") ? "pet.html" : "pages/pet.html";
+    return `${page}?id=${encodeURIComponent(payload.pet_id || notification?.entity_id || "")}#petGiftCenter`;
+  }
+
   function showNearbyLostToast(notification) {
     const payload = notification?.payload || {};
     const isMemorial = notification?.type === "memorial_created";
+    const isGift = notification?.type === "pet_gift_received";
     const isSighting = notification?.type === "lost_pet_sighting";
     let toast = document.getElementById("nearbyLostToast");
     if (!toast) {
@@ -250,25 +257,25 @@
       toast.innerHTML = '<span class="nearby-lost-toast__icon">🚨</span><span><strong></strong><small></small></span><b>Open →</b>';
       document.body.appendChild(toast);
     }
-    toast.href = isMemorial ? memorialLink(notification) : nearbyAlertLink(payload.report_id || notification.entity_id);
-    toast.querySelector(".nearby-lost-toast__icon").textContent = isMemorial ? "🤍" : "🚨";
-    toast.querySelector("strong").textContent = isMemorial ? `${payload.pet_name || "A beloved pet"} is now remembered` : isSighting ? `Possible sighting: ${payload.pet_name || "Your lost pet"}` : `Lost pet nearby: ${payload.pet_name || "Community alert"}`;
+    toast.href = isGift ? petGiftLink(notification) : isMemorial ? memorialLink(notification) : nearbyAlertLink(payload.report_id || notification.entity_id);
+    toast.querySelector(".nearby-lost-toast__icon").textContent = isGift ? (payload.gift_emoji || "🎁") : isMemorial ? "🤍" : "🚨";
+    toast.querySelector("strong").textContent = isGift ? `${payload.pet_name || "Your pet"} received ${payload.gift_name || "a gift"}` : isMemorial ? `${payload.pet_name || "A beloved pet"} is now remembered` : isSighting ? `Possible sighting: ${payload.pet_name || "Your lost pet"}` : `Lost pet nearby: ${payload.pet_name || "Community alert"}`;
     const distance = payload.distance_km !== undefined ? `${payload.distance_km} km away · ` : "";
-    toast.querySelector("small").textContent = isMemorial ? "Visit the Memorial Garden to leave a flower or light a candle." : `${distance}${payload.address || "Open the alert for the location"}`;
+    toast.querySelector("small").textContent = isGift ? (payload.message || "A community member sent a little kindness.") : isMemorial ? "Visit the Memorial Garden to leave a flower or light a candle." : `${distance}${payload.address || "Open the alert for the location"}`;
     toast.classList.remove("is-visible");
     requestAnimationFrame(() => toast.classList.add("is-visible"));
     clearTimeout(toast._hideTimer);
     toast._hideTimer = setTimeout(() => toast.classList.remove("is-visible"), 10000);
 
     if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
-      const browserNotification = new Notification(`🚨 ${payload.pet_name || "Lost pet"} nearby`, {
-        body:`${distance}${payload.address || "Tap to view the Lost & Found alert."}`,
+      const browserNotification = new Notification(isGift ? `${payload.gift_emoji || "🎁"} A gift for ${payload.pet_name || "your pet"}` : isMemorial ? `🤍 ${payload.pet_name || "A beloved pet"} is now remembered` : `🚨 ${payload.pet_name || "Lost pet"} nearby`, {
+        body:isGift ? (payload.message || `${payload.gift_name || "A gift"} was added to the pet profile.`) : isMemorial ? "Visit the Memorial Garden." : `${distance}${payload.address || "Tap to view the Lost & Found alert."}`,
         icon:location.pathname.includes("/pages/") ? "../assets/favicon.png" : "assets/favicon.png",
-        tag:`lost-pet-${payload.report_id || notification.id}`
+        tag:isGift ? `pet-gift-${notification.id}` : isMemorial ? `memorial-${notification.id}` : `lost-pet-${payload.report_id || notification.id}`
       });
       browserNotification.onclick = () => {
         window.focus();
-        location.href = nearbyAlertLink(payload.report_id || notification.entity_id);
+        location.href = isGift ? petGiftLink(notification) : isMemorial ? memorialLink(notification) : nearbyAlertLink(payload.report_id || notification.entity_id);
         browserNotification.close();
       };
     }
@@ -286,7 +293,7 @@
   }
 
   async function handleNearbyNotification(notification) {
-    if (!notification || !["nearby_lost_pet", "lost_pet_sighting", "memorial_created"].includes(notification.type)) return;
+    if (!notification || !["nearby_lost_pet", "lost_pet_sighting", "memorial_created", "pet_gift_received"].includes(notification.type)) return;
     const existing = state.nearbyNotifications.findIndex(item => item.id === notification.id);
     if (existing >= 0) state.nearbyNotifications[existing] = notification;
     else state.nearbyNotifications.unshift(notification);
@@ -308,7 +315,7 @@
   }
 
   async function loadReportStatuses() {
-    const ids = [...new Set(state.nearbyNotifications.filter(item => item.type !== "memorial_created").map(item => item.payload?.report_id || item.entity_id).filter(Boolean))];
+    const ids = [...new Set(state.nearbyNotifications.filter(item => ["nearby_lost_pet", "lost_pet_sighting"].includes(item.type)).map(item => item.payload?.report_id || item.entity_id).filter(Boolean))];
     if (!ids.length) return;
     const { data } = await state.client.from("lost_pet_reports").select("id,status,resolved,resolved_at").in("id", ids);
     (data || []).forEach(report => state.reportStatuses.set(String(report.id), report));
@@ -333,6 +340,7 @@
     list.innerHTML = state.nearbyNotifications.map(notification => {
       const payload = notification.payload || {};
       const isMemorial = notification.type === "memorial_created";
+      const isGift = notification.type === "pet_gift_received";
       const reportId = payload.report_id || notification.entity_id || "";
       const report = state.reportStatuses.get(String(reportId));
       const resolved = Boolean(report?.resolved || report?.status === "found");
@@ -340,6 +348,12 @@
       const distance = payload.distance_km !== undefined ? `${payload.distance_km} km away` : "Nearby alert";
       if (isMemorial) {
         return `<a class="notification-center__item notification-center__item--memorial${notification.read_at ? "" : " is-unread"}" href="${memorialLink(notification)}" data-notification-id="${notification.id}"><span class="notification-center__icon">🤍</span><span class="notification-center__copy"><strong>${escapeNotificationText(payload.pet_name || "A beloved pet")} is now remembered</strong><small>Visit their story, leave a flower or light a candle.</small><em>Memorial Garden · ${formatNotificationTime(notification.created_at)}</em></span>${notification.read_at ? "" : '<span class="notification-center__dot" aria-label="Unread"></span>'}</a>`;
+      }
+      if (isGift) {
+        const photo = payload.pet_image
+          ? `<span class="notification-center__icon notification-center__pet-photo"><img src="${escapeNotificationText(payload.pet_image)}" alt=""></span>`
+          : `<span class="notification-center__icon">${escapeNotificationText(payload.gift_emoji || "🎁")}</span>`;
+        return `<a class="notification-center__item notification-center__item--gift${notification.read_at ? "" : " is-unread"}" href="${petGiftLink(notification)}" data-notification-id="${notification.id}">${photo}<span class="notification-center__copy"><strong>${escapeNotificationText(payload.pet_name || "Your pet")} received ${escapeNotificationText(payload.gift_name || "a gift")}</strong><small>${escapeNotificationText(payload.message || "A community member sent a little kindness.")}</small><em>${escapeNotificationText(payload.gift_emoji || "🎁")} Gift received · ${formatNotificationTime(notification.created_at)}</em></span>${notification.read_at ? "" : '<span class="notification-center__dot" aria-label="Unread"></span>'}</a>`;
       }
       return `<a class="notification-center__item${notification.read_at ? "" : " is-unread"}${resolved ? " is-resolved" : ""}" href="${nearbyAlertLink(reportId)}" data-notification-id="${notification.id}"><span class="notification-center__icon">${resolved ? "✅" : isSighting ? "👁" : "🚨"}</span><span class="notification-center__copy"><strong>${resolved ? "Pet found: " : isSighting ? "Possible sighting: " : "Lost pet nearby: "}${escapeNotificationText(payload.pet_name || "Community alert")}</strong><small>${escapeNotificationText(payload.address || payload.note || distance)}</small><em>${isSighting ? "Sighting report" : distance} · ${formatNotificationTime(notification.created_at)}${resolved ? " · Resolved" : ""}</em></span>${notification.read_at ? "" : '<span class="notification-center__dot" aria-label="Unread"></span>'}</a>`;
     }).join("");
@@ -353,7 +367,7 @@
     const { data, error } = await state.client.from("notifications")
       .select("id,type,entity_id,payload,read_at,created_at")
       .eq("user_id", state.user.id)
-      .in("type", ["nearby_lost_pet", "lost_pet_sighting", "memorial_created"])
+      .in("type", ["nearby_lost_pet", "lost_pet_sighting", "memorial_created", "pet_gift_received"])
       .order("created_at", { ascending:false })
       .limit(50);
     if (error) throw error;
