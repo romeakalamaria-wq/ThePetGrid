@@ -1,1454 +1,635 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Messages - ThePetGrid</title>
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="../assets/favicon.png"
-    >
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-    <link rel="stylesheet" href="../design/theme.css">
-    <link rel="stylesheet" href="../design/style.css">
-    <link rel="stylesheet" href="../design/header.css">
-    <link rel="stylesheet" href="../css/messages.css">
-
-</head>
-
-<body>
-
-    <!-- ==========================================
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Messages - ThePetGrid</title>
+<link href="../assets/favicon.png" rel="icon" type="image/png"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="../design/theme.css" rel="stylesheet"/>
+<link href="../design/style.css" rel="stylesheet"/>
+<link href="../design/header.css" rel="stylesheet"/>
+<link href="../css/messages.css" rel="stylesheet"/>
+<link href="../design/atlas-shell.css" rel="stylesheet"/></head>
+<body class="atlas-shell">
+<!-- ==========================================
          HEADER
     =========================================== -->
-
-    <header class="main-header">
-
-        <div class="header-container">
-
-            <a
-                href="../index.html"
-                class="logo"
-            >
-                <span class="logo-icon">🐾</span>
-                <span>ThePetGrid</span>
-            </a>
-
-
-            <nav class="main-nav">
-
-                <a href="../index.html">
+<header class="main-header">
+<div class="header-container">
+<a class="logo" href="../index.html">
+<span class="logo-icon">🐾</span>
+<span>ThePetGrid</span>
+</a>
+<nav class="main-nav">
+<a href="../index.html">
                     Home
                 </a>
-
-                <a href="map.html">
+<a href="map.html">
                     Map
                 </a>
-
-                <a href="pets.html">
+<a href="pets.html">
                     Pets
                 </a>
-
-                <a href="community.html">
+<a href="community.html">
                     Community
                 </a>
-
-                <a href="#">
+<a href="#">
                     Rescue
                 </a>
-
-                <a href="#">
+<a href="#">
                     About
                 </a>
-
-            </nav>
-
-
-            <div class="header-actions">
-
-                <a
-                    href="upload.html"
-                    class="add-pet-btn"
-                >
+</nav>
+<div class="header-actions">
+<a class="add-pet-btn" href="upload.html">
                     + Add Pet
                 </a>
-
-                <div id="userArea">
-
-                    <a
-                        href="login.html"
-                        class="login-btn"
-                    >
+<div id="userArea">
+<a class="login-btn" href="login.html">
                         Log In
                     </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </header>
-
-
-    <!-- ==========================================
+</div>
+</div>
+</div>
+</header>
+<!-- ==========================================
          MESSAGES PAGE
     =========================================== -->
-
-    <main class="messages-page">
-
-        <div class="messages-container">
-
-
-            <!-- ==================================
+<main class="messages-page">
+<div class="messages-container">
+<!-- ==================================
                  PAGE INTRO
             =================================== -->
-
-            <section class="messages-page-heading">
-
-                <div>
-
-                    <span class="messages-eyebrow">
+<section class="messages-page-heading">
+<div>
+<span class="messages-eyebrow">
                         Community
                     </span>
-
-                    <h1>
+<h1>
                         Messages
                     </h1>
-
-                    <p>
+<p>
                         Stay connected with pet lovers from around the world.
                     </p>
-
-                </div>
-
-
-                <button
-                    id="newConversationButton"
-                    class="new-conversation-btn"
-                    type="button"
-                >
-                    <span aria-hidden="true">✏️</span>
+</div>
+<button class="new-conversation-btn" id="newConversationButton" type="button">
+<span aria-hidden="true">✏️</span>
                     New Message
                 </button>
-
-            </section>
-
-
-            <!-- ==================================
+</section>
+<!-- ==================================
                  MESSAGING APPLICATION
             =================================== -->
-
-            <section class="messaging-app">
-
-
-                <!-- ==============================
+<section class="messaging-app">
+<!-- ==============================
                      CONVERSATIONS SIDEBAR
                 =============================== -->
-
-                <aside
-                    id="conversationsSidebar"
-                    class="conversations-sidebar"
-                >
-
-                    <div class="conversations-header">
-
-                        <div>
-
-                            <span class="panel-eyebrow">
+<aside class="conversations-sidebar" id="conversationsSidebar">
+<div class="conversations-header">
+<div>
+<span class="panel-eyebrow">
                                 Inbox
                             </span>
-
-                            <h2>
+<h2>
                                 Conversations
                             </h2>
-
-                        </div>
-
-
-                        <button
-                            id="mobileCloseConversations"
-                            class="mobile-panel-close"
-                            type="button"
-                            aria-label="Close conversations"
-                        >
+</div>
+<button aria-label="Close conversations" class="mobile-panel-close" id="mobileCloseConversations" type="button">
                             ×
                         </button>
-
-                    </div>
-
-
-                    <div class="conversation-search-wrapper">
-
-                        <span
-                            class="conversation-search-icon"
-                            aria-hidden="true"
-                        >
+</div>
+<div class="conversation-search-wrapper">
+<span aria-hidden="true" class="conversation-search-icon">
                             🔍
                         </span>
-
-                        <label
-                            class="sr-only"
-                            for="conversationSearchInput"
-                        >
+<label class="sr-only" for="conversationSearchInput">
                             Search conversations
                         </label>
-
-                        <input
-                            id="conversationSearchInput"
-                            class="conversation-search-input"
-                            type="search"
-                            placeholder="Search conversations..."
-                            autocomplete="off"
-                        >
-
-                        <button
-                            id="clearConversationSearch"
-                            class="conversation-search-clear"
-                            type="button"
-                            aria-label="Clear conversation search"
-                            hidden
-                        >
+<input autocomplete="off" class="conversation-search-input" id="conversationSearchInput" placeholder="Search conversations..." type="search"/>
+<button aria-label="Clear conversation search" class="conversation-search-clear" hidden="" id="clearConversationSearch" type="button">
                             ×
                         </button>
-
-                    </div>
-
-
-                    <div
-                        class="conversation-filters"
-                        role="group"
-                        aria-label="Conversation filters"
-                    >
-
-                        <button
-                            class="conversation-filter-btn active"
-                            type="button"
-                            data-conversation-filter="all"
-                        >
+</div>
+<div aria-label="Conversation filters" class="conversation-filters" role="group">
+<button class="conversation-filter-btn active" data-conversation-filter="all" type="button">
                             All
                         </button>
-
-                        <button
-                            class="conversation-filter-btn"
-                            type="button"
-                            data-conversation-filter="unread"
-                        >
+<button class="conversation-filter-btn" data-conversation-filter="unread" type="button">
                             Unread
                         </button>
-
-                        <button
-                            class="conversation-filter-btn"
-                            type="button"
-                            data-conversation-filter="online"
-                        >
+<button class="conversation-filter-btn" data-conversation-filter="online" type="button">
                             Online
                         </button>
-
-                    </div>
-
-
-                    <div
-                        id="conversationList"
-                        class="conversation-list"
-                        aria-live="polite"
-                    ></div>
-
-
-                    <div
-                        id="conversationsEmptyState"
-                        class="conversations-empty-state"
-                        hidden
-                    >
-
-                        <div class="empty-state-icon">
+</div>
+<div aria-live="polite" class="conversation-list" id="conversationList"></div>
+<div class="conversations-empty-state" hidden="" id="conversationsEmptyState">
+<div class="empty-state-icon">
                             💬
                         </div>
-
-                        <h3>
+<h3>
                             No conversations found
                         </h3>
-
-                        <p>
+<p>
                             Start a new conversation with another member.
                         </p>
-
-                    </div>
-
-                </aside>
-
-
-                <!-- ==============================
+</div>
+</aside>
+<!-- ==============================
                      CHAT PANEL
                 =============================== -->
-
-                <section class="chat-panel">
-
-
-                    <!-- EMPTY CHAT STATE -->
-
-                    <div
-                        id="chatEmptyState"
-                        class="chat-empty-state"
-                    >
-
-                        <div class="chat-empty-illustration">
-
-                            <div class="chat-empty-bubble chat-empty-bubble-one">
+<section class="chat-panel">
+<!-- EMPTY CHAT STATE -->
+<div class="chat-empty-state" id="chatEmptyState">
+<div class="chat-empty-illustration">
+<div class="chat-empty-bubble chat-empty-bubble-one">
                                 🐾
                             </div>
-
-                            <div class="chat-empty-bubble chat-empty-bubble-two">
+<div class="chat-empty-bubble chat-empty-bubble-two">
                                 💬
                             </div>
-
-                            <div class="chat-empty-bubble chat-empty-bubble-three">
+<div class="chat-empty-bubble chat-empty-bubble-three">
                                 ❤️
                             </div>
-
-                        </div>
-
-                        <span class="panel-eyebrow">
+</div>
+<span class="panel-eyebrow">
                             ThePetGrid Messages
                         </span>
-
-                        <h2>
+<h2>
                             Select a conversation
                         </h2>
-
-                        <p>
+<p>
                             Choose a conversation from your inbox or start a new
                             message with another member.
                         </p>
-
-                        <button
-                            id="emptyStateNewMessageButton"
-                            class="chat-empty-action-btn"
-                            type="button"
-                        >
+<button class="chat-empty-action-btn" id="emptyStateNewMessageButton" type="button">
                             Start a Conversation
                         </button>
-
-                    </div>
-
-
-                    <!-- ACTIVE CHAT -->
-
-                    <div
-                        id="activeChat"
-                        class="active-chat"
-                        hidden
-                    >
-
-
-                        <!-- CHAT HEADER -->
-
-                        <header class="chat-header">
-
-                            <div class="chat-header-left">
-
-                                <button
-                                    id="mobileOpenConversations"
-                                    class="mobile-chat-action"
-                                    type="button"
-                                    aria-label="Open conversations"
-                                >
+</div>
+<!-- ACTIVE CHAT -->
+<div class="active-chat" hidden="" id="activeChat">
+<!-- CHAT HEADER -->
+<header class="chat-header">
+<div class="chat-header-left">
+<button aria-label="Open conversations" class="mobile-chat-action" id="mobileOpenConversations" type="button">
                                     ☰
                                 </button>
-
-
-                                <button
-                                    id="chatUserButton"
-                                    class="chat-user-button"
-                                    type="button"
-                                >
-
-                                    <span class="chat-avatar-wrapper">
-
-                                        <img
-                                            id="chatUserAvatar"
-                                            class="chat-user-avatar"
-                                            src="../assets/avatar.png"
-                                            alt="Conversation user"
-                                        >
-
-                                        <span
-                                            id="chatUserPresence"
-                                            class="presence-dot"
-                                            aria-label="Offline"
-                                        ></span>
-
-                                    </span>
-
-
-                                    <span class="chat-user-identity">
-
-                                        <strong id="chatUserName">
+<button class="chat-user-button" id="chatUserButton" type="button">
+<span class="chat-avatar-wrapper">
+<img alt="Conversation user" class="chat-user-avatar" id="chatUserAvatar" src="../assets/avatar.png"/>
+<span aria-label="Offline" class="presence-dot" id="chatUserPresence"></span>
+</span>
+<span class="chat-user-identity">
+<strong id="chatUserName">
                                             User
                                         </strong>
-
-                                        <span id="chatUserStatus">
+<span id="chatUserStatus">
                                             Offline
                                         </span>
-
-                                    </span>
-
-                                </button>
-
-                            </div>
-
-
-                            <div class="chat-header-actions">
-
-                                <button
-                                    id="searchMessagesButton"
-                                    class="chat-header-action-btn"
-                                    type="button"
-                                    aria-label="Search messages"
-                                    title="Search messages"
-                                >
+</span>
+</button>
+</div>
+<div class="chat-header-actions">
+<button aria-label="Search messages" class="chat-header-action-btn" id="searchMessagesButton" title="Search messages" type="button">
                                     🔍
                                 </button>
-
-                                <button
-                                    id="mobileOpenDetails"
-                                    class="chat-header-action-btn"
-                                    type="button"
-                                    aria-label="Open user details"
-                                    title="User details"
-                                >
+<button aria-label="Open user details" class="chat-header-action-btn" id="mobileOpenDetails" title="User details" type="button">
                                     👤
                                 </button>
-
-                                <button
-                                    id="conversationOptionsButton"
-                                    class="chat-header-action-btn"
-                                    type="button"
-                                    aria-label="Conversation options"
-                                    aria-haspopup="menu"
-                                    aria-expanded="false"
-                                    title="Conversation options"
-                                >
+<button aria-expanded="false" aria-haspopup="menu" aria-label="Conversation options" class="chat-header-action-btn" id="conversationOptionsButton" title="Conversation options" type="button">
                                     ⋯
                                 </button>
-
-                            </div>
-
-
-                            <div
-                                id="conversationOptionsMenu"
-                                class="conversation-options-menu"
-                                role="menu"
-                                hidden
-                            >
-
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    data-conversation-action="pin"
-                                >
+</div>
+<div class="conversation-options-menu" hidden="" id="conversationOptionsMenu" role="menu">
+<button data-conversation-action="pin" role="menuitem" type="button">
                                     📌 Pin conversation
                                 </button>
-
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    data-conversation-action="archive"
-                                >
+<button data-conversation-action="archive" role="menuitem" type="button">
                                     📂 Archive conversation
                                 </button>
-
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    data-conversation-action="mark-unread"
-                                >
+<button data-conversation-action="mark-unread" role="menuitem" type="button">
                                     ✉️ Mark as unread
                                 </button>
-
-                                <button
-                                    class="danger-menu-action"
-                                    type="button"
-                                    role="menuitem"
-                                    data-conversation-action="delete"
-                                >
+<button class="danger-menu-action" data-conversation-action="delete" role="menuitem" type="button">
                                     🗑️ Delete conversation
                                 </button>
-
-                            </div>
-
-                        </header>
-
-
-                        <!-- MESSAGE SEARCH -->
-
-                        <div
-                            id="messageSearchBar"
-                            class="message-search-bar"
-                            hidden
-                        >
-
-                            <span aria-hidden="true">
+</div>
+</header>
+<!-- MESSAGE SEARCH -->
+<div class="message-search-bar" hidden="" id="messageSearchBar">
+<span aria-hidden="true">
                                 🔍
                             </span>
-
-                            <label
-                                class="sr-only"
-                                for="messageSearchInput"
-                            >
+<label class="sr-only" for="messageSearchInput">
                                 Search inside this conversation
                             </label>
-
-                            <input
-                                id="messageSearchInput"
-                                type="search"
-                                placeholder="Search messages..."
-                                autocomplete="off"
-                            >
-
-                            <span id="messageSearchResultCount">
+<input autocomplete="off" id="messageSearchInput" placeholder="Search messages..." type="search"/>
+<span id="messageSearchResultCount">
                                 0 results
                             </span>
-
-                            <button
-                                id="closeMessageSearch"
-                                type="button"
-                                aria-label="Close message search"
-                            >
+<button aria-label="Close message search" id="closeMessageSearch" type="button">
                                 ×
                             </button>
-
-                        </div>
-
-
-                        <!-- MESSAGES AREA -->
-
-                        <div
-                            id="messagesViewport"
-                            class="messages-viewport"
-                            tabindex="0"
-                        >
-
-                            <div
-                                id="messagesList"
-                                class="messages-list"
-                                aria-live="polite"
-                            ></div>
-
-
-                            <button
-                                id="scrollToLatestButton"
-                                class="scroll-to-latest-btn"
-                                type="button"
-                                aria-label="Scroll to latest message"
-                                hidden
-                            >
+</div>
+<!-- MESSAGES AREA -->
+<div class="messages-viewport" id="messagesViewport" tabindex="0">
+<div aria-live="polite" class="messages-list" id="messagesList"></div>
+<button aria-label="Scroll to latest message" class="scroll-to-latest-btn" hidden="" id="scrollToLatestButton" type="button">
                                 ↓
                             </button>
-
-                        </div>
-
-
-                        <!-- TYPING INDICATOR -->
-
-                        <div
-                            id="typingIndicator"
-                            class="typing-indicator"
-                            hidden
-                        >
-
-                            <img
-                                id="typingIndicatorAvatar"
-                                src="../assets/avatar.png"
-                                alt=""
-                            >
-
-                            <div class="typing-bubble">
-
-                                <span></span>
-                                <span></span>
-                                <span></span>
-
-                            </div>
-
-                            <p>
-                                <strong id="typingUserName">
+</div>
+<!-- TYPING INDICATOR -->
+<div class="typing-indicator" hidden="" id="typingIndicator">
+<img alt="" id="typingIndicatorAvatar" src="../assets/avatar.png"/>
+<div class="typing-bubble">
+<span></span>
+<span></span>
+<span></span>
+</div>
+<p>
+<strong id="typingUserName">
                                     User
                                 </strong>
                                 is typing...
                             </p>
-
-                        </div>
-
-
-                        <!-- ATTACHMENT PREVIEW -->
-
-                        <div
-                            id="attachmentPreview"
-                            class="attachment-preview"
-                            hidden
-                        >
-
-                            <div class="attachment-preview-content">
-
-                                <img
-                                    id="attachmentPreviewImage"
-                                    src=""
-                                    alt="Selected attachment preview"
-                                >
-
-                                <div>
-
-                                    <strong id="attachmentPreviewName">
+</div>
+<!-- ATTACHMENT PREVIEW -->
+<div class="attachment-preview" hidden="" id="attachmentPreview">
+<div class="attachment-preview-content">
+<img alt="Selected attachment preview" id="attachmentPreviewImage" src=""/>
+<div>
+<strong id="attachmentPreviewName">
                                         image.jpg
                                     </strong>
-
-                                    <span id="attachmentPreviewSize">
+<span id="attachmentPreviewSize">
                                         0 KB
                                     </span>
-
-                                </div>
-
-                            </div>
-
-                            <button
-                                id="removeAttachmentButton"
-                                type="button"
-                                aria-label="Remove attachment"
-                            >
+</div>
+</div>
+<button aria-label="Remove attachment" id="removeAttachmentButton" type="button">
                                 ×
                             </button>
-
-                        </div>
-
-
-                        <!-- MESSAGE COMPOSER -->
-
-                        <footer class="message-composer">
-
-                            <form
-                                id="messageComposerForm"
-                                class="message-composer-form"
-                            >
-
-                                <div class="composer-actions">
-
-                                    <button
-                                        id="emojiButton"
-                                        class="composer-icon-btn"
-                                        type="button"
-                                        aria-label="Choose emoji"
-                                        aria-expanded="false"
-                                    >
+</div>
+<!-- MESSAGE COMPOSER -->
+<footer class="message-composer">
+<form class="message-composer-form" id="messageComposerForm">
+<div class="composer-actions">
+<button aria-expanded="false" aria-label="Choose emoji" class="composer-icon-btn" id="emojiButton" type="button">
                                         😊
                                     </button>
-
-
-                                    <button
-                                        id="attachmentButton"
-                                        class="composer-icon-btn"
-                                        type="button"
-                                        aria-label="Attach image"
-                                    >
+<button aria-label="Attach image" class="composer-icon-btn" id="attachmentButton" type="button">
                                         📎
                                     </button>
-
-
-                                    <input
-                                        id="attachmentInput"
-                                        type="file"
-                                        accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.zip"
-                                        hidden
-                                    >
-
-                                    <button
-                                        id="giftButton"
-                                        class="composer-icon-btn"
-                                        type="button"
-                                        aria-label="Send a virtual gift"
-                                    >
+<input accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.zip" hidden="" id="attachmentInput" type="file"/>
+<button aria-label="Send a virtual gift" class="composer-icon-btn" id="giftButton" type="button">
                                         🎁
                                     </button>
-
-                                </div>
-
-
-                                <div class="message-input-wrapper">
-
-                                    <label
-                                        class="sr-only"
-                                        for="messageInput"
-                                    >
+</div>
+<div class="message-input-wrapper">
+<label class="sr-only" for="messageInput">
                                         Type a message
                                     </label>
-
-                                    <textarea
-                                        id="messageInput"
-                                        rows="1"
-                                        maxlength="1500"
-                                        placeholder="Type a message..."
-                                        autocomplete="off"
-                                    ></textarea>
-
-                                </div>
-
-
-                                <button
-                                    id="sendMessageButton"
-                                    class="send-message-button"
-                                    type="submit"
-                                    aria-label="Send message"
-                                    disabled
-                                >
-                                    <span class="send-message-icon">
+<textarea autocomplete="off" id="messageInput" maxlength="1500" placeholder="Type a message..." rows="1"></textarea>
+</div>
+<button aria-label="Send message" class="send-message-button" disabled="" id="sendMessageButton" type="submit">
+<span class="send-message-icon">
                                         ➤
                                     </span>
-
-                                    <span class="send-message-text">
+<span class="send-message-text">
                                         Send
                                     </span>
-                                </button>
-
-                            </form>
-
-
-                            <div class="composer-footer">
-
-                                <span>
+</button>
+</form>
+<div class="composer-footer">
+<span>
                                     Press Enter to send
                                 </span>
-
-                                <span id="messageInputCounter">
+<span id="messageInputCounter">
                                     0 / 1500
                                 </span>
-
-                            </div>
-
-
-                            <!-- EMOJI PICKER -->
-
-                            <div
-                                id="emojiPicker"
-                                class="emoji-picker"
-                                hidden
-                            >
-
-                                <div class="emoji-picker-header">
-
-                                    <strong>
+</div>
+<!-- EMOJI PICKER -->
+<div class="emoji-picker" hidden="" id="emojiPicker">
+<div class="emoji-picker-header">
+<strong>
                                         Emojis
                                     </strong>
-
-                                    <button
-                                        id="closeEmojiPicker"
-                                        type="button"
-                                        aria-label="Close emoji picker"
-                                    >
+<button aria-label="Close emoji picker" id="closeEmojiPicker" type="button">
                                         ×
                                     </button>
-
-                                </div>
-
-                                <div
-                                    id="emojiGrid"
-                                    class="emoji-grid"
-                                >
-
-                                    <button type="button" data-emoji="😀">😀</button>
-                                    <button type="button" data-emoji="😂">😂</button>
-                                    <button type="button" data-emoji="🥰">🥰</button>
-                                    <button type="button" data-emoji="😍">😍</button>
-                                    <button type="button" data-emoji="😊">😊</button>
-                                    <button type="button" data-emoji="😎">😎</button>
-                                    <button type="button" data-emoji="🥹">🥹</button>
-                                    <button type="button" data-emoji="😢">😢</button>
-                                    <button type="button" data-emoji="❤️">❤️</button>
-                                    <button type="button" data-emoji="🧡">🧡</button>
-                                    <button type="button" data-emoji="💛">💛</button>
-                                    <button type="button" data-emoji="💚">💚</button>
-                                    <button type="button" data-emoji="💙">💙</button>
-                                    <button type="button" data-emoji="💜">💜</button>
-                                    <button type="button" data-emoji="👍">👍</button>
-                                    <button type="button" data-emoji="👏">👏</button>
-                                    <button type="button" data-emoji="🙏">🙏</button>
-                                    <button type="button" data-emoji="🎉">🎉</button>
-                                    <button type="button" data-emoji="🐾">🐾</button>
-                                    <button type="button" data-emoji="🐶">🐶</button>
-                                    <button type="button" data-emoji="🐱">🐱</button>
-                                    <button type="button" data-emoji="🐰">🐰</button>
-                                    <button type="button" data-emoji="🦜">🦜</button>
-                                    <button type="button" data-emoji="🐢">🐢</button>
-
-                                </div>
-
-                            </div>
-
-                        </footer>
-
-                    </div>
-
-                </section>
-
-
-                <!-- ==============================
+</div>
+<div class="emoji-grid" id="emojiGrid">
+<button data-emoji="😀" type="button">😀</button>
+<button data-emoji="😂" type="button">😂</button>
+<button data-emoji="🥰" type="button">🥰</button>
+<button data-emoji="😍" type="button">😍</button>
+<button data-emoji="😊" type="button">😊</button>
+<button data-emoji="😎" type="button">😎</button>
+<button data-emoji="🥹" type="button">🥹</button>
+<button data-emoji="😢" type="button">😢</button>
+<button data-emoji="❤️" type="button">❤️</button>
+<button data-emoji="🧡" type="button">🧡</button>
+<button data-emoji="💛" type="button">💛</button>
+<button data-emoji="💚" type="button">💚</button>
+<button data-emoji="💙" type="button">💙</button>
+<button data-emoji="💜" type="button">💜</button>
+<button data-emoji="👍" type="button">👍</button>
+<button data-emoji="👏" type="button">👏</button>
+<button data-emoji="🙏" type="button">🙏</button>
+<button data-emoji="🎉" type="button">🎉</button>
+<button data-emoji="🐾" type="button">🐾</button>
+<button data-emoji="🐶" type="button">🐶</button>
+<button data-emoji="🐱" type="button">🐱</button>
+<button data-emoji="🐰" type="button">🐰</button>
+<button data-emoji="🦜" type="button">🦜</button>
+<button data-emoji="🐢" type="button">🐢</button>
+</div>
+</div>
+</footer>
+</div>
+</section>
+<!-- ==============================
                      USER DETAILS PANEL
                 =============================== -->
-
-                <aside
-                    id="conversationDetailsPanel"
-                    class="conversation-details-panel"
-                >
-
-                    <div class="details-panel-header">
-
-                        <div>
-
-                            <span class="panel-eyebrow">
+<aside class="conversation-details-panel" id="conversationDetailsPanel">
+<div class="details-panel-header">
+<div>
+<span class="panel-eyebrow">
                                 Conversation
                             </span>
-
-                            <h2>
+<h2>
                                 Details
                             </h2>
-
-                        </div>
-
-                        <button
-                            id="mobileCloseDetails"
-                            class="mobile-panel-close"
-                            type="button"
-                            aria-label="Close user details"
-                        >
+</div>
+<button aria-label="Close user details" class="mobile-panel-close" id="mobileCloseDetails" type="button">
                             ×
                         </button>
-
-                    </div>
-
-
-                    <div
-                        id="detailsEmptyState"
-                        class="details-empty-state"
-                    >
-
-                        <div class="empty-state-icon">
+</div>
+<div class="details-empty-state" id="detailsEmptyState">
+<div class="empty-state-icon">
                             👤
                         </div>
-
-                        <h3>
+<h3>
                             No conversation selected
                         </h3>
-
-                        <p>
+<p>
                             Select a conversation to view member information.
                         </p>
-
-                    </div>
-
-
-                    <div
-                        id="detailsContent"
-                        class="details-content"
-                        hidden
-                    >
-
-
-                        <!-- USER SUMMARY -->
-
-                        <section class="details-user-card">
-
-                            <div class="details-avatar-wrapper">
-
-                                <img
-                                    id="detailsUserAvatar"
-                                    class="details-user-avatar"
-                                    src="../assets/avatar.png"
-                                    alt="Conversation member"
-                                >
-
-                                <span
-                                    id="detailsUserPresence"
-                                    class="presence-dot"
-                                    aria-label="Offline"
-                                ></span>
-
-                            </div>
-
-                            <h3 id="detailsUserName">
+</div>
+<div class="details-content" hidden="" id="detailsContent">
+<!-- USER SUMMARY -->
+<section class="details-user-card">
+<div class="details-avatar-wrapper">
+<img alt="Conversation member" class="details-user-avatar" id="detailsUserAvatar" src="../assets/avatar.png"/>
+<span aria-label="Offline" class="presence-dot" id="detailsUserPresence"></span>
+</div>
+<h3 id="detailsUserName">
                                 User
                             </h3>
-
-                            <p id="detailsUsername">
+<p id="detailsUsername">
                                 @username
                             </p>
-
-                            <span
-                                id="detailsUserStatus"
-                                class="details-status-badge"
-                            >
+<span class="details-status-badge" id="detailsUserStatus">
                                 Offline
                             </span>
-
-                            <p
-                                id="detailsUserLocation"
-                                class="details-user-location"
-                            >
+<p class="details-user-location" id="detailsUserLocation">
                                 📍 Location unavailable
                             </p>
-
-
-                            <div class="details-user-actions">
-
-                                <a
-                                    id="viewProfileLink"
-                                    class="details-primary-action"
-                                    href="user-profile.html"
-                                >
+<div class="details-user-actions">
+<a class="details-primary-action" href="user-profile.html" id="viewProfileLink">
                                     View Profile
                                 </a>
-
-                                <button
-                                    id="detailsFollowButton"
-                                    class="details-secondary-action"
-                                    type="button"
-                                >
+<button class="details-secondary-action" id="detailsFollowButton" type="button">
                                     + Follow
                                 </button>
-
-                            </div>
-
-                        </section>
-
-
-                        <!-- CHAT SETTINGS -->
-
-                        <section class="details-section">
-
-                            <button
-                                class="details-section-toggle"
-                                type="button"
-                                aria-expanded="true"
-                                data-details-section="settings"
-                            >
-
-                                <span>
-
-                                    <span
-                                        class="details-section-icon"
-                                        aria-hidden="true"
-                                    >
+</div>
+</section>
+<!-- CHAT SETTINGS -->
+<section class="details-section">
+<button aria-expanded="true" class="details-section-toggle" data-details-section="settings" type="button">
+<span>
+<span aria-hidden="true" class="details-section-icon">
                                         ⚙️
                                     </span>
 
                                     Chat Settings
 
                                 </span>
-
-                                <span aria-hidden="true">
+<span aria-hidden="true">
                                    ⌄
                                 </span>
-
-                            </button>
-
-
-                            <div
-                                id="detailsSectionSettings"
-                                class="details-section-content"
-                            >
-
-                                <label class="details-setting-row">
-
-                                    <span>
-
-                                        <strong>
+</button>
+<div class="details-section-content" id="detailsSectionSettings">
+<label class="details-setting-row">
+<span>
+<strong>
                                             Notifications
                                         </strong>
-
-                                        <small>
+<small>
                                             Receive alerts for new messages
                                         </small>
-
-                                    </span>
-
-                                    <input
-                                        id="conversationNotificationsToggle"
-                                        type="checkbox"
-                                        checked
-                                    >
-
-                                </label>
-
-
-                                <button
-                                    id="pinConversationButton"
-                                    class="details-list-action"
-                                    type="button"
-                                >
-                                    <span>📌</span>
+</span>
+<input checked="" id="conversationNotificationsToggle" type="checkbox"/>
+</label>
+<button class="details-list-action" id="pinConversationButton" type="button">
+<span>📌</span>
                                     Pin conversation
                                 </button>
-
-
-                                <button
-                                    id="archiveConversationButton"
-                                    class="details-list-action"
-                                    type="button"
-                                >
-                                    <span>📂</span>
+<button class="details-list-action" id="archiveConversationButton" type="button">
+<span>📂</span>
                                     Archive conversation
                                 </button>
-
-                            </div>
-
-                        </section>
-
-
-                        <!-- SHARED PHOTOS -->
-
-                        <section class="details-section">
-
-                            <button
-                                class="details-section-toggle"
-                                type="button"
-                                aria-expanded="true"
-                                data-details-section="photos"
-                            >
-
-                                <span>
-
-                                    <span
-                                        class="details-section-icon"
-                                        aria-hidden="true"
-                                    >
+</div>
+</section>
+<!-- SHARED PHOTOS -->
+<section class="details-section">
+<button aria-expanded="true" class="details-section-toggle" data-details-section="photos" type="button">
+<span>
+<span aria-hidden="true" class="details-section-icon">
                                         📷
                                     </span>
 
                                     Shared Photos
 
                                 </span>
-
-                                <span
-                                    id="sharedPhotosCount"
-                                    class="details-section-count"
-                                >
+<span class="details-section-count" id="sharedPhotosCount">
                                     0
                                 </span>
-
-                            </button>
-
-
-                            <div
-                                id="detailsSectionPhotos"
-                                class="details-section-content"
-                            >
-
-                                <div
-                                    id="sharedPhotosGrid"
-                                    class="shared-photos-grid"
-                                ></div>
-
-
-                                <div
-                                    id="sharedPhotosEmpty"
-                                    class="details-mini-empty"
-                                >
+</button>
+<div class="details-section-content" id="detailsSectionPhotos">
+<div class="shared-photos-grid" id="sharedPhotosGrid"></div>
+<div class="details-mini-empty" id="sharedPhotosEmpty">
                                     No shared photos yet.
                                 </div>
-
-                            </div>
-
-                        </section>
-
-
-                        <!-- SHARED FILES -->
-
-                        <section class="details-section">
-
-                            <button
-                                class="details-section-toggle"
-                                type="button"
-                                aria-expanded="true"
-                                data-details-section="files"
-                            >
-
-                                <span>
-
-                                    <span
-                                        class="details-section-icon"
-                                        aria-hidden="true"
-                                    >
+</div>
+</section>
+<!-- SHARED FILES -->
+<section class="details-section">
+<button aria-expanded="true" class="details-section-toggle" data-details-section="files" type="button">
+<span>
+<span aria-hidden="true" class="details-section-icon">
                                         📎
                                     </span>
 
                                     Shared Files
 
                                 </span>
-
-                                <span
-                                    id="sharedFilesCount"
-                                    class="details-section-count"
-                                >
+<span class="details-section-count" id="sharedFilesCount">
                                     0
                                 </span>
-
-                            </button>
-
-
-                            <div
-                                id="detailsSectionFiles"
-                                class="details-section-content"
-                            >
-
-                                <div
-                                    id="sharedFilesList"
-                                    class="shared-files-list"
-                                ></div>
-
-
-                                <div
-                                    id="sharedFilesEmpty"
-                                    class="details-mini-empty"
-                                >
+</button>
+<div class="details-section-content" id="detailsSectionFiles">
+<div class="shared-files-list" id="sharedFilesList"></div>
+<div class="details-mini-empty" id="sharedFilesEmpty">
                                     No shared files yet.
                                 </div>
-
-                            </div>
-
-                        </section>
-
-
-                        <!-- DANGER ACTIONS -->
-
-                        <section class="details-danger-section">
-
-                            <button
-                                id="blockUserButton"
-                                class="details-danger-action"
-                                type="button"
-                            >
+</div>
+</section>
+<!-- DANGER ACTIONS -->
+<section class="details-danger-section">
+<button class="details-danger-action" id="blockUserButton" type="button">
                                 🚫 Block User
                             </button>
-
-                            <button
-                                id="deleteConversationButton"
-                                class="details-danger-action"
-                                type="button"
-                            >
+<button class="details-danger-action" id="deleteConversationButton" type="button">
                                 🗑️ Delete Conversation
                             </button>
-
-                        </section>
-
-                    </div>
-
-                </aside>
-
-            </section>
-
-        </div>
-
-    </main>
-
-
-    <!-- ==========================================
+</section>
+</div>
+</aside>
+</section>
+</div>
+</main>
+<!-- ==========================================
          NEW CONVERSATION MODAL
     =========================================== -->
-
-    <div
-        id="newConversationModal"
-        class="messages-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="newConversationModalTitle"
-        hidden
-    >
-
-        <div
-            class="messages-modal-overlay"
-            data-close-new-conversation-modal
-        ></div>
-
-
-        <section class="messages-modal-card">
-
-            <header class="messages-modal-header">
-
-                <div>
-
-                    <span class="messages-eyebrow">
+<div aria-labelledby="newConversationModalTitle" aria-modal="true" class="messages-modal" hidden="" id="newConversationModal" role="dialog">
+<div class="messages-modal-overlay" data-close-new-conversation-modal=""></div>
+<section class="messages-modal-card">
+<header class="messages-modal-header">
+<div>
+<span class="messages-eyebrow">
                         New Message
                     </span>
-
-                    <h2 id="newConversationModalTitle">
+<h2 id="newConversationModalTitle">
                         Start a Conversation
                     </h2>
-
-                    <p>
+<p>
                         Search for another ThePetGrid member.
                     </p>
-
-                </div>
-
-
-                <button
-                    id="closeNewConversationModal"
-                    class="messages-modal-close"
-                    type="button"
-                    aria-label="Close new conversation window"
-                >
+</div>
+<button aria-label="Close new conversation window" class="messages-modal-close" id="closeNewConversationModal" type="button">
                     ×
                 </button>
-
-            </header>
-
-
-            <div class="new-conversation-search-wrapper">
-
-                <span aria-hidden="true">
+</header>
+<div class="new-conversation-search-wrapper">
+<span aria-hidden="true">
                     🔍
                 </span>
-
-                <label
-                    class="sr-only"
-                    for="newConversationSearchInput"
-                >
+<label class="sr-only" for="newConversationSearchInput">
                     Search users
                 </label>
-
-                <input
-                    id="newConversationSearchInput"
-                    type="search"
-                    placeholder="Search by name or username..."
-                    autocomplete="off"
-                >
-
-                <button
-                    id="clearNewConversationSearch"
-                    type="button"
-                    aria-label="Clear user search"
-                    hidden
-                >
+<input autocomplete="off" id="newConversationSearchInput" placeholder="Search by name or username..." type="search"/>
+<button aria-label="Clear user search" hidden="" id="clearNewConversationSearch" type="button">
                     ×
                 </button>
-
-            </div>
-
-
-            <div
-                id="newConversationUsersList"
-                class="new-conversation-users-list"
-                aria-live="polite"
-            ></div>
-
-
-            <div
-                id="newConversationEmptyState"
-                class="new-conversation-empty-state"
-                hidden
-            >
-
-                <div class="empty-state-icon">
+</div>
+<div aria-live="polite" class="new-conversation-users-list" id="newConversationUsersList"></div>
+<div class="new-conversation-empty-state" hidden="" id="newConversationEmptyState">
+<div class="empty-state-icon">
                     🐾
                 </div>
-
-                <h3>
+<h3>
                     No users found
                 </h3>
-
-                <p>
+<p>
                     Try searching with another name or username.
                 </p>
-
-            </div>
-
-        </section>
-
-    </div>
-
-
-    <!-- ==========================================
+</div>
+</section>
+</div>
+<!-- ==========================================
          IMAGE VIEWER MODAL
     =========================================== -->
-
-    <div
-        id="imageViewerModal"
-        class="image-viewer-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Image preview"
-        hidden
-    >
-
-        <div
-            class="image-viewer-overlay"
-            data-close-image-viewer
-        ></div>
-
-        <button
-            id="closeImageViewer"
-            class="image-viewer-close"
-            type="button"
-            aria-label="Close image preview"
-        >
+<div aria-label="Image preview" aria-modal="true" class="image-viewer-modal" hidden="" id="imageViewerModal" role="dialog">
+<div class="image-viewer-overlay" data-close-image-viewer=""></div>
+<button aria-label="Close image preview" class="image-viewer-close" id="closeImageViewer" type="button">
             ×
         </button>
-
-        <img
-            id="imageViewerImage"
-            src=""
-            alt="Shared image preview"
-        >
-
-    </div>
-
-
-    <!-- ==========================================
+<img alt="Shared image preview" id="imageViewerImage" src=""/>
+</div>
+<!-- ==========================================
          CONFIRMATION MODAL
     =========================================== -->
-
-    <div
-        id="confirmationModal"
-        class="messages-modal confirmation-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="confirmationModalTitle"
-        hidden
-    >
-
-        <div
-            class="messages-modal-overlay"
-            data-close-confirmation-modal
-        ></div>
-
-
-        <section class="messages-modal-card confirmation-modal-card">
-
-            <div
-                id="confirmationModalIcon"
-                class="confirmation-modal-icon"
-            >
+<div aria-labelledby="confirmationModalTitle" aria-modal="true" class="messages-modal confirmation-modal" hidden="" id="confirmationModal" role="dialog">
+<div class="messages-modal-overlay" data-close-confirmation-modal=""></div>
+<section class="messages-modal-card confirmation-modal-card">
+<div class="confirmation-modal-icon" id="confirmationModalIcon">
                 ⚠️
             </div>
-
-            <h2 id="confirmationModalTitle">
+<h2 id="confirmationModalTitle">
                 Confirm Action
             </h2>
-
-            <p id="confirmationModalText">
+<p id="confirmationModalText">
                 Are you sure you want to continue?
             </p>
-
-
-            <div class="confirmation-modal-actions">
-
-                <button
-                    id="cancelConfirmationButton"
-                    class="confirmation-cancel-btn"
-                    type="button"
-                >
+<div class="confirmation-modal-actions">
+<button class="confirmation-cancel-btn" id="cancelConfirmationButton" type="button">
                     Cancel
                 </button>
-
-                <button
-                    id="confirmActionButton"
-                    class="confirmation-confirm-btn"
-                    type="button"
-                >
+<button class="confirmation-confirm-btn" id="confirmActionButton" type="button">
                     Confirm
                 </button>
-
-            </div>
-
-        </section>
-
-    </div>
-
-
-    <!-- ==========================================
+</div>
+</section>
+</div>
+<!-- ==========================================
          TOAST
     =========================================== -->
-
-    <div
-        id="messagesToast"
-        class="messages-toast"
-        role="status"
-        aria-live="polite"
-        hidden
-    >
-
-        <span id="messagesToastIcon">
+<div aria-live="polite" class="messages-toast" hidden="" id="messagesToast" role="status">
+<span id="messagesToastIcon">
             ✓
         </span>
-
-        <p id="messagesToastText">
+<p id="messagesToastText">
             Action completed.
         </p>
-
-    </div>
-
-
-
-    <!-- VIRTUAL GIFTS MODAL -->
-    <div id="giftModal" class="messages-modal" hidden>
-        <div class="messages-modal-overlay" data-close-gift-modal></div>
-        <section class="messages-modal-card gift-modal-card" role="dialog" aria-modal="true" aria-labelledby="giftModalTitle">
-            <header class="messages-modal-header">
-                <div>
-                    <span class="panel-eyebrow">ThePetGrid Gifts</span>
-                    <h2 id="giftModalTitle">Send a virtual gift</h2>
-                    <p>Demo gifts are free for now. Payments will be connected later.</p>
-                </div>
-                <button id="closeGiftModal" class="messages-modal-close" type="button" aria-label="Close gift store">×</button>
-            </header>
-            <div id="giftGrid" class="gift-grid">
-                <button type="button" class="gift-card" data-gift-code="bone" data-gift-emoji="🦴" data-gift-name="Bone"><span>🦴</span><strong>Bone</strong><small>For a very good pet</small><b>Free demo</b></button>
-                <button type="button" class="gift-card" data-gift-code="food" data-gift-emoji="🥫" data-gift-name="Pet Food"><span>🥫</span><strong>Pet Food</strong><small>A tasty surprise</small><b>Free demo</b></button>
-                <button type="button" class="gift-card" data-gift-code="toy" data-gift-emoji="🧸" data-gift-name="Toy"><span>🧸</span><strong>Toy</strong><small>Playtime gift</small><b>Free demo</b></button>
-                <button type="button" class="gift-card" data-gift-code="heart" data-gift-emoji="❤️" data-gift-name="Heart"><span>❤️</span><strong>Heart</strong><small>Send some love</small><b>Free demo</b></button>
-                <button type="button" class="gift-card" data-gift-code="flowers" data-gift-emoji="🌹" data-gift-name="Flowers"><span>🌹</span><strong>Flowers</strong><small>A caring gesture</small><b>Free demo</b></button>
-                <button type="button" class="gift-card" data-gift-code="candle" data-gift-emoji="🕯️" data-gift-name="Candle"><span>🕯️</span><strong>Candle</strong><small>For remembrance</small><b>Free demo</b></button>
-            </div>
-        </section>
-    </div>
-
-    <!-- ==========================================
+</div>
+<!-- VIRTUAL GIFTS MODAL -->
+<div class="messages-modal" hidden="" id="giftModal">
+<div class="messages-modal-overlay" data-close-gift-modal=""></div>
+<section aria-labelledby="giftModalTitle" aria-modal="true" class="messages-modal-card gift-modal-card" role="dialog">
+<header class="messages-modal-header">
+<div>
+<span class="panel-eyebrow">ThePetGrid Gifts</span>
+<h2 id="giftModalTitle">Send a virtual gift</h2>
+<p>Demo gifts are free for now. Payments will be connected later.</p>
+</div>
+<button aria-label="Close gift store" class="messages-modal-close" id="closeGiftModal" type="button">×</button>
+</header>
+<div class="gift-grid" id="giftGrid">
+<button class="gift-card" data-gift-code="bone" data-gift-emoji="🦴" data-gift-name="Bone" type="button"><span>🦴</span><strong>Bone</strong><small>For a very good pet</small><b>Free demo</b></button>
+<button class="gift-card" data-gift-code="food" data-gift-emoji="🥫" data-gift-name="Pet Food" type="button"><span>🥫</span><strong>Pet Food</strong><small>A tasty surprise</small><b>Free demo</b></button>
+<button class="gift-card" data-gift-code="toy" data-gift-emoji="🧸" data-gift-name="Toy" type="button"><span>🧸</span><strong>Toy</strong><small>Playtime gift</small><b>Free demo</b></button>
+<button class="gift-card" data-gift-code="heart" data-gift-emoji="❤️" data-gift-name="Heart" type="button"><span>❤️</span><strong>Heart</strong><small>Send some love</small><b>Free demo</b></button>
+<button class="gift-card" data-gift-code="flowers" data-gift-emoji="🌹" data-gift-name="Flowers" type="button"><span>🌹</span><strong>Flowers</strong><small>A caring gesture</small><b>Free demo</b></button>
+<button class="gift-card" data-gift-code="candle" data-gift-emoji="🕯️" data-gift-name="Candle" type="button"><span>🕯️</span><strong>Candle</strong><small>For remembrance</small><b>Free demo</b></button>
+</div>
+</section>
+</div>
+<!-- ==========================================
          MOBILE OVERLAY
     =========================================== -->
-
-    <div
-        id="mobileMessagesOverlay"
-        class="mobile-messages-overlay"
-        hidden
-    ></div>
-
-
-    <!-- ==========================================
+<div class="mobile-messages-overlay" hidden="" id="mobileMessagesOverlay"></div>
+<!-- ==========================================
          SCRIPTS
     =========================================== -->
-
-    <script src="../store/pet-store.js?v=3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/auth.js"></script>
-    <script src="../js/community-safety.js?v=1"></script>
-    <script src="../js/header.js"></script>
-    <script src="../js/messages-supabase.js?v=5.3.0"></script>
-
+<script src="../store/pet-store.js?v=3"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/auth.js"></script>
+<script src="../js/community-safety.js?v=1"></script>
+<script src="../js/header.js"></script>
+<script src="../js/messages-supabase.js?v=5.3.0"></script>
 <script src="../js/header-live.js"></script>
-</body>
-
+<script src="../js/atlas-shell.js"></script></body>
 </html>

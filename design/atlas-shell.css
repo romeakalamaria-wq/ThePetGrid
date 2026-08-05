@@ -1,0 +1,189 @@
+/* =========================================================
+   THEPETGRID — ATLAS SHELL v1
+   One World Experience: shared ambience, header and motion.
+   ========================================================= */
+:root{
+  --atlas-space:#020611;
+  --atlas-space-soft:#071126;
+  --atlas-glass:rgba(7,15,34,.72);
+  --atlas-glass-strong:rgba(5,12,28,.9);
+  --atlas-line:rgba(255,255,255,.13);
+  --atlas-cyan:#69e8ff;
+  --atlas-violet:#9d72ff;
+  --atlas-gold:#ffc65c;
+  --atlas-text:#f7f9ff;
+  --atlas-muted:#a8b6d3;
+  --atlas-shadow:0 28px 80px rgba(0,0,0,.34);
+}
+
+html{background:var(--atlas-space)}
+body.atlas-shell{
+  position:relative;
+  isolation:isolate;
+  min-height:100vh;
+  color:var(--text-primary,#222);
+  background:
+    radial-gradient(circle at 15% 12%,rgba(78,119,255,.24),transparent 31rem),
+    radial-gradient(circle at 88% 22%,rgba(157,114,255,.18),transparent 28rem),
+    radial-gradient(circle at 58% 92%,rgba(105,232,255,.12),transparent 34rem),
+    linear-gradient(145deg,#020611 0%,#071126 48%,#02040c 100%);
+  background-attachment:fixed;
+}
+body.atlas-shell::before,
+body.atlas-shell::after{
+  content:"";
+  position:fixed;
+  z-index:-2;
+  width:34rem;
+  height:34rem;
+  border-radius:50%;
+  filter:blur(75px);
+  pointer-events:none;
+  opacity:.22;
+  animation:atlasAmbientDrift 18s ease-in-out infinite alternate;
+}
+body.atlas-shell::before{left:-15rem;top:28%;background:#3157d8}
+body.atlas-shell::after{right:-17rem;bottom:-12rem;background:#663fbd;animation-delay:-8s}
+body.atlas-shell > main{position:relative;z-index:1}
+
+/* Shared Atlas header */
+body.atlas-shell .main-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  color:var(--atlas-text);
+  border-bottom:1px solid var(--atlas-line);
+  background:rgba(3,8,21,.78);
+  box-shadow:0 16px 45px rgba(0,0,0,.24);
+  backdrop-filter:blur(24px) saturate(135%);
+}
+body.atlas-shell .header-container{min-height:76px}
+body.atlas-shell .logo{color:#fff}
+body.atlas-shell .logo-icon{
+  background:linear-gradient(135deg,var(--atlas-cyan),var(--atlas-violet));
+  color:#071126;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14),0 12px 32px rgba(78,119,255,.34);
+}
+body.atlas-shell .main-nav a{color:#aebcda}
+body.atlas-shell .main-nav a:hover,
+body.atlas-shell .main-nav a.active,
+body.atlas-shell .main-nav a[aria-current="page"]{
+  color:#fff;
+  background:rgba(105,232,255,.1);
+  box-shadow:inset 0 0 0 1px rgba(105,232,255,.15);
+}
+body.atlas-shell .login-btn,
+body.atlas-shell .user-menu__toggle{
+  color:#edf3ff;
+  border-color:var(--atlas-line);
+  background:rgba(255,255,255,.07);
+}
+body.atlas-shell .add-pet-btn{
+  color:#071126;
+  background:linear-gradient(135deg,#fff,#bdefff);
+  box-shadow:0 10px 30px rgba(105,232,255,.22);
+}
+body.atlas-shell .nav-toggle{color:#fff;background:rgba(255,255,255,.09)}
+body.atlas-shell .user-menu__dropdown{
+  color:#eef4ff;
+  border-color:var(--atlas-line);
+  background:var(--atlas-glass-strong);
+  box-shadow:var(--atlas-shadow);
+  backdrop-filter:blur(22px);
+}
+body.atlas-shell .user-menu__dropdown a,
+body.atlas-shell .user-menu__dropdown button{color:#dce6fb}
+body.atlas-shell .user-menu__dropdown a:hover,
+body.atlas-shell .user-menu__dropdown button:hover{color:#fff;background:rgba(105,232,255,.1)}
+
+/* Keeps page content readable while sharing the Atlas atmosphere */
+body.atlas-shell main section,
+body.atlas-shell main article,
+body.atlas-shell main aside{--atlas-local-line:rgba(255,255,255,.12)}
+body.atlas-shell :is(.browse-hero,.community-hero,.messages-page-heading,.pet-profile-section,.hero){position:relative}
+body.atlas-shell :is(.browse-hero,.community-hero,.messages-page-heading) h1,
+body.atlas-shell .hero h1{color:#fff;text-shadow:0 8px 32px rgba(0,0,0,.32)}
+body.atlas-shell :is(.browse-hero,.community-hero,.messages-page-heading) p,
+body.atlas-shell .hero p{color:#bdc9e1}
+
+/* Persistent gateway back to Atlas */
+.atlas-return{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:1200;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:48px;
+  padding:8px 15px 8px 9px;
+  border:1px solid rgba(105,232,255,.27);
+  border-radius:999px;
+  color:#eefbff;
+  background:rgba(4,12,29,.8);
+  box-shadow:0 18px 55px rgba(0,0,0,.38),inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter:blur(22px);
+  text-decoration:none;
+  font-weight:750;
+  transition:transform .22s ease,border-color .22s ease,background .22s ease;
+}
+.atlas-return:hover{transform:translateY(-3px);border-color:rgba(105,232,255,.6);background:rgba(10,27,55,.92)}
+.atlas-return__globe{
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,#9ff4ff 0 8%,#3286da 27%,#17386f 60%,#071126 100%);
+  box-shadow:0 0 22px rgba(105,232,255,.42);
+  animation:atlasGlobePulse 3.2s ease-in-out infinite;
+}
+.atlas-return small{display:block;color:#8da5cc;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase}
+.atlas-return strong{display:block;font-size:.8rem}
+
+/* Page travel transition */
+.atlas-transition{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  background:radial-gradient(circle at center,#102653 0,#040a18 42%,#010207 78%);
+  transition:opacity .34s ease,visibility .34s ease;
+}
+.atlas-transition.is-active{opacity:1;visibility:visible;pointer-events:auto}
+.atlas-transition__content{text-align:center;color:#fff;transform:translateY(12px) scale(.98);transition:transform .38s ease}
+.atlas-transition.is-active .atlas-transition__content{transform:none}
+.atlas-transition__orbit{
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:78px;
+  height:78px;
+  margin:0 auto 20px;
+  border:1px solid rgba(105,232,255,.28);
+  border-radius:50%;
+  box-shadow:0 0 52px rgba(105,232,255,.2);
+}
+.atlas-transition__orbit::before{content:"";position:absolute;inset:-7px;border-top:2px solid var(--atlas-cyan);border-radius:50%;animation:atlasOrbit 1s linear infinite}
+.atlas-transition__orbit span{font-size:2rem}
+.atlas-transition small{display:block;color:#7f96be;font-size:.65rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+.atlas-transition strong{display:block;margin-top:7px;font-size:clamp(1.25rem,3vw,2rem);font-weight:600}
+
+@keyframes atlasAmbientDrift{to{transform:translate3d(7%,-5%,0) scale(1.08)}}
+@keyframes atlasGlobePulse{50%{transform:scale(1.06);box-shadow:0 0 34px rgba(105,232,255,.65)}}
+@keyframes atlasOrbit{to{transform:rotate(360deg)}}
+
+@media(max-width:900px){
+  body.atlas-shell .main-nav{background:rgba(3,8,21,.96);border:1px solid var(--atlas-line);border-radius:18px;padding:10px}
+  .atlas-return{right:14px;bottom:14px;padding-right:11px}
+  .atlas-return__copy{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  body.atlas-shell::before,body.atlas-shell::after,.atlas-return__globe,.atlas-transition__orbit::before{animation:none!important}
+  .atlas-transition{transition-duration:.01ms}
+}

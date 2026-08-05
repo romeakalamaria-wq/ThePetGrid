@@ -11,8 +11,8 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="../css/pet-profile.css" rel="stylesheet"/>
-</head>
-<body>
+<link href="../design/atlas-shell.css" rel="stylesheet"/></head>
+<body class="atlas-shell">
 <!-- =========================================
          HEADER
     ========================================== -->
@@ -178,16 +178,16 @@
                             </button>
 </div>
 <div class="pet-profile__secondary-actions">
-<button class="button button--secondary" type="button" data-share-current-page>📤 Share Pet</button>
-<a class="button button--danger" id="reportLostPetButton" href="lost-found.html?mode=lost">🆘 Report This Pet as Lost</a>
-<button class="button memorial-create-button" id="createPetMemorialButton" type="button" hidden>🤍 Create Memorial</button>
-<a class="button memorial-visit-button" id="visitPetMemorialButton" href="memorial.html" hidden>🕯️ Visit Memorial</a>
+<button class="button button--secondary" data-share-current-page="" type="button">📤 Share Pet</button>
+<a class="button button--danger" href="lost-found.html?mode=lost" id="reportLostPetButton">🆘 Report This Pet as Lost</a>
+<button class="button memorial-create-button" hidden="" id="createPetMemorialButton" type="button">🤍 Create Memorial</button>
+<a class="button memorial-visit-button" hidden="" href="memorial.html" id="visitPetMemorialButton">🕯️ Visit Memorial</a>
 </div>
 </div>
 </div>
 </article>
 <!-- GIFT CENTER -->
-<section class="pet-gift-center" id="petGiftCenter" aria-labelledby="petGiftCenterTitle">
+<section aria-labelledby="petGiftCenterTitle" class="pet-gift-center" id="petGiftCenter">
 <div class="pet-gift-center__header">
 <div><span class="pet-profile__eyebrow">Community kindness</span><h2 id="petGiftCenterTitle">🎁 Gift Showcase</h2><p>Send a small free gift and make this pet's day.</p><p class="pet-gift-availability" id="petGiftAvailability">One free gift per pet every 24 hours.</p></div>
 <button class="button button--primary" id="sendPetGiftButtonSecondary" type="button">Send a Gift</button>
@@ -197,47 +197,43 @@
 <h3>Gift history</h3>
 <div class="pet-gift-recent-list" id="petGiftRecentList"><p class="pet-gift-empty">Loading gifts...</p></div>
 </section>
-
 </div>
 </section>
 </main>
-
-<div class="pet-gift-modal" id="petGiftModal" hidden>
-<div class="pet-gift-modal__overlay" data-close-pet-gift-modal></div>
-<section class="pet-gift-modal__card" role="dialog" aria-modal="true" aria-labelledby="petGiftModalTitle">
-<div class="pet-gift-modal__header"><div><h2 id="petGiftModalTitle">Send a gift to this pet</h2><p>Choose one free gift. The owner will receive a notification.</p></div><button id="closePetGiftModal" type="button" aria-label="Close">×</button></div>
+<div class="pet-gift-modal" hidden="" id="petGiftModal">
+<div class="pet-gift-modal__overlay" data-close-pet-gift-modal=""></div>
+<section aria-labelledby="petGiftModalTitle" aria-modal="true" class="pet-gift-modal__card" role="dialog">
+<div class="pet-gift-modal__header"><div><h2 id="petGiftModalTitle">Send a gift to this pet</h2><p>Choose one free gift. The owner will receive a notification.</p></div><button aria-label="Close" id="closePetGiftModal" type="button">×</button></div>
 <label class="pet-gift-message-label" for="petGiftMessage">Optional message</label>
-<textarea id="petGiftMessage" maxlength="280" rows="3" placeholder="Write a kind message..."></textarea>
+<textarea id="petGiftMessage" maxlength="280" placeholder="Write a kind message..." rows="3"></textarea>
 <div class="pet-gift-picker" id="petGiftGrid">
-<button type="button" data-gift-code="bone"><span>🦴</span><strong>Bone</strong><small>For a very good pet</small><b>Free</b></button>
-<button type="button" data-gift-code="food"><span>🥫</span><strong>Pet Food</strong><small>A tasty surprise</small><b>Free</b></button>
-<button type="button" data-gift-code="toy"><span>🧸</span><strong>Toy</strong><small>For playtime</small><b>Free</b></button>
-<button type="button" data-gift-code="heart"><span>❤️</span><strong>Heart</strong><small>Send some love</small><b>Free</b></button>
+<button data-gift-code="bone" type="button"><span>🦴</span><strong>Bone</strong><small>For a very good pet</small><b>Free</b></button>
+<button data-gift-code="food" type="button"><span>🥫</span><strong>Pet Food</strong><small>A tasty surprise</small><b>Free</b></button>
+<button data-gift-code="toy" type="button"><span>🧸</span><strong>Toy</strong><small>For playtime</small><b>Free</b></button>
+<button data-gift-code="heart" type="button"><span>❤️</span><strong>Heart</strong><small>Send some love</small><b>Free</b></button>
 </div>
 </section>
 </div>
-
-<div class="pet-memorial-modal" id="petMemorialModal" hidden>
-<div class="pet-memorial-modal__overlay" data-close-pet-memorial></div>
+<div class="pet-memorial-modal" hidden="" id="petMemorialModal">
+<div class="pet-memorial-modal__overlay" data-close-pet-memorial=""></div>
 <form class="pet-memorial-modal__card" id="petMemorialForm">
-<button class="pet-memorial-modal__close" type="button" data-close-pet-memorial aria-label="Close">×</button>
+<button aria-label="Close" class="pet-memorial-modal__close" data-close-pet-memorial="" type="button">×</button>
 <span class="pet-profile__eyebrow">A gentle, permanent tribute</span>
 <h2>Create a Memorial for <span id="memorialPetName">this pet</span></h2>
 <p>This will change the profile status to <strong>In Memory</strong>. The pet and its story will not be deleted.</p>
 <div class="pet-memorial-form-grid">
-<label><span>Date of birth</span><input name="birthDate" type="date"></label>
-<label><span>Date of passing *</span><input name="passedDate" type="date" required></label>
-<label class="pet-memorial-form-wide"><span>Farewell message *</span><textarea name="farewellMessage" rows="3" maxlength="1200" required placeholder="Write a few words from the heart…"></textarea></label>
-<label class="pet-memorial-form-wide"><span>Life story</span><textarea name="story" rows="5" maxlength="4000" placeholder="Share the moments and memories you want to keep forever…"></textarea></label>
+<label><span>Date of birth</span><input name="birthDate" type="date"/></label>
+<label><span>Date of passing *</span><input name="passedDate" required="" type="date"/></label>
+<label class="pet-memorial-form-wide"><span>Farewell message *</span><textarea maxlength="1200" name="farewellMessage" placeholder="Write a few words from the heart…" required="" rows="3"></textarea></label>
+<label class="pet-memorial-form-wide"><span>Life story</span><textarea maxlength="4000" name="story" placeholder="Share the moments and memories you want to keep forever…" rows="5"></textarea></label>
 <label><span>Visibility</span><select name="visibility"><option value="public">Public memorial</option><option value="private">Private memorial</option></select></label>
-<label class="pet-memorial-notify"><input name="notifyFollowers" type="checkbox" checked><span>🤍 Notify this pet's followers</span></label>
+<label class="pet-memorial-notify"><input checked="" name="notifyFollowers" type="checkbox"/><span>🤍 Notify this pet's followers</span></label>
 </div>
-<div class="pet-memorial-confirm"><label><input name="confirmed" type="checkbox" required><span>I understand this profile will become an In Memory profile.</span></label></div>
-<p class="pet-memorial-status" id="petMemorialStatus" hidden></p>
+<div class="pet-memorial-confirm"><label><input name="confirmed" required="" type="checkbox"/><span>I understand this profile will become an In Memory profile.</span></label></div>
+<p class="pet-memorial-status" hidden="" id="petMemorialStatus"></p>
 <button class="button memorial-create-button" type="submit">Create Memorial with Love</button>
 </form>
 </div>
-
 <!-- =========================================
          FOOTER
     ========================================== -->
@@ -262,5 +258,5 @@
 <script src="../js/memorial-flow.js"></script>
 <script src="../js/pet-profile.js"></script>
 <script src="../js/header.js"></script><script src="../js/header-live.js"></script>
-</body>
+<script src="../js/atlas-shell.js"></script></body>
 </html>
