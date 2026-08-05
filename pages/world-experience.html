@@ -90,7 +90,7 @@
         <span id="petFocusType" class="pet-focus-card__type">PET</span>
       </div>
       <div class="pet-focus-card__body">
-        <p class="pet-focus-card__eyebrow">LIVING CELL</p>
+        <div class="pet-focus-card__eyebrow-row"><p class="pet-focus-card__eyebrow">LIVING CELL</p><span id="petStoryStatus" class="pet-story-status">NEW STORY</span></div>
         <h2 id="petFocusName">Pet story</h2>
         <p id="petFocusLocation">Somewhere in the world</p>
         <div class="pet-focus-card__signal"><span></span><strong id="petFocusSignal">Signal active</strong></div>
@@ -101,6 +101,15 @@
           </div>
           <p id="petFocusStory">This light is part of the living world of ThePetGrid.</p>
         </div>
+        <section class="atlas-journey" aria-label="Your Atlas journey">
+          <div class="atlas-journey__heading"><span>🌍 YOUR JOURNEY</span><button id="resetAtlasJourney" type="button">Reset</button></div>
+          <div class="atlas-journey__stats">
+            <div><strong id="journeyPetCount">0</strong><span>pets</span></div>
+            <div><strong id="journeyCountryCount">0</strong><span>countries</span></div>
+            <div><strong id="journeyCityCount">0</strong><span>cities</span></div>
+          </div>
+          <p id="journeyMilestone" class="atlas-journey__milestone">Your journey begins with this light.</p>
+        </section>
         <div class="pet-focus-card__actions">
           <a id="petFocusLink" href="pets.html">Open profile <span>→</span></a>
           <button id="exploreNextStory" type="button">Explore another story <span>↗</span></button>
