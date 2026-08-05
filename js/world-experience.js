@@ -8,7 +8,7 @@
     countryCount: $("#worldCountryCount"), cityCount: $("#worldCityCount"), activePlace: $("#activePlace"), explore: $("#exploreWorld"),
     reset: $("#returnHome"), motion: $("#toggleMotion"), lite: $("#toggleLite"), sound: $("#toggleSound"), toast: $("#worldToast"),
     quality: $("#qualityBadge"), fps: $("#fpsReadout"), clock: $("#worldClock"), liveSignal: $("#liveSignal"), liveSignalText: $("#liveSignalText"),
-    modes: [...document.querySelectorAll("[data-world-mode]")], focusCard:$("#petFocusCard"), focusImage:$("#petFocusImage"), focusType:$("#petFocusType"), focusName:$("#petFocusName"), focusLocation:$("#petFocusLocation"), focusSignal:$("#petFocusSignal"), focusLink:$("#petFocusLink"), focusFlag:$("#petFocusFlag"), focusTime:$("#petFocusTime"), focusStory:$("#petFocusStory"), exploreNext:$("#exploreNextStory"), storyStatus:$("#petStoryStatus"), journeyPets:$("#journeyPetCount"), journeyCountries:$("#journeyCountryCount"), journeyCities:$("#journeyCityCount"), journeyMilestone:$("#journeyMilestone"), resetJourney:$("#resetAtlasJourney"), closeFocus:$("#closePetFocus")
+    modes: [...document.querySelectorAll("[data-world-mode]")], focusCard:$("#petFocusCard"), focusImage:$("#petFocusImage"), focusType:$("#petFocusType"), focusName:$("#petFocusName"), focusLocation:$("#petFocusLocation"), focusSignal:$("#petFocusSignal"), focusLink:$("#petFocusLink"), focusFlag:$("#petFocusFlag"), focusTime:$("#petFocusTime"), focusStory:$("#petFocusStory"), exploreNext:$("#exploreNextStory"), closeFocus:$("#closePetFocus"), eventsPanel:$("#worldEventsPanel"), eventsList:$("#worldEventsList"), eventsEmpty:$("#worldEventsEmpty"), eventsToggle:$("#toggleWorldEvents")
   };
 
   const DEMO_PETS = [
@@ -22,35 +22,8 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),journey:null,achievementKeys:new Set()
+    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false
   };
-
-  const JOURNEY_STORAGE_KEY = "tpg:atlas-journey:v1";
-  const ACHIEVEMENTS = [
-    {key:"first-light",test:j=>j.pets.length>=1,label:"First Light",message:"You discovered your first living story."},
-    {key:"story-hunter",test:j=>j.pets.length>=10,label:"Story Hunter",message:"You explored 10 pet stories."},
-    {key:"city-hopper",test:j=>j.cities.length>=5,label:"City Hopper",message:"You reached 5 cities."},
-    {key:"world-explorer",test:j=>j.countries.length>=5,label:"World Explorer",message:"You explored 5 countries."}
-  ];
-
-  function emptyJourney(){return {pets:[],countries:[],cities:[],firstVisit:new Date().toISOString(),lastVisit:new Date().toISOString(),achievements:[]}}
-  function loadJourney(){
-    try{const saved=JSON.parse(localStorage.getItem(JOURNEY_STORAGE_KEY)||"null");const base=emptyJourney();state.journey={...base,...(saved||{}),pets:Array.isArray(saved?.pets)?saved.pets:[],countries:Array.isArray(saved?.countries)?saved.countries:[],cities:Array.isArray(saved?.cities)?saved.cities:[],achievements:Array.isArray(saved?.achievements)?saved.achievements:[]};}
-    catch{state.journey=emptyJourney()}
-    state.exploredPets=new Set(state.journey.pets);state.exploredCountries=new Set(state.journey.countries);state.exploredCities=new Set(state.journey.cities);state.achievementKeys=new Set(state.journey.achievements);
-  }
-  function saveJourney(){if(!state.journey)return;state.journey.pets=[...state.exploredPets];state.journey.countries=[...state.exploredCountries];state.journey.cities=[...state.exploredCities];state.journey.achievements=[...state.achievementKeys];state.journey.lastVisit=new Date().toISOString();localStorage.setItem(JOURNEY_STORAGE_KEY,JSON.stringify(state.journey))}
-  function renderJourney(){
-    if(ui.journeyPets)ui.journeyPets.textContent=state.exploredPets.size;
-    if(ui.journeyCountries)ui.journeyCountries.textContent=state.exploredCountries.size;
-    if(ui.journeyCities)ui.journeyCities.textContent=state.exploredCities.size;
-    if(ui.journeyMilestone){const p=state.exploredPets.size,c=state.exploredCountries.size,ci=state.exploredCities.size;ui.journeyMilestone.textContent=p<2?"Your journey begins with this light.":c<3?`${p} stories discovered across ${ci} ${ci===1?"city":"cities"}.`:`You have explored ${p} stories in ${c} countries.`}
-  }
-  function checkAchievements(){
-    for(const achievement of ACHIEVEMENTS){if(!state.achievementKeys.has(achievement.key)&&achievement.test(state.journey)){state.achievementKeys.add(achievement.key);toast(`🏆 ${achievement.label} — ${achievement.message}`);saveJourney();break}}
-  }
-  function resetJourney(){if(!confirm("Reset your Atlas journey progress?"))return;state.journey=emptyJourney();state.exploredPets.clear();state.exploredCountries.clear();state.exploredCities.clear();state.achievementKeys.clear();saveJourney();renderJourney();toast("Atlas journey reset") }
-
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
   const escapeHtml = (value) => String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -104,15 +77,74 @@
     const lines=[`${name} is one of the living lights glowing from ${place}.`,`${name}'s story has found a place on the world grid in ${place}.`,`A new connection begins with ${name}, shining from ${place}.`];
     let hash=0;for(const char of petKey(pet))hash=((hash<<5)-hash)+char.charCodeAt(0)|0;return lines[Math.abs(hash)%lines.length];
   }
+  const EVENT_META = Object.freeze({
+    new_pet:{icon:"🌟",label:"New pet",tone:660,color:"#69e8ff"},
+    adoption:{icon:"❤️",label:"Adoption",tone:520,color:"#72ffb0"},
+    lost:{icon:"🆘",label:"Lost alert",tone:360,color:"#ff526e"},
+    birthday:{icon:"🎂",label:"Birthday",tone:740,color:"#ffc65c"},
+    memorial:{icon:"🕊️",label:"Memorial",tone:420,color:"#e7e8ff"},
+    milestone:{icon:"🏆",label:"Milestone",tone:600,color:"#a77cff"}
+  });
+  function createWorldEvent(type,pet,options={}){
+    const meta=EVENT_META[type]||EVENT_META.new_pet;
+    return {
+      id:options.id||`${type}-${petKey(pet)}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+      type,pet:pet||null,city:options.city||pet?.city||"",country:options.country||pet?.country||"",
+      createdAt:options.createdAt||pet?.created_at||new Date().toISOString(),priority:options.priority||((type==="lost"||type==="adoption")?"high":"normal"),
+      message:options.message||eventMessage(type,pet),icon:meta.icon,label:meta.label,color:meta.color,tone:meta.tone
+    };
+  }
+  function eventMessage(type,pet){
+    const name=pet?.name||"A pet",place=pet?.city||pet?.country||"the world";
+    if(type==="adoption")return `${name} found a new home in ${place}.`;
+    if(type==="lost")return `${name} was reported missing in ${place}.`;
+    if(type==="birthday")return `${name} is celebrating today in ${place}.`;
+    if(type==="memorial")return `${name}'s light shines from ${place}.`;
+    if(type==="milestone")return `${place} reached a new community milestone.`;
+    return `${name} joined the living world from ${place}.`;
+  }
+  function seedWorldEvents(){
+    const recent=state.pets.slice(0,6).map((pet,index)=>createWorldEvent(index===1&&pet.is_lost?"lost":index===2&&pet.is_memorial?"memorial":"new_pet",pet,{createdAt:pet.created_at||new Date(Date.now()-index*18*60000).toISOString()}));
+    state.events=recent;
+    renderWorldEvents();
+  }
+  function pushWorldEvent(event,{announce=true}={}){
+    state.events=[event,...state.events.filter(item=>item.id!==event.id)].slice(0,10);
+    renderWorldEvents();
+    if(announce){
+      ui.liveSignalText.textContent=event.message;ui.liveSignal.hidden=false;clearTimeout(pushWorldEvent.hide);pushWorldEvent.hide=setTimeout(()=>ui.liveSignal.hidden=true,5200);
+      playTone(event.tone,.11);
+    }
+  }
+  function eventAge(value){
+    const time=new Date(value).getTime();if(!Number.isFinite(time))return "Now";
+    const diff=Math.max(0,Date.now()-time),mins=Math.floor(diff/60000),hours=Math.floor(diff/3600000),days=Math.floor(diff/86400000);
+    if(mins<1)return "Now";if(mins<60)return `${mins}m`;if(hours<24)return `${hours}h`;if(days<7)return `${days}d`;return new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short"}).format(new Date(time));
+  }
+  function renderWorldEvents(){
+    if(!ui.eventsList)return;
+    ui.eventsEmpty.hidden=state.events.length>0;
+    ui.eventsList.innerHTML=state.events.map(event=>`<button class="world-event" type="button" data-world-event-id="${escapeHtml(event.id)}" data-priority="${escapeHtml(event.priority)}" style="--event-color:${escapeHtml(event.color)}"><span class="world-event__icon">${event.icon}</span><span class="world-event__content"><strong>${escapeHtml(event.label)}</strong><span>${escapeHtml(event.message)}</span></span><time>${escapeHtml(eventAge(event.createdAt))}</time></button>`).join("");
+  }
+  function focusWorldEvent(event){
+    if(!event)return;
+    const pet=event.pet;
+    if(pet&&Number.isFinite(Number(pet.latitude))&&Number.isFinite(Number(pet.longitude))){
+      state.globe?.pointOfView({lat:Number(pet.latitude),lng:Number(pet.longitude),altitude:.68},1450);showPetFocus(pet);refreshLivingCells();
+    }
+    toast(event.message);playTone(event.tone,.1);
+  }
+  function toggleWorldEvents(){
+    state.eventsCollapsed=!state.eventsCollapsed;ui.eventsPanel?.classList.toggle("is-collapsed",state.eventsCollapsed);ui.eventsToggle?.setAttribute("aria-expanded",String(!state.eventsCollapsed));if(ui.eventsToggle)ui.eventsToggle.textContent=state.eventsCollapsed?"+":"−";
+  }
+
   function rememberStory(pet){
-    const key=petKey(pet),wasVisited=state.exploredPets.has(key);state.exploredPets.add(key);if(pet?.country)state.exploredCountries.add(pet.country);if(pet?.city)state.exploredCities.add(`${pet.city}|${pet.country||""}`);
+    const key=petKey(pet);state.exploredPets.add(key);if(pet?.country)state.exploredCountries.add(pet.country);if(pet?.city)state.exploredCities.add(`${pet.city}|${pet.country||""}`);
     state.storyHistory=state.storyHistory.filter(item=>petKey(item)!==key);state.storyHistory.unshift(pet);if(state.storyHistory.length>20)state.storyHistory.length=20;
-    if(ui.storyStatus){ui.storyStatus.textContent=wasVisited?"VISITED":"NEW STORY";ui.storyStatus.classList.toggle("is-visited",wasVisited)}
-    if(!state.journey)state.journey=emptyJourney();saveJourney();renderJourney();checkAchievements();
   }
   function nextStoryPet(){
     if(!state.pets.length)return null;const current=state.selectedPet;const candidates=state.pets.filter(pet=>pet!==current);if(!candidates.length)return current||state.pets[0];
-    const ranked=candidates.map(pet=>{let score=Math.random()*2;const key=petKey(pet),cityKey=`${pet.city||""}|${pet.country||""}`;if(!state.exploredPets.has(key))score+=12;if(pet.country&&!state.exploredCountries.has(pet.country))score+=8;if(pet.city&&!state.exploredCities.has(cityKey))score+=6;if(current?.type&&pet.type!==current.type)score+=3;if(current?.city&&pet.city===current.city)score+=2;if(current?.country&&pet.country===current.country)score+=1;return {pet,score}}).sort((a,b)=>b.score-a.score);
+    const ranked=candidates.map(pet=>{let score=Math.random()*2;if(current?.city&&pet.city===current.city)score+=8;if(current?.country&&pet.country===current.country)score+=5;if(current?.type&&pet.type===current.type)score+=3;if(!state.exploredPets.has(petKey(pet)))score+=4;return {pet,score}}).sort((a,b)=>b.score-a.score);
     return ranked[0].pet;
   }
   function ringColor(point){const color=pointColor(point);return t=>color.startsWith("rgba")?color:`${color}${Math.max(0,Math.round((1-t)*210)).toString(16).padStart(2,"0")}`}
@@ -175,7 +207,7 @@
   function subscribeRealtime(){
     const client=window.ThePetGridSupabase?.client;if(!client?.channel)return;
     state.realtime=client.channel("atlas-living-world").on("postgres_changes",{event:"INSERT",schema:"public",table:"pets"},payload=>{
-      const pet=normalizePet(payload.new);if(!Number.isFinite(pet.latitude)||!Number.isFinite(pet.longitude))return;state.pets.unshift(pet);state.globe?.pointsData([...state.pets]);refreshLivingCells();updateStats();ui.liveSignalText.textContent=`${pet.name||"A new pet"} joined from ${pet.city||pet.country||"the world"}`;ui.liveSignal.hidden=false;setTimeout(()=>ui.liveSignal.hidden=true,6000);playTone(660,.12)
+      const pet=normalizePet(payload.new);if(!Number.isFinite(pet.latitude)||!Number.isFinite(pet.longitude))return;state.pets.unshift(pet);state.globe?.pointsData([...state.pets]);refreshLivingCells();updateStats();pushWorldEvent(createWorldEvent("new_pet",pet));
     }).subscribe();
   }
 
@@ -191,12 +223,12 @@
     ui.motion.addEventListener("click",()=>{state.rotating=!state.rotating;if(state.globe)state.globe.controls().autoRotate=state.rotating;ui.motion.setAttribute("aria-pressed",String(!state.rotating));ui.motion.textContent=state.rotating?"Pause motion":"Resume motion"});
     ui.lite.addEventListener("click",()=>{setQuality(state.lite?"high":"lite",true);ui.lite.setAttribute("aria-pressed",String(state.lite));ui.lite.textContent=state.lite?"Full effects":"Lite mode"});
     ui.sound.addEventListener("click",()=>{state.sound=!state.sound;ui.sound.setAttribute("aria-pressed",String(state.sound));ui.sound.textContent=state.sound?"Sound on":"Sound off";if(state.sound){ensureAudio()?.resume();playTone(440,.12)}toast(state.sound?"Ambient interaction sound enabled":"Sound disabled")});
-    ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.exploreNext?.addEventListener("click",exploreNextStory);ui.resetJourney?.addEventListener("click",resetJourney);document.addEventListener("keydown",event=>{if(event.key==="Escape")hidePetFocus();if(event.key.toLowerCase()==="n"&&!ui.focusCard?.hidden)exploreNextStory()});
+    ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.exploreNext?.addEventListener("click",exploreNextStory);ui.eventsToggle?.addEventListener("click",toggleWorldEvents);ui.eventsList?.addEventListener("click",event=>{const button=event.target.closest("[data-world-event-id]");if(!button)return;focusWorldEvent(state.events.find(item=>item.id===button.dataset.worldEventId));});document.addEventListener("keydown",event=>{if(event.key==="Escape")hidePetFocus();if(event.key.toLowerCase()==="n"&&!ui.focusCard?.hidden)exploreNextStory()});
   }
 
   async function init(){
     try{
-      setBoot(12,"Calibrating Atlas Engine…");loadJourney();renderJourney();state.quality=detectQuality();setQuality(state.quality);initStars();await sleep(300);setBoot(34,"Igniting the sun…");await sleep(250);setBoot(52,"Finding living stories…");state.pets=(await loadPets()).map(normalizePet);state.rings=makeRings(state.pets);await sleep(220);setBoot(72,"Forming clouds and atmosphere…");makeGlobe();updateStats();updateClock();state.clockTimer=setInterval(updateClock,30000);bind();subscribeRealtime();pulseRandomPet();monitorPerformance();await sleep(650);setBoot(100,"The planet is alive.");ui.app.hidden=false;await sleep(650);ui.boot.classList.add("is-leaving");setTimeout(()=>ui.boot.remove(),1100)
+      setBoot(12,"Calibrating Atlas Engine…");state.quality=detectQuality();setQuality(state.quality);initStars();await sleep(300);setBoot(34,"Igniting the sun…");await sleep(250);setBoot(52,"Finding living stories…");state.pets=(await loadPets()).map(normalizePet);state.rings=makeRings(state.pets);await sleep(220);setBoot(72,"Forming clouds and atmosphere…");makeGlobe();updateStats();updateClock();seedWorldEvents();state.clockTimer=setInterval(()=>{updateClock();renderWorldEvents()},30000);bind();subscribeRealtime();pulseRandomPet();monitorPerformance();await sleep(650);setBoot(100,"The planet is alive.");ui.app.hidden=false;await sleep(650);ui.boot.classList.add("is-leaving");setTimeout(()=>ui.boot.remove(),1100)
     }catch(error){console.error("ThePetGrid World Experience:",error);ui.app.hidden=false;ui.fallback.hidden=false;ui.boot.classList.add("is-leaving")}
   }
   init();
