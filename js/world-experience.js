@@ -22,7 +22,7 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,selectedCountry:null,countryCache:new Map(),countryLabels:[]
+    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,pulseHideTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,selectedCountry:null,countryCache:new Map(),countryLabels:[],activePulsePet:null,userInteractingUntil:0
   };
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
@@ -83,14 +83,18 @@
     if(state.globe)state.globe.labelsData(state.countryLabels);
   }
   function selectedCountryColor(point){
+    if(point===state.activePulsePet)return "#ffffff";
     if(state.selectedCountry&&countryKey(point.country)!==state.selectedCountry)return "rgba(255,255,255,.025)";
     return pointColor(point);
   }
   function selectedCountryAltitude(point){
-    const base=pointAltitude(point);return state.selectedCountry&&countryKey(point.country)===state.selectedCountry?base+.08:base;
+    const base=pointAltitude(point);
+    if(point===state.activePulsePet)return base+(state.lite?.1:.18);
+    return state.selectedCountry&&countryKey(point.country)===state.selectedCountry?base+.08:base;
   }
   function selectedCountryRadius(point){
     const normal=state.lite?.2:state.quality==="ultra"?.38:.32;
+    if(point===state.activePulsePet)return state.lite?.52:.78;
     if(point===state.selectedPet)return state.lite?.42:.62;
     return state.selectedCountry&&countryKey(point.country)===state.selectedCountry?normal*1.65:normal;
   }
@@ -159,7 +163,53 @@
   function updateStats(){const countries=new Set(state.pets.map(p=>p.country).filter(Boolean));const cities=new Set(state.pets.map(p=>`${p.city}|${p.country}`).filter(v=>!v.startsWith("|")));countUp(ui.petCount,state.pets.length);countUp(ui.countryCount,countries.size);countUp(ui.cityCount,cities.size);const active=[...cities].slice(0,3).map(v=>v.split("|")[0]).filter(Boolean);if(active.length)ui.activePlace.textContent=active.join(" · ")}
   function updateClock(){ui.clock.textContent=new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"UTC",hour12:false}).format(new Date())+" UTC"}
 
-  function pulseRandomPet(){clearInterval(state.pulseTimer);state.pulseTimer=setInterval(()=>{if(!state.pets.length||document.hidden)return;const pet=state.pets[Math.floor(Math.random()*state.pets.length)];ui.liveSignalText.textContent=`${pet.name||"A pet"} is glowing from ${pet.city||pet.country||"the world"}`;ui.liveSignal.hidden=false;clearTimeout(pulseRandomPet.hide);pulseRandomPet.hide=setTimeout(()=>ui.liveSignal.hidden=true,4200)},8500)}
+  function isUserInteracting(){return Date.now()<state.userInteractingUntil||Boolean(state.selectedPet)||Boolean(state.selectedCountry)}
+  function markUserInteraction(){state.userInteractingUntil=Date.now()+9000}
+  function clearActivePulse(){
+    state.activePulsePet=null;
+    if(ui.liveSignal)ui.liveSignal.hidden=true;
+    if(state.globe){
+      state.globe.pointColor(selectedCountryColor).pointAltitude(selectedCountryAltitude).pointRadius(selectedCountryRadius);
+      refreshLivingCells();
+    }
+  }
+  function activateLivingPulse(pet){
+    if(!pet||!state.globe)return;
+    clearTimeout(state.pulseHideTimer);
+    state.activePulsePet=pet;
+    const pulseRing={...pet,ringMax:state.lite?2.4:4.3,ringSpeed:state.lite?.75:1.15,ringPeriod:520};
+    state.globe
+      .pointColor(selectedCountryColor)
+      .pointAltitude(selectedCountryAltitude)
+      .pointRadius(selectedCountryRadius)
+      .ringsData([...state.rings,pulseRing]);
+    const location=pet.city||pet.country||"the world";
+    const messages=[
+      `${pet.name||"A pet"} is glowing from ${location}`,
+      `${pet.name||"A pet"} became active in ${location}`,
+      `A living story awakened in ${location}`
+    ];
+    ui.liveSignalText.textContent=messages[Math.floor(Math.random()*messages.length)];
+    ui.liveSignal.hidden=false;
+    playTone(610,.08);
+    if(!isUserInteracting()&&state.rotating){
+      state.globe.pointOfView({lat:pet.latitude,lng:pet.longitude,altitude:1.45},1250);
+    }
+    state.pulseHideTimer=setTimeout(clearActivePulse,4600);
+  }
+  function scheduleLivingPulse(){
+    clearTimeout(state.pulseTimer);
+    const delay=8000+Math.round(Math.random()*4000);
+    state.pulseTimer=setTimeout(()=>{
+      if(state.pets.length&&!document.hidden){
+        const candidates=state.selectedCountry?state.pets.filter(p=>countryKey(p.country)===state.selectedCountry):state.pets;
+        const pool=candidates.length?candidates:state.pets;
+        activateLivingPulse(pool[Math.floor(Math.random()*pool.length)]);
+      }
+      scheduleLivingPulse();
+    },delay);
+  }
+  function pulseRandomPet(){scheduleLivingPulse()}
   function subscribeRealtime(){
     const client=window.ThePetGridSupabase?.client;if(!client?.channel)return;
     state.realtime=client.channel("atlas-living-world").on("postgres_changes",{event:"INSERT",schema:"public",table:"pets"},payload=>{
@@ -179,7 +229,9 @@
     ui.motion.addEventListener("click",()=>{state.rotating=!state.rotating;if(state.globe)state.globe.controls().autoRotate=state.rotating;ui.motion.setAttribute("aria-pressed",String(!state.rotating));ui.motion.textContent=state.rotating?"Pause motion":"Resume motion"});
     ui.lite.addEventListener("click",()=>{setQuality(state.lite?"high":"lite",true);ui.lite.setAttribute("aria-pressed",String(state.lite));ui.lite.textContent=state.lite?"Full effects":"Lite mode"});
     ui.sound.addEventListener("click",()=>{state.sound=!state.sound;ui.sound.setAttribute("aria-pressed",String(state.sound));ui.sound.textContent=state.sound?"Sound on":"Sound off";if(state.sound){ensureAudio()?.resume();playTone(440,.12)}toast(state.sound?"Ambient interaction sound enabled":"Sound disabled")});
-    ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.closeCountryPanel?.addEventListener("click",()=>closeCountry());ui.backToWorld?.addEventListener("click",()=>closeCountry({resetView:true}));ui.countryTopCities?.addEventListener("click",event=>{const button=event.target.closest("[data-country-city]");if(button&&state.selectedCountry)focusCity(button.dataset.countryCity,state.selectedCountry)});document.addEventListener("keydown",event=>{if(event.key==="Escape"){hidePetFocus();closeCountry()}});
+    ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.closeCountryPanel?.addEventListener("click",()=>closeCountry());ui.backToWorld?.addEventListener("click",()=>closeCountry({resetView:true}));ui.countryTopCities?.addEventListener("click",event=>{const button=event.target.closest("[data-country-city]");if(button&&state.selectedCountry)focusCity(button.dataset.countryCity,state.selectedCountry)});
+    ["pointerdown","wheel","touchstart"].forEach(eventName=>ui.stage?.addEventListener(eventName,markUserInteraction,{passive:true}));
+    document.addEventListener("keydown",event=>{markUserInteraction();if(event.key==="Escape"){hidePetFocus();closeCountry()}});
   }
 
   async function init(){
