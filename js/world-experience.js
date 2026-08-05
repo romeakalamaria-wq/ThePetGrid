@@ -8,7 +8,7 @@
     countryCount: $("#worldCountryCount"), cityCount: $("#worldCityCount"), activePlace: $("#activePlace"), explore: $("#exploreWorld"),
     reset: $("#returnHome"), motion: $("#toggleMotion"), lite: $("#toggleLite"), sound: $("#toggleSound"), toast: $("#worldToast"),
     quality: $("#qualityBadge"), fps: $("#fpsReadout"), clock: $("#worldClock"), liveSignal: $("#liveSignal"), liveSignalText: $("#liveSignalText"),
-    modes: [...document.querySelectorAll("[data-world-mode]")], focusCard:$("#petFocusCard"), focusImage:$("#petFocusImage"), focusType:$("#petFocusType"), focusName:$("#petFocusName"), focusLocation:$("#petFocusLocation"), focusSignal:$("#petFocusSignal"), focusLink:$("#petFocusLink"), closeFocus:$("#closePetFocus"), countryPanel:$("#countryPanel"), countryFlag:$("#countryFlag"), countryName:$("#countryName"), countrySubtitle:$("#countrySubtitle"), countryPetCount:$("#countryPetCount"), countryCityCount:$("#countryCityCount"), countryTypeCount:$("#countryTypeCount"), countryActiveCount:$("#countryActiveCount"), countryTypeSummary:$("#countryTypeSummary"), countryTopTypes:$("#countryTopTypes"), countryTopCities:$("#countryTopCities"), countryLatestPets:$("#countryLatestPets"), browseCountryPets:$("#browseCountryPets"), closeCountryPanel:$("#closeCountryPanel"), backToWorld:$("#backToWorld")
+    modes: [...document.querySelectorAll("[data-world-mode]")], focusCard:$("#petFocusCard"), focusImage:$("#petFocusImage"), focusType:$("#petFocusType"), focusName:$("#petFocusName"), focusLocation:$("#petFocusLocation"), focusSignal:$("#petFocusSignal"), focusLink:$("#petFocusLink"), focusFlag:$("#petFocusFlag"), focusTime:$("#petFocusTime"), focusStory:$("#petFocusStory"), exploreNext:$("#exploreNextStory"), closeFocus:$("#closePetFocus")
   };
 
   const DEMO_PETS = [
@@ -22,7 +22,7 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,pulseHideTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,selectedCountry:null,countryCache:new Map(),countryLabels:[],activePulsePet:null,userInteractingUntil:0
+    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set()
   };
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
@@ -38,7 +38,7 @@
   }
   function setQuality(level,announce=false){
     state.quality=level;state.lite=level==="lite";ui.app.dataset.quality=level;ui.app.classList.toggle("is-lite",state.lite);ui.quality.textContent=level.toUpperCase();
-    if(state.globe){state.globe.pointRadius(selectedCountryRadius).showAtmosphere(!state.lite);if(state.clouds)state.clouds.visible=!state.lite}
+    if(state.globe){state.globe.pointRadius(state.lite?.2:level==="ultra"?.38:.32).showAtmosphere(!state.lite);if(state.clouds)state.clouds.visible=!state.lite}
     if(announce)toast(`${level[0].toUpperCase()+level.slice(1)} rendering enabled`);
   }
 
@@ -58,73 +58,53 @@
   function normalizePet(pet){return {...pet,latitude:Number(pet.latitude),longitude:Number(pet.longitude),is_lost:Boolean(pet.is_lost),is_memorial:Boolean(pet.is_memorial)}}
   function profileHref(pet){return pet?.id?`pet.html?id=${encodeURIComponent(pet.id)}`:"pets.html"}
   function petImage(pet){return pet?.image_url||pet?.image||"../assets/avatar.png"}
+  function petKey(pet){return String(pet?.id ?? ([pet?.name,pet?.city,pet?.country].filter(Boolean).join("|") || Math.random()))}
+  function countryFlag(country){
+    const codes={Greece:"GR",Italy:"IT",Japan:"JP",Australia:"AU",USA:"US","United States":"US","United Kingdom":"GB",Brazil:"BR",France:"FR",Canada:"CA",UAE:"AE","United Arab Emirates":"AE","South Africa":"ZA",Philippines:"PH",Germany:"DE",Spain:"ES",Portugal:"PT",Cyprus:"CY",Turkey:"TR",India:"IN",China:"CN",Mexico:"MX",Argentina:"AR",Netherlands:"NL",Belgium:"BE",Sweden:"SE",Norway:"NO",Finland:"FI",Denmark:"DK",Poland:"PL",Austria:"AT",Switzerland:"CH",Romania:"RO",Bulgaria:"BG",Serbia:"RS",Croatia:"HR",Albania:"AL",Egypt:"EG",Morocco:"MA",Ireland:"IE","New Zealand":"NZ",Singapore:"SG",Malaysia:"MY",Thailand:"TH",Vietnam:"VN","South Korea":"KR",Indonesia:"ID"};
+    const code=codes[String(country||"").trim()];
+    return code?[...code].map(letter=>String.fromCodePoint(127397+letter.charCodeAt(0))).join(""):"🌍";
+  }
+  function relativeTime(value){
+    if(!value)return "A living story";
+    const time=new Date(value).getTime();if(!Number.isFinite(time))return "A living story";
+    const diff=Math.max(0,Date.now()-time),minutes=Math.floor(diff/60000),hours=Math.floor(diff/3600000),days=Math.floor(diff/86400000);
+    if(minutes<1)return "Joined just now";if(minutes<60)return `Joined ${minutes} min ago`;if(hours<24)return `Joined ${hours} hr${hours===1?"":"s"} ago`;if(days===1)return "Joined yesterday";if(days<7)return `Joined ${days} days ago`;return `Joined ${new Intl.DateTimeFormat("en-GB",{dateStyle:"medium"}).format(new Date(time))}`;
+  }
+  function storyText(pet){
+    const name=pet?.name||"This pet",place=pet?.city||pet?.country||"the world";
+    if(pet?.is_lost)return `${name}'s signal is being shared from ${place}. Every extra pair of eyes can help this story find its way home.`;
+    if(pet?.is_memorial)return `${name}'s light continues to glow from ${place}, keeping a loved story present in the living world.`;
+    const lines=[`${name} is one of the living lights glowing from ${place}.`,`${name}'s story has found a place on the world grid in ${place}.`,`A new connection begins with ${name}, shining from ${place}.`];
+    let hash=0;for(const char of petKey(pet))hash=((hash<<5)-hash)+char.charCodeAt(0)|0;return lines[Math.abs(hash)%lines.length];
+  }
+  function rememberStory(pet){
+    const key=petKey(pet);state.exploredPets.add(key);if(pet?.country)state.exploredCountries.add(pet.country);if(pet?.city)state.exploredCities.add(`${pet.city}|${pet.country||""}`);
+    state.storyHistory=state.storyHistory.filter(item=>petKey(item)!==key);state.storyHistory.unshift(pet);if(state.storyHistory.length>20)state.storyHistory.length=20;
+  }
+  function nextStoryPet(){
+    if(!state.pets.length)return null;const current=state.selectedPet;const candidates=state.pets.filter(pet=>pet!==current);if(!candidates.length)return current||state.pets[0];
+    const ranked=candidates.map(pet=>{let score=Math.random()*2;if(current?.city&&pet.city===current.city)score+=8;if(current?.country&&pet.country===current.country)score+=5;if(current?.type&&pet.type===current.type)score+=3;if(!state.exploredPets.has(petKey(pet)))score+=4;return {pet,score}}).sort((a,b)=>b.score-a.score);
+    return ranked[0].pet;
+  }
   function ringColor(point){const color=pointColor(point);return t=>color.startsWith("rgba")?color:`${color}${Math.max(0,Math.round((1-t)*210)).toString(16).padStart(2,"0")}`}
   function makeRings(pets){const limit=state.lite?Math.min(28,pets.length):Math.min(state.quality==="ultra"?120:70,pets.length);return pets.slice(0,limit).map((pet,index)=>({...pet,ringMax:state.lite?1.2:1.8+(index%4)*.18,ringSpeed:.35+(index%5)*.06,ringPeriod:950+(index%7)*170}))}
   function refreshLivingCells(){state.rings=makeRings(state.pets);if(state.globe){state.globe.ringsData(state.rings).ringColor(ringColor).ringMaxRadius("ringMax").ringPropagationSpeed("ringSpeed").ringRepeatPeriod("ringPeriod")}}
-  function showPetFocus(pet){state.selectedPet=pet;if(!ui.focusCard)return;ui.focusImage.src=petImage(pet);ui.focusImage.alt=pet.name||"Pet";ui.focusType.textContent=String(pet.type||"Pet").toUpperCase();ui.focusName.textContent=pet.name||"Pet story";ui.focusLocation.textContent=[pet.city,pet.country].filter(Boolean).join(", ")||"Somewhere in the world";ui.focusSignal.textContent=pet.is_lost?"Lost signal — priority":pet.is_memorial?"Memorial light":"Living signal active";ui.focusLink.href=profileHref(pet);ui.focusCard.hidden=false;if(state.globe)state.globe.pointRadius(p=>p===state.selectedPet?(state.lite?.42:.62):(state.lite?.2:state.quality==="ultra"?.38:.32))}
-  function hidePetFocus(){state.selectedPet=null;if(ui.focusCard)ui.focusCard.hidden=true;if(state.globe)state.globe.pointRadius(selectedCountryRadius)}
-
-
-  const COUNTRY_CODES={Greece:"GR",Italy:"IT",Japan:"JP",Australia:"AU",USA:"US","United States":"US","United Kingdom":"GB",Canada:"CA",France:"FR",Germany:"DE",Spain:"ES",Portugal:"PT",Brazil:"BR",Mexico:"MX",Argentina:"AR","South Africa":"ZA",Philippines:"PH",India:"IN",China:"CN",Turkey:"TR",Netherlands:"NL",Belgium:"BE",Sweden:"SE",Norway:"NO",Finland:"FI",Denmark:"DK",Poland:"PL",Austria:"AT",Switzerland:"CH",Romania:"RO",Bulgaria:"BG",Serbia:"RS",Croatia:"HR",Albania:"AL",Cyprus:"CY",Egypt:"EG",Morocco:"MA",Russia:"RU",Ukraine:"UA","Saudi Arabia":"SA",UAE:"AE","United Arab Emirates":"AE",Israel:"IL",Lebanon:"LB",Jordan:"JO",Iran:"IR",Pakistan:"PK",Indonesia:"ID",Thailand:"TH",Vietnam:"VN","South Korea":"KR",Singapore:"SG",Malaysia:"MY",Chile:"CL",Peru:"PE",Colombia:"CO",Ireland:"IE","New Zealand":"NZ"};
-  function flagEmoji(country){const code=COUNTRY_CODES[country];return code?[...code].map(char=>String.fromCodePoint(127397+char.charCodeAt(0))).join(""):"🌍"}
-  function relativeTime(value){if(!value)return "Recently";const time=new Date(value).getTime();if(!Number.isFinite(time))return "Recently";const seconds=Math.max(0,Math.floor((Date.now()-time)/1000));if(seconds<60)return "Just now";const minutes=Math.floor(seconds/60);if(minutes<60)return `${minutes} min ago`;const hours=Math.floor(minutes/60);if(hours<24)return `${hours}h ago`;const days=Math.floor(hours/24);if(days===1)return "Yesterday";if(days<7)return `${days} days ago`;return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short"}).format(new Date(time))}
-  function countryKey(value){return String(value||"").trim()}
-  function countryStats(country){
-    const key=countryKey(country);if(state.countryCache.has(key))return state.countryCache.get(key);
-    const pets=state.pets.filter(p=>countryKey(p.country)===key);const cityCounts=new Map(),typeCounts=new Map();
-    for(const pet of pets){if(pet.city)cityCounts.set(pet.city,(cityCounts.get(pet.city)||0)+1);const type=pet.type||"Other";typeCounts.set(type,(typeCounts.get(type)||0)+1)}
-    const average=(field)=>pets.length?pets.reduce((sum,p)=>sum+Number(p[field]||0),0)/pets.length:0;
-    const stats={country:key,pets,cities:[...cityCounts.entries()].sort((a,b)=>b[1]-a[1]),types:[...typeCounts.entries()].sort((a,b)=>b[1]-a[1]),lat:average("latitude"),lng:average("longitude")};
-    state.countryCache.set(key,stats);return stats;
+  function showPetFocus(pet,{animate=true}={}){
+    state.selectedPet=pet;if(!ui.focusCard)return;rememberStory(pet);
+    ui.focusImage.src=petImage(pet);ui.focusImage.alt=pet.name||"Pet";ui.focusType.textContent=String(pet.type||"Pet").toUpperCase();ui.focusName.textContent=pet.name||"Pet story";ui.focusLocation.textContent=[pet.city,pet.country].filter(Boolean).join(", ")||"Somewhere in the world";ui.focusSignal.textContent=pet.is_lost?"Lost signal — priority":pet.is_memorial?"Memorial light":"Living signal active";ui.focusLink.href=profileHref(pet);
+    if(ui.focusFlag)ui.focusFlag.textContent=countryFlag(pet.country);if(ui.focusTime)ui.focusTime.textContent=relativeTime(pet.created_at);if(ui.focusStory)ui.focusStory.textContent=storyText(pet);
+    ui.focusCard.hidden=false;if(animate){ui.focusCard.classList.remove("is-transitioning");void ui.focusCard.offsetWidth;ui.focusCard.classList.add("is-transitioning");}
+    if(state.globe)state.globe.pointRadius(p=>p===state.selectedPet?(state.lite?.42:.62):(state.lite?.2:state.quality==="ultra"?.38:.32));
   }
-  function rebuildCountryIntelligence(){
-    state.countryCache.clear();const countries=[...new Set(state.pets.map(p=>countryKey(p.country)).filter(Boolean))];
-    state.countryLabels=countries.map(country=>{const stats=countryStats(country);return {country,lat:stats.lat,lng:stats.lng,size:Math.min(1.15,.62+Math.log2(stats.pets.length+1)*.12)}});
-    if(state.globe)state.globe.labelsData(state.countryLabels);
+  function exploreNextStory(){
+    const next=nextStoryPet();if(!next)return;state.globe?.pointOfView({lat:Number(next.latitude),lng:Number(next.longitude),altitude:.62},1550);showPetFocus(next);toast(`Next story · ${next.name||"A pet"}`);playTone(560,.09);
   }
-  function selectedCountryColor(point){
-    if(point===state.activePulsePet)return "#ffffff";
-    if(state.selectedCountry&&countryKey(point.country)!==state.selectedCountry)return "rgba(255,255,255,.025)";
-    return pointColor(point);
-  }
-  function selectedCountryAltitude(point){
-    const base=pointAltitude(point);
-    if(point===state.activePulsePet)return base+(state.lite?.1:.18);
-    return state.selectedCountry&&countryKey(point.country)===state.selectedCountry?base+.08:base;
-  }
-  function selectedCountryRadius(point){
-    const normal=state.lite?.2:state.quality==="ultra"?.38:.32;
-    if(point===state.activePulsePet)return state.lite?.52:.78;
-    if(point===state.selectedPet)return state.lite?.42:.62;
-    return state.selectedCountry&&countryKey(point.country)===state.selectedCountry?normal*1.65:normal;
-  }
-  function focusCity(city,country){
-    const pets=state.pets.filter(p=>p.city===city&&countryKey(p.country)===country);if(!pets.length)return;
-    const lat=pets.reduce((sum,p)=>sum+p.latitude,0)/pets.length,lng=pets.reduce((sum,p)=>sum+p.longitude,0)/pets.length;
-    state.globe?.pointOfView({lat,lng,altitude:.72},1350);toast(`${city} · ${pets.length} pet${pets.length===1?"":"s"}`);
-  }
-  function showCountry(country){
-    const stats=countryStats(country);if(!stats.pets.length)return;state.selectedCountry=country;hidePetFocus();
-    ui.countryFlag.textContent=flagEmoji(country);ui.countryName.textContent=country;ui.countrySubtitle.textContent=`${stats.pets.length} living ${stats.pets.length===1?"story":"stories"} across ${stats.cities.length||1} ${stats.cities.length===1?"city":"cities"}.`;
-    ui.countryPetCount.textContent=stats.pets.length.toLocaleString("en-GB");ui.countryCityCount.textContent=stats.cities.length.toLocaleString("en-GB");ui.countryTypeCount.textContent=stats.types.length.toLocaleString("en-GB");
-    const glowing=Math.max(1,Math.min(stats.pets.length,state.lite?3:Math.ceil(stats.pets.length*.65)));ui.countryActiveCount.textContent=`${glowing} pet${glowing===1?"":"s"} glowing`;
-    ui.countryTypeSummary.textContent=`${stats.types.length} type${stats.types.length===1?"":"s"}`;
-    const maxType=Math.max(1,...stats.types.map(([,count])=>count));ui.countryTopTypes.innerHTML=stats.types.slice(0,5).map(([type,count])=>{const pct=Math.round(count/stats.pets.length*100);return `<div class="country-type-row"><div><strong>${escapeHtml(type)}</strong><span>${count} · ${pct}%</span></div><div class="country-type-track"><i style="--bar:${Math.max(8,Math.round(count/maxType*100))}%"></i></div></div>`}).join("")||'<p class="country-panel__empty">No type data yet.</p>';
-    ui.countryTopCities.innerHTML=stats.cities.slice(0,5).map(([city,count],index)=>`<button type="button" data-country-city="${escapeHtml(city)}"><b>${String(index+1).padStart(2,"0")}</b><span><strong>${escapeHtml(city)}</strong><small>${count} pet${count===1?"":"s"}</small></span><i>→</i></button>`).join("")||'<p class="country-panel__empty">No city data yet.</p>';
-    const arrivals=[...stats.pets].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,4);ui.countryLatestPets.innerHTML=arrivals.map(p=>`<a href="${profileHref(p)}"><img src="${escapeHtml(petImage(p))}" alt=""><span><strong>${escapeHtml(p.name||"Pet")}</strong><small>${escapeHtml(p.city||country)} · ${escapeHtml(relativeTime(p.created_at))}</small></span><i>→</i></a>`).join("");
-    ui.browseCountryPets.href=`pets.html?country=${encodeURIComponent(country)}`;ui.countryPanel.hidden=false;ui.app.classList.add("has-country-focus");
-    state.globe?.pointColor(selectedCountryColor).pointAltitude(selectedCountryAltitude).pointRadius(selectedCountryRadius).pointOfView({lat:stats.lat,lng:stats.lng,altitude:.86},1650);
-    state.globe?.controls()&&(state.globe.controls().autoRotate=false);toast(`${flagEmoji(country)} ${country} intelligence`);playTone(580,.1);
-  }
-  function closeCountry({resetView=false}={}){
-    state.selectedCountry=null;ui.countryPanel.hidden=true;ui.app.classList.remove("has-country-focus");
-    if(state.globe){state.globe.pointColor(pointColor).pointAltitude(pointAltitude).pointRadius(selectedCountryRadius);state.globe.controls().autoRotate=state.rotating;if(resetView)state.globe.pointOfView({lat:18,lng:18,altitude:2.25},1450)}
-  }
+  function hidePetFocus(){state.selectedPet=null;if(ui.focusCard)ui.focusCard.hidden=true;if(state.globe)state.globe.pointRadius(state.lite?.2:state.quality==="ultra"?.38:.32)}
 
   function pointColor(point){if(state.mode==="lost")return point.is_lost?"#ff526e":"rgba(255,82,110,.035)";if(state.mode==="memorial")return point.is_memorial?"#f1efff":"rgba(231,232,255,.035)";const palette={Dog:"#68e8ff",Cat:"#a77cff",Bird:"#ffc85d",Rabbit:"#72ffb0"};return palette[point.type]||"#ffffff"}
   function pointAltitude(point){return point.is_lost?.2:point.is_memorial?.16:.095}
   function updateModeAtmosphere(mode){ui.app.classList.toggle("is-lost",mode==="lost");ui.app.classList.toggle("is-memorial",mode==="memorial");if(state.globe){state.globe.atmosphereColor(mode==="lost"?"#ff526e":mode==="memorial"?"#b6b7ff":"#5bc8ff")}}
-  function applyMode(mode){state.mode=mode;ui.modes.forEach(button=>button.classList.toggle("is-active",button.dataset.worldMode===mode));updateModeAtmosphere(mode);if(state.globe)state.globe.pointColor(selectedCountryColor).pointAltitude(selectedCountryAltitude).pointsTransitionDuration(850);const labels={all:"The whole living world",pets:"Every light is a pet",lost:"Lost Pet Signal mode",memorial:"Memorial starlight mode"};toast(labels[mode])}
+  function applyMode(mode){state.mode=mode;ui.modes.forEach(button=>button.classList.toggle("is-active",button.dataset.worldMode===mode));updateModeAtmosphere(mode);if(state.globe)state.globe.pointColor(pointColor).pointAltitude(pointAltitude).pointsTransitionDuration(850);const labels={all:"The whole living world",pets:"Every light is a pet",lost:"Lost Pet Signal mode",memorial:"Memorial starlight mode"};toast(labels[mode])}
 
   function buildCloudLayer(world){
     if(!window.THREE||state.lite)return;
@@ -148,9 +128,8 @@
     if(typeof window.Globe!=="function"||!supportsWebGL())throw new Error("WebGL globe unavailable");
     const world=window.Globe()(ui.stage).width(innerWidth).height(innerHeight).backgroundColor("rgba(0,0,0,0)")
       .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-night.jpg").bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
-      .showAtmosphere(true).atmosphereColor("#5bc8ff").atmosphereAltitude(.21).pointsData(state.pets).pointLat("latitude").pointLng("longitude").pointColor(selectedCountryColor)
-      .pointAltitude(selectedCountryAltitude).pointRadius(selectedCountryRadius).pointsMerge(false).pointsTransitionDuration(900)
-      .labelsData(state.countryLabels).labelLat("lat").labelLng("lng").labelText("country").labelSize("size").labelColor(()=>"rgba(228,239,255,.9)").labelDotRadius(.22).labelAltitude(.025).labelResolution(2).onLabelClick(label=>showCountry(label.country))
+      .showAtmosphere(true).atmosphereColor("#5bc8ff").atmosphereAltitude(.21).pointsData(state.pets).pointLat("latitude").pointLng("longitude").pointColor(pointColor)
+      .pointAltitude(pointAltitude).pointRadius(p=>p===state.selectedPet?(state.lite?.42:.62):(state.lite?.2:state.quality==="ultra"?.38:.32)).pointsMerge(false).pointsTransitionDuration(900)
       .ringsData(state.rings).ringLat("latitude").ringLng("longitude").ringColor(ringColor).ringMaxRadius("ringMax").ringPropagationSpeed("ringSpeed").ringRepeatPeriod("ringPeriod")
       .pointLabel(point=>`<div class="living-cell-tooltip"><img src="${escapeHtml(petImage(point))}" alt=""><div><b>${escapeHtml(point.name||"Pet")}</b><span>${escapeHtml([point.type,point.city,point.country].filter(Boolean).join(" · "))}</span></div></div>`)
       .onPointClick(point=>{world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:.62},1450);showPetFocus(point);toast(`${point.name||"A pet"} · ${point.city||point.country||"ThePetGrid"}`);playTone(520,.08)})
@@ -163,57 +142,11 @@
   function updateStats(){const countries=new Set(state.pets.map(p=>p.country).filter(Boolean));const cities=new Set(state.pets.map(p=>`${p.city}|${p.country}`).filter(v=>!v.startsWith("|")));countUp(ui.petCount,state.pets.length);countUp(ui.countryCount,countries.size);countUp(ui.cityCount,cities.size);const active=[...cities].slice(0,3).map(v=>v.split("|")[0]).filter(Boolean);if(active.length)ui.activePlace.textContent=active.join(" · ")}
   function updateClock(){ui.clock.textContent=new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"UTC",hour12:false}).format(new Date())+" UTC"}
 
-  function isUserInteracting(){return Date.now()<state.userInteractingUntil||Boolean(state.selectedPet)||Boolean(state.selectedCountry)}
-  function markUserInteraction(){state.userInteractingUntil=Date.now()+9000}
-  function clearActivePulse(){
-    state.activePulsePet=null;
-    if(ui.liveSignal)ui.liveSignal.hidden=true;
-    if(state.globe){
-      state.globe.pointColor(selectedCountryColor).pointAltitude(selectedCountryAltitude).pointRadius(selectedCountryRadius);
-      refreshLivingCells();
-    }
-  }
-  function activateLivingPulse(pet){
-    if(!pet||!state.globe)return;
-    clearTimeout(state.pulseHideTimer);
-    state.activePulsePet=pet;
-    const pulseRing={...pet,ringMax:state.lite?2.4:4.3,ringSpeed:state.lite?.75:1.15,ringPeriod:520};
-    state.globe
-      .pointColor(selectedCountryColor)
-      .pointAltitude(selectedCountryAltitude)
-      .pointRadius(selectedCountryRadius)
-      .ringsData([...state.rings,pulseRing]);
-    const location=pet.city||pet.country||"the world";
-    const messages=[
-      `${pet.name||"A pet"} is glowing from ${location}`,
-      `${pet.name||"A pet"} became active in ${location}`,
-      `A living story awakened in ${location}`
-    ];
-    ui.liveSignalText.textContent=messages[Math.floor(Math.random()*messages.length)];
-    ui.liveSignal.hidden=false;
-    playTone(610,.08);
-    if(!isUserInteracting()&&state.rotating){
-      state.globe.pointOfView({lat:pet.latitude,lng:pet.longitude,altitude:1.45},1250);
-    }
-    state.pulseHideTimer=setTimeout(clearActivePulse,4600);
-  }
-  function scheduleLivingPulse(){
-    clearTimeout(state.pulseTimer);
-    const delay=8000+Math.round(Math.random()*4000);
-    state.pulseTimer=setTimeout(()=>{
-      if(state.pets.length&&!document.hidden){
-        const candidates=state.selectedCountry?state.pets.filter(p=>countryKey(p.country)===state.selectedCountry):state.pets;
-        const pool=candidates.length?candidates:state.pets;
-        activateLivingPulse(pool[Math.floor(Math.random()*pool.length)]);
-      }
-      scheduleLivingPulse();
-    },delay);
-  }
-  function pulseRandomPet(){scheduleLivingPulse()}
+  function pulseRandomPet(){clearInterval(state.pulseTimer);state.pulseTimer=setInterval(()=>{if(!state.pets.length||document.hidden)return;const pet=state.pets[Math.floor(Math.random()*state.pets.length)];ui.liveSignalText.textContent=`${pet.name||"A pet"} is glowing from ${pet.city||pet.country||"the world"}`;ui.liveSignal.hidden=false;clearTimeout(pulseRandomPet.hide);pulseRandomPet.hide=setTimeout(()=>ui.liveSignal.hidden=true,4200)},8500)}
   function subscribeRealtime(){
     const client=window.ThePetGridSupabase?.client;if(!client?.channel)return;
     state.realtime=client.channel("atlas-living-world").on("postgres_changes",{event:"INSERT",schema:"public",table:"pets"},payload=>{
-      const pet=normalizePet(payload.new);if(!Number.isFinite(pet.latitude)||!Number.isFinite(pet.longitude))return;state.pets.unshift(pet);state.globe?.pointsData([...state.pets]);refreshLivingCells();rebuildCountryIntelligence();updateStats();ui.liveSignalText.textContent=`${pet.name||"A new pet"} joined from ${pet.city||pet.country||"the world"}`;ui.liveSignal.hidden=false;setTimeout(()=>ui.liveSignal.hidden=true,6000);playTone(660,.12)
+      const pet=normalizePet(payload.new);if(!Number.isFinite(pet.latitude)||!Number.isFinite(pet.longitude))return;state.pets.unshift(pet);state.globe?.pointsData([...state.pets]);refreshLivingCells();updateStats();ui.liveSignalText.textContent=`${pet.name||"A new pet"} joined from ${pet.city||pet.country||"the world"}`;ui.liveSignal.hidden=false;setTimeout(()=>ui.liveSignal.hidden=true,6000);playTone(660,.12)
     }).subscribe();
   }
 
@@ -229,14 +162,12 @@
     ui.motion.addEventListener("click",()=>{state.rotating=!state.rotating;if(state.globe)state.globe.controls().autoRotate=state.rotating;ui.motion.setAttribute("aria-pressed",String(!state.rotating));ui.motion.textContent=state.rotating?"Pause motion":"Resume motion"});
     ui.lite.addEventListener("click",()=>{setQuality(state.lite?"high":"lite",true);ui.lite.setAttribute("aria-pressed",String(state.lite));ui.lite.textContent=state.lite?"Full effects":"Lite mode"});
     ui.sound.addEventListener("click",()=>{state.sound=!state.sound;ui.sound.setAttribute("aria-pressed",String(state.sound));ui.sound.textContent=state.sound?"Sound on":"Sound off";if(state.sound){ensureAudio()?.resume();playTone(440,.12)}toast(state.sound?"Ambient interaction sound enabled":"Sound disabled")});
-    ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.closeCountryPanel?.addEventListener("click",()=>closeCountry());ui.backToWorld?.addEventListener("click",()=>closeCountry({resetView:true}));ui.countryTopCities?.addEventListener("click",event=>{const button=event.target.closest("[data-country-city]");if(button&&state.selectedCountry)focusCity(button.dataset.countryCity,state.selectedCountry)});
-    ["pointerdown","wheel","touchstart"].forEach(eventName=>ui.stage?.addEventListener(eventName,markUserInteraction,{passive:true}));
-    document.addEventListener("keydown",event=>{markUserInteraction();if(event.key==="Escape"){hidePetFocus();closeCountry()}});
+    ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.exploreNext?.addEventListener("click",exploreNextStory);document.addEventListener("keydown",event=>{if(event.key==="Escape")hidePetFocus();if(event.key.toLowerCase()==="n"&&!ui.focusCard?.hidden)exploreNextStory()});
   }
 
   async function init(){
     try{
-      setBoot(12,"Calibrating Atlas Engine…");state.quality=detectQuality();setQuality(state.quality);initStars();await sleep(300);setBoot(34,"Igniting the sun…");await sleep(250);setBoot(52,"Finding living stories…");state.pets=(await loadPets()).map(normalizePet);state.rings=makeRings(state.pets);rebuildCountryIntelligence();await sleep(220);setBoot(72,"Forming clouds and atmosphere…");makeGlobe();updateStats();updateClock();state.clockTimer=setInterval(updateClock,30000);bind();subscribeRealtime();pulseRandomPet();monitorPerformance();await sleep(650);setBoot(100,"The planet is alive.");ui.app.hidden=false;await sleep(650);ui.boot.classList.add("is-leaving");setTimeout(()=>ui.boot.remove(),1100)
+      setBoot(12,"Calibrating Atlas Engine…");state.quality=detectQuality();setQuality(state.quality);initStars();await sleep(300);setBoot(34,"Igniting the sun…");await sleep(250);setBoot(52,"Finding living stories…");state.pets=(await loadPets()).map(normalizePet);state.rings=makeRings(state.pets);await sleep(220);setBoot(72,"Forming clouds and atmosphere…");makeGlobe();updateStats();updateClock();state.clockTimer=setInterval(updateClock,30000);bind();subscribeRealtime();pulseRandomPet();monitorPerformance();await sleep(650);setBoot(100,"The planet is alive.");ui.app.hidden=false;await sleep(650);ui.boot.classList.add("is-leaving");setTimeout(()=>ui.boot.remove(),1100)
     }catch(error){console.error("ThePetGrid World Experience:",error);ui.app.hidden=false;ui.fallback.hidden=false;ui.boot.classList.add("is-leaving")}
   }
   init();
