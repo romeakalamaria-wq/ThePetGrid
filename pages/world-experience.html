@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#020611">
+  <title>The Living World — ThePetGrid</title>
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="stylesheet" href="../css/world-experience.css">
+</head>
+<body>
+  <div id="worldBoot" class="world-boot" aria-live="polite">
+    <div class="boot-mark" aria-hidden="true">🐾</div>
+    <p class="boot-brand">THEPETGRID</p>
+    <h1>Awakening the living world</h1>
+    <div class="boot-progress"><span id="bootProgress"></span></div>
+    <p id="bootStatus">Preparing the stars…</p>
+  </div>
+
+  <main id="worldExperience" class="world-experience" hidden>
+    <canvas id="starCanvas" class="star-canvas" aria-hidden="true"></canvas>
+    <div id="globeStage" class="globe-stage" aria-label="Interactive three-dimensional pet world"></div>
+    <div class="space-vignette" aria-hidden="true"></div>
+
+    <header class="world-header">
+      <a class="world-brand" href="../index.html" aria-label="Back to ThePetGrid home">
+        <span class="world-brand__paw">🐾</span>
+        <span><strong>ThePetGrid</strong><small>The Living World</small></span>
+      </a>
+      <div class="world-header__actions">
+        <button id="toggleMotion" class="glass-button" type="button" aria-pressed="false">Pause motion</button>
+        <button id="toggleLite" class="glass-button" type="button" aria-pressed="false">Lite mode</button>
+        <a class="glass-button" href="map.html">2D Map</a>
+      </div>
+    </header>
+
+    <section class="world-intro" aria-labelledby="worldTitle">
+      <p class="world-kicker"><span></span> A WORLD BUILT BY PETS</p>
+      <h1 id="worldTitle">Every light<br>is a living story.</h1>
+      <p>Explore a planet shaped by the pets and people of ThePetGrid.</p>
+      <div class="world-intro__actions">
+        <button id="exploreWorld" class="primary-action" type="button">Explore the world <span>→</span></button>
+        <button id="returnHome" class="secondary-action" type="button">Reset view</button>
+      </div>
+    </section>
+
+    <aside class="world-stats" aria-label="World statistics">
+      <p class="world-stats__live"><i></i> LIVE WORLD</p>
+      <div class="world-stats__grid">
+        <div><strong id="worldPetCount">0</strong><span>living stories</span></div>
+        <div><strong id="worldCountryCount">0</strong><span>countries</span></div>
+        <div><strong id="worldCityCount">0</strong><span>cities</span></div>
+      </div>
+      <div class="world-activity">
+        <span>NOW GLOWING</span>
+        <strong id="activePlace">Athens · Rome · Tokyo</strong>
+      </div>
+    </aside>
+
+    <nav class="world-dock" aria-label="World modes">
+      <button class="is-active" type="button" data-world-mode="all"><span>🌍</span><small>World</small></button>
+      <button type="button" data-world-mode="pets"><span>🐾</span><small>Pets</small></button>
+      <button type="button" data-world-mode="lost"><span>🆘</span><small>Lost</small></button>
+      <button type="button" data-world-mode="memorial"><span>🕊️</span><small>Memorial</small></button>
+    </nav>
+
+    <div id="worldToast" class="world-toast" hidden></div>
+    <div id="globeFallback" class="globe-fallback" hidden>
+      <span>🌍</span><h2>Your browser could not start the 3D world.</h2>
+      <p>The classic map remains available on every device.</p>
+      <a href="map.html">Open the 2D map</a>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.1/dist/globe.gl.min.js"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/world-experience.js"></script>
+</body>
+</html>
