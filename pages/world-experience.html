@@ -1,100 +1,424 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#020611">
-  <title>The Living World — ThePetGrid</title>
-  <link rel="icon" href="../assets/favicon.png">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="stylesheet" href="../css/world-experience.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#020611"
+  >
+
+  <title>
+    The Living World — ThePetGrid
+  </title>
+
+  <link
+    rel="icon"
+    href="../assets/favicon.png"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://cdn.jsdelivr.net"
+    crossorigin
+  >
+
+  <link
+    rel="preconnect"
+    href="https://unpkg.com"
+    crossorigin
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/world-experience.css"
+  >
 </head>
+
 <body>
-  <div id="worldBoot" class="world-boot" aria-live="polite">
-    <div class="boot-orbit" aria-hidden="true"><span>🐾</span></div>
-    <p class="boot-brand">THEPETGRID · PROJECT ATLAS</p>
-    <h1>Bringing the planet to life</h1>
-    <div class="boot-progress"><span id="bootProgress"></span></div>
-    <p id="bootStatus">Igniting the stars…</p>
+
+  <div
+    id="worldBoot"
+    class="world-boot"
+    aria-live="polite"
+  >
+
+    <div
+      class="boot-orbit"
+      aria-hidden="true"
+    >
+      <span>🐾</span>
+    </div>
+
+    <p class="boot-brand">
+      THEPETGRID · PROJECT ATLAS
+    </p>
+
+    <h1>
+      Bringing the planet to life
+    </h1>
+
+    <div class="boot-progress">
+      <span id="bootProgress"></span>
+    </div>
+
+    <p id="bootStatus">
+      Igniting the stars…
+    </p>
+
   </div>
 
-  <main id="worldExperience" class="world-experience" hidden data-quality="high">
-    <canvas id="starCanvas" class="star-canvas" aria-hidden="true"></canvas>
-    <div class="nebula nebula-a" aria-hidden="true"></div>
-    <div class="nebula nebula-b" aria-hidden="true"></div>
-    <div id="globeStage" class="globe-stage" aria-label="Interactive three-dimensional pet world"></div>
-    <div class="space-vignette" aria-hidden="true"></div>
+
+  <main
+    id="worldExperience"
+    class="world-experience"
+    hidden
+    data-quality="high"
+  >
+
+    <canvas
+      id="starCanvas"
+      class="star-canvas"
+      aria-hidden="true"
+    ></canvas>
+
+    <div
+      class="nebula nebula-a"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      class="nebula nebula-b"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      id="globeStage"
+      class="globe-stage"
+      aria-label="Interactive three-dimensional pet world"
+    ></div>
+
+    <div
+      class="space-vignette"
+      aria-hidden="true"
+    ></div>
+
 
     <header class="world-header">
-      <a class="world-brand" href="../index.html" aria-label="Back to ThePetGrid home">
-        <span class="world-brand__paw">🐾</span>
-        <span><strong>ThePetGrid</strong><small>Project Atlas · Planet Alive</small></span>
+
+      <a
+        class="world-brand"
+        href="../index.html"
+        aria-label="Back to ThePetGrid home"
+      >
+
+        <span class="world-brand__paw">
+          🐾
+        </span>
+
+        <span>
+          <strong>ThePetGrid</strong>
+          <small>
+            Project Atlas · Planet Alive
+          </small>
+        </span>
+
       </a>
+
+
       <div class="world-header__actions">
-        <span id="qualityBadge" class="quality-badge" title="Adaptive rendering quality">HIGH</span>
-        <button id="toggleSound" class="glass-button" type="button" aria-pressed="false">Sound off</button>
-        <button id="toggleMotion" class="glass-button" type="button" aria-pressed="false">Pause motion</button>
-        <button id="toggleLite" class="glass-button" type="button" aria-pressed="false">Lite mode</button>
-        <a class="glass-button" href="map.html">2D Map</a>
+
+        <span
+          id="qualityBadge"
+          class="quality-badge"
+          title="Adaptive rendering quality"
+        >
+          HIGH
+        </span>
+
+        <button
+          id="toggleSound"
+          class="glass-button"
+          type="button"
+          aria-pressed="false"
+        >
+          Sound off
+        </button>
+
+        <button
+          id="toggleMotion"
+          class="glass-button"
+          type="button"
+          aria-pressed="false"
+        >
+          Pause motion
+        </button>
+
+        <button
+          id="toggleLite"
+          class="glass-button"
+          type="button"
+          aria-pressed="false"
+        >
+          Lite mode
+        </button>
+
+        <a
+          class="glass-button"
+          href="map.html"
+        >
+          2D Map
+        </a>
+
       </div>
+
     </header>
 
-    <section class="world-intro" aria-labelledby="worldTitle">
-      <p class="world-kicker"><span></span> THE PLANET IS ALIVE</p>
-      <h1 id="worldTitle">Every light<br>breathes a story.</h1>
-      <p>Clouds drift, cities glow and every pulse belongs to a pet in the living world of ThePetGrid.</p>
+
+    <section
+      class="world-intro"
+      aria-labelledby="worldTitle"
+    >
+
+      <p class="world-kicker">
+        <span></span>
+        THE PLANET IS ALIVE
+      </p>
+
+      <h1 id="worldTitle">
+        Every light
+        <br>
+        breathes a story.
+      </h1>
+
+      <p>
+        Clouds drift, cities glow and every pulse belongs
+        to a pet in the living world of ThePetGrid.
+      </p>
+
       <div class="world-intro__actions">
-        <button id="exploreWorld" class="primary-action" type="button">Begin the journey <span>→</span></button>
-        <button id="returnHome" class="secondary-action" type="button">Reset view</button>
+
+        <button
+          id="exploreWorld"
+          class="primary-action"
+          type="button"
+        >
+          Begin the journey
+          <span>→</span>
+        </button>
+
+        <button
+          id="returnHome"
+          class="secondary-action"
+          type="button"
+        >
+          Reset view
+        </button>
+
       </div>
+
     </section>
 
-    <aside class="world-stats" aria-label="World statistics">
+
+    <aside
+      class="world-stats"
+      aria-label="World statistics"
+    >
+
       <div class="world-stats__heading">
-        <p class="world-stats__live"><i></i> LIVE WORLD</p>
-        <span id="worldClock">--:-- UTC</span>
+
+        <p class="world-stats__live">
+          <i></i>
+          LIVE WORLD
+        </p>
+
+        <span id="worldClock">
+          --:-- UTC
+        </span>
+
       </div>
+
+
       <div class="world-stats__grid">
-        <div><strong id="worldPetCount">0</strong><span>living stories</span></div>
-        <div><strong id="worldCountryCount">0</strong><span>countries</span></div>
-        <div><strong id="worldCityCount">0</strong><span>cities</span></div>
+
+        <div>
+          <strong id="worldPetCount">
+            0
+          </strong>
+
+          <span>
+            living stories
+          </span>
+        </div>
+
+        <div>
+          <strong id="worldCountryCount">
+            0
+          </strong>
+
+          <span>
+            countries
+          </span>
+        </div>
+
+        <div>
+          <strong id="worldCityCount">
+            0
+          </strong>
+
+          <span>
+            cities
+          </span>
+        </div>
+
       </div>
+
+
       <div class="world-activity">
-        <span>NOW GLOWING</span>
-        <strong id="activePlace">Athens · Rome · Tokyo</strong>
+
+        <span>
+          NOW GLOWING
+        </span>
+
+        <strong id="activePlace">
+          Athens · Rome · Tokyo
+        </strong>
+
       </div>
-      <div class="performance-meter" aria-label="Rendering performance">
-        <span>ATLAS ENGINE</span>
-        <strong id="fpsReadout">60 FPS</strong>
+
+
+      <div
+        class="performance-meter"
+        aria-label="Rendering performance"
+      >
+
+        <span>
+          ATLAS ENGINE
+        </span>
+
+        <strong id="fpsReadout">
+          60 FPS
+        </strong>
+
       </div>
+
     </aside>
 
-    <section id="liveSignal" class="live-signal" aria-live="polite" hidden>
+
+    <section
+      id="liveSignal"
+      class="live-signal"
+      aria-live="polite"
+      hidden
+    >
+
       <span class="live-signal__pulse"></span>
-      <div><small>NEW LIGHT</small><strong id="liveSignalText">A pet joined the world</strong></div>
+
+      <div>
+        <small>
+          NEW LIGHT
+        </small>
+
+        <strong id="liveSignalText">
+          A pet joined the world
+        </strong>
+      </div>
+
     </section>
 
-    <nav class="world-dock" aria-label="World modes">
-      <button class="is-active" type="button" data-world-mode="all"><span>🌍</span><small>World</small></button>
-      <button type="button" data-world-mode="pets"><span>🐾</span><small>Pets</small></button>
-      <button type="button" data-world-mode="lost"><span>🆘</span><small>Lost</small></button>
-      <button type="button" data-world-mode="memorial"><span>🕊️</span><small>Memorial</small></button>
+
+    <nav
+      class="world-dock"
+      aria-label="World modes"
+    >
+
+      <button
+        class="is-active"
+        type="button"
+        data-world-mode="all"
+      >
+        <span>🌍</span>
+        <small>World</small>
+      </button>
+
+      <button
+        type="button"
+        data-world-mode="pets"
+      >
+        <span>🐾</span>
+        <small>Pets</small>
+      </button>
+
+      <button
+        type="button"
+        data-world-mode="lost"
+      >
+        <span>🆘</span>
+        <small>Lost</small>
+      </button>
+
+      <button
+        type="button"
+        data-world-mode="memorial"
+      >
+        <span>🕊️</span>
+        <small>Memorial</small>
+      </button>
+
     </nav>
 
-    <div id="worldToast" class="world-toast" hidden></div>
-    <div id="globeFallback" class="globe-fallback" hidden>
-      <span>🌍</span><h2>Your browser could not start the 3D world.</h2>
-      <p>The classic map remains available on every device.</p>
-      <a href="map.html">Open the 2D map</a>
+
+    <div
+      id="worldToast"
+      class="world-toast"
+      hidden
+    ></div>
+
+
+    <div
+      id="globeFallback"
+      class="globe-fallback"
+      hidden
+    >
+
+      <span>🌍</span>
+
+      <h2>
+        Your browser could not start the 3D world.
+      </h2>
+
+      <p>
+        The classic map remains available on every device.
+      </p>
+
+      <a href="map.html">
+        Open the 2D map
+      </a>
+
     </div>
+
   </main>
 
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+
+  <!--
+    IMPORTANT:
+    Δεν φορτώνουμε ξεχωριστά three.min.js.
+    Το Globe.GL φορτώνει τη συμβατή Three.js έκδοση που χρειάζεται.
+  -->
   <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.1/dist/globe.gl.min.js"></script>
+
   <script src="../js/supabase-config.js"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/world-experience.js"></script>
+
 </body>
+
 </html>
