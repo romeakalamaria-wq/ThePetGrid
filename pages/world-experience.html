@@ -98,6 +98,51 @@
       </div>
     </aside>
 
+
+    <aside id="countryPanel" class="country-panel" hidden aria-live="polite">
+      <button id="closeCountryPanel" class="country-panel__close" type="button" aria-label="Close country intelligence">×</button>
+
+      <div class="country-panel__hero">
+        <span id="countryFlag" class="country-panel__flag" aria-hidden="true">🌍</span>
+        <div>
+          <p class="country-panel__eyebrow">COUNTRY INTELLIGENCE</p>
+          <h2 id="countryName">Living world</h2>
+          <p id="countrySubtitle">Select a country light to explore its pet community.</p>
+        </div>
+      </div>
+
+      <div class="country-panel__metrics">
+        <div><span aria-hidden="true">🐾</span><strong id="countryPetCount">0</strong><small>Pets</small></div>
+        <div><span aria-hidden="true">🏙️</span><strong id="countryCityCount">0</strong><small>Cities</small></div>
+        <div><span aria-hidden="true">✨</span><strong id="countryTypeCount">0</strong><small>Types</small></div>
+      </div>
+
+      <div class="country-active">
+        <span class="country-active__dot" aria-hidden="true"></span>
+        <div><small>GLOWING NOW</small><strong id="countryActiveCount">0 pets glowing</strong></div>
+      </div>
+
+      <section class="country-panel__section">
+        <div class="country-panel__section-heading"><h3>Top Pet Types</h3><span id="countryTypeSummary">0 types</span></div>
+        <div id="countryTopTypes" class="country-type-list"></div>
+      </section>
+
+      <section class="country-panel__section">
+        <div class="country-panel__section-heading"><h3>Top Cities</h3><span>Explore</span></div>
+        <div id="countryTopCities" class="country-city-list"></div>
+      </section>
+
+      <section class="country-panel__section">
+        <div class="country-panel__section-heading"><h3>Latest Arrivals</h3><span>Recent stories</span></div>
+        <div id="countryLatestPets" class="country-arrivals"></div>
+      </section>
+
+      <div class="country-panel__actions">
+        <a id="browseCountryPets" href="pets.html">Browse country pets <span>→</span></a>
+        <button id="backToWorld" type="button">Back to world</button>
+      </div>
+    </aside>
+
     <div id="worldToast" class="world-toast" hidden></div>
     <div id="globeFallback" class="globe-fallback" hidden>
       <span>🌍</span><h2>Your browser could not start the 3D world.</h2>
