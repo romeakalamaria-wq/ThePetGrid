@@ -23,8 +23,8 @@
 <main class="pet-profile-page">
 <section class="pet-profile-section">
 <div class="pet-profile-container">
-<a class="back-link" href="pets.html">
-                    ← Back to Browse Pets
+<a class="back-link" href="world-experience.html">
+                    ← Back to Atlas
                 </a>
 <!-- LOADING -->
 <div class="pet-profile-loading" id="petProfileLoading">
@@ -66,6 +66,9 @@
 </div>
 <!-- CONTENT -->
 <div class="pet-profile__content">
+<div class="pet-profile__atlas-header">
+<span class="pet-profile__atlas-badge">🌍 Living Story</span>
+</div>
 <div class="pet-profile__top">
 <div>
 <p class="pet-profile__type" id="petProfileType">
@@ -186,6 +189,82 @@
 </div>
 </div>
 </article>
+<!-- ATLAS LIVING STORY -->
+<section class="atlas-pet-story" id="atlasPetStory" hidden aria-labelledby="atlasPetStoryTitle">
+  <div class="atlas-pet-story__header">
+    <div>
+      <span class="pet-profile__eyebrow">Atlas Pet Story</span>
+      <h2 id="atlasPetStoryTitle">A living story in the world</h2>
+      <p id="atlasPetStoryText">This pet's story is part of the living world of ThePetGrid.</p>
+    </div>
+    <span class="atlas-pet-story__signal"><i></i> Story active</span>
+  </div>
+
+  <div class="atlas-pet-story__facts" aria-label="Story details">
+    <div><small>Joined</small><strong id="atlasPetJoined">Date unavailable</strong></div>
+    <div><small>Home</small><strong id="atlasPetHome">Location unavailable</strong></div>
+    <div><small>Owner</small><strong id="atlasPetOwner">ThePetGrid Member</strong></div>
+    <div><small>Community</small><strong id="atlasPetCommunity">0 followers</strong></div>
+  </div>
+
+  <div class="atlas-pet-timeline">
+    <div class="atlas-pet-timeline__heading">
+      <span class="pet-profile__eyebrow">Timeline</span>
+      <h3>The journey so far</h3>
+    </div>
+    <ol id="atlasPetTimeline" class="atlas-pet-timeline__list"></ol>
+  </div>
+</section>
+
+<!-- ATLAS CONNECTION -->
+<section class="atlas-pet-connection" id="atlasPetConnection" hidden aria-labelledby="atlasPetConnectionTitle">
+  <div class="atlas-pet-connection__header">
+    <div>
+      <span class="pet-profile__eyebrow">Atlas connection</span>
+      <h2 id="atlasPetConnectionTitle">This story has a place in the world</h2>
+      <p id="atlasPetConnectionText">Explore this pet's location, photos and nearby stories.</p>
+    </div>
+    <a class="atlas-view-button" id="viewPetOnAtlas" href="world-experience.html">
+      <span aria-hidden="true">🌍</span> View on Atlas
+    </a>
+  </div>
+
+  <div class="atlas-pet-connection__grid">
+    <article class="atlas-location-card">
+      <div class="atlas-section-heading">
+        <span aria-hidden="true">🗺️</span>
+        <div><small>Location</small><h3 id="atlasPetMapTitle">Pet location</h3></div>
+      </div>
+      <div class="atlas-mini-map" id="atlasPetMiniMap">
+        <iframe id="atlasPetMapFrame" title="Pet location map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" hidden></iframe>
+        <div class="atlas-mini-map__fallback" id="atlasPetMapFallback">
+          <span aria-hidden="true">📍</span>
+          <strong id="atlasPetMapFallbackTitle">Location unavailable</strong>
+          <p>When coordinates are available, the pet's position will appear here.</p>
+        </div>
+      </div>
+      <p class="atlas-location-card__caption" id="atlasPetMapCaption">Location unavailable</p>
+    </article>
+
+    <article class="atlas-gallery-card" id="atlasPetGalleryCard" hidden>
+      <div class="atlas-section-heading">
+        <span aria-hidden="true">📸</span>
+        <div><small>Gallery</small><h3>More moments</h3></div>
+      </div>
+      <div class="atlas-pet-gallery" id="atlasPetGallery"></div>
+    </article>
+  </div>
+
+  <article class="atlas-nearby-card">
+    <div class="atlas-section-heading">
+      <span aria-hidden="true">🐾</span>
+      <div><small>Nearby stories</small><h3>Pets from the same part of the world</h3></div>
+    </div>
+    <div class="atlas-nearby-pets" id="atlasNearbyPets">
+      <p class="atlas-nearby-pets__empty">Looking for nearby stories…</p>
+    </div>
+  </article>
+</section>
 <!-- GIFT CENTER -->
 <section aria-labelledby="petGiftCenterTitle" class="pet-gift-center" id="petGiftCenter">
 <div class="pet-gift-center__header">

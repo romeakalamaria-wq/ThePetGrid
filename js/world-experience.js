@@ -22,7 +22,7 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false
+    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false
   };
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
@@ -38,7 +38,7 @@
   }
   function setQuality(level,announce=false){
     state.quality=level;state.lite=level==="lite";ui.app.dataset.quality=level;ui.app.classList.toggle("is-lite",state.lite);ui.quality.textContent=level.toUpperCase();
-    if(state.globe){state.globe.pointRadius(state.lite?.2:level==="ultra"?.38:.32).showAtmosphere(!state.lite);if(state.clouds)state.clouds.visible=!state.lite}
+    if(state.globe){state.globe.pointRadius(state.lite?.2:level==="ultra"?.38:.32).showAtmosphere(!state.lite);if(state.clouds)state.clouds.visible=!state.lite;if(state.dayNightShader?.uniforms?.atlasNightStrength)state.dayNightShader.uniforms.atlasNightStrength.value=state.lite?.72:1.18}
     if(announce)toast(`${level[0].toUpperCase()+level.slice(1)} rendering enabled`);
   }
 
@@ -171,32 +171,159 @@
     if(!window.THREE||state.lite)return;
     const texture=new THREE.TextureLoader().load("https://unpkg.com/three-globe/example/img/earth-clouds.png");
     const geometry=new THREE.SphereGeometry(100.55,state.quality==="ultra"?96:64,state.quality==="ultra"?96:64);
-    const material=new THREE.MeshPhongMaterial({map:texture,transparent:true,opacity:.34,depthWrite:false,blending:THREE.AdditiveBlending});
+    const material=new THREE.MeshPhongMaterial({map:texture,transparent:true,opacity:.42,depthWrite:false,blending:THREE.AdditiveBlending});
     const clouds=new THREE.Mesh(geometry,material);clouds.renderOrder=2;world.scene().add(clouds);state.clouds=clouds;
   }
   function buildLighting(world){
     if(!window.THREE)return;
-    const material=world.globeMaterial();material.bumpScale=8;material.shininess=4;material.specular=new THREE.Color("#2b4f75");
+    const material=world.globeMaterial();material.bumpScale=10;material.shininess=12;material.specular=new THREE.Color("#6aa8ff");
     world.scene().children.filter(o=>o.isLight).forEach(light=>{if(light.type==="AmbientLight")light.intensity=.62});
-    const sun=new THREE.DirectionalLight(0xffffff,2.15);sun.position.set(-180,80,120);world.scene().add(sun);state.sun=sun;
+    const sun=new THREE.DirectionalLight(0xffffff,2.15);
+    sun.target.position.set(0,0,0);
+    world.scene().add(sun);
+    world.scene().add(sun.target);
+    state.sun=sun;
+    updateSunLight(true);
     const rim=new THREE.DirectionalLight(0x5bc8ff,.72);rim.position.set(140,-40,-120);world.scene().add(rim);
   }
+
+
+
+  // =====================================================
+  // LIVE EARTH DAY / NIGHT MATERIAL
+  // =====================================================
+  function buildDayNightMaterial(world){
+    if(!window.THREE)return;
+    const material=world.globeMaterial();
+    const loader=new THREE.TextureLoader();
+    const nightTexture=loader.load(
+      "https://unpkg.com/three-globe/example/img/earth-night.jpg",
+      texture=>{
+        if("colorSpace" in texture&&THREE.SRGBColorSpace)texture.colorSpace=THREE.SRGBColorSpace;
+        else if("encoding" in texture&&THREE.sRGBEncoding)texture.encoding=THREE.sRGBEncoding;
+        texture.needsUpdate=true;
+      },
+      undefined,
+      error=>console.warn("Atlas Live Earth: night texture could not load.",error)
+    );
+    nightTexture.wrapS=THREE.RepeatWrapping;
+    nightTexture.wrapT=THREE.ClampToEdgeWrapping;
+    state.nightTexture=nightTexture;
+
+    material.onBeforeCompile=shader=>{
+      shader.uniforms.atlasNightTexture={value:nightTexture};
+      shader.uniforms.atlasSunDirection={value:new THREE.Vector3(1,0,0)};
+      shader.uniforms.atlasTwilightWidth={value:.12};
+      shader.uniforms.atlasNightStrength={value:state.lite?.72:1.18};
+
+      shader.vertexShader=shader.vertexShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+          varying vec3 vAtlasWorldNormal;
+          varying vec2 vAtlasUv;`
+        )
+        .replace(
+          "#include <defaultnormal_vertex>",
+          `#include <defaultnormal_vertex>
+          vAtlasWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
+          vAtlasUv = uv;`
+        );
+
+      shader.fragmentShader=shader.fragmentShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+          uniform sampler2D atlasNightTexture;
+          uniform vec3 atlasSunDirection;
+          uniform float atlasTwilightWidth;
+          uniform float atlasNightStrength;
+          varying vec3 vAtlasWorldNormal;
+          varying vec2 vAtlasUv;`
+        )
+        .replace(
+          "#include <dithering_fragment>",
+          `vec3 atlasNormal = normalize(vAtlasWorldNormal);
+          float atlasSolarDot = dot(atlasNormal, normalize(atlasSunDirection));
+          float atlasDay = smoothstep(-atlasTwilightWidth, atlasTwilightWidth * 1.55, atlasSolarDot);
+          float atlasNight = 1.0 - smoothstep(-atlasTwilightWidth * 1.35, atlasTwilightWidth * .25, atlasSolarDot);
+          float atlasTwilight = 1.0 - smoothstep(0.0, atlasTwilightWidth * 1.8, abs(atlasSolarDot));
+          vec3 atlasNightColor = texture2D(atlasNightTexture, vAtlasUv).rgb;
+          vec3 atlasBaseColor = gl_FragColor.rgb * mix(.13, 1.0, atlasDay);
+          vec3 atlasCityLights = atlasNightColor * atlasNight * atlasNightStrength;
+          vec3 atlasSunsetGlow = vec3(1.0, .24, .045) * atlasTwilight * .07;
+          gl_FragColor.rgb = atlasBaseColor + atlasCityLights + atlasSunsetGlow;
+          #include <dithering_fragment>`
+        );
+
+      state.dayNightShader=shader;
+      updateSunLight(true);
+    };
+
+    material.customProgramCacheKey=()=>"thepetgrid-live-earth-v1";
+    material.needsUpdate=true;
+  }
+
+  // =====================================================
+  // REAL SOLAR POSITION
+  // =====================================================
+  function getSolarPosition(date=new Date()){
+    const utcHours=date.getUTCHours()+date.getUTCMinutes()/60+date.getUTCSeconds()/3600;
+    const subsolarLongitude=180-utcHours*15;
+    const startOfYear=Date.UTC(date.getUTCFullYear(),0,0);
+    const dayOfYear=(date.getTime()-startOfYear)/86400000;
+    const solarDeclination=-23.44*Math.cos((2*Math.PI/365)*(dayOfYear+10));
+    return {latitude:solarDeclination,longitude:subsolarLongitude};
+  }
+
+  function updateSunLight(force=false){
+    if(!state.sun||!window.THREE)return;
+    const now=Date.now();
+    if(!force&&now-(updateSunLight.lastUpdate||0)<60000)return;
+    updateSunLight.lastUpdate=now;
+
+    const solarPosition=getSolarPosition(new Date(now));
+    const latitude=THREE.MathUtils.degToRad(solarPosition.latitude);
+    const longitude=THREE.MathUtils.degToRad(solarPosition.longitude);
+    const distance=240;
+
+    state.sun.position.set(
+      Math.cos(latitude)*Math.sin(longitude)*distance,
+      Math.sin(latitude)*distance,
+      Math.cos(latitude)*Math.cos(longitude)*distance
+    );
+    state.sun.target.position.set(0,0,0);
+    state.sun.target.updateMatrixWorld();
+
+    if(state.dayNightShader?.uniforms?.atlasSunDirection){
+      state.dayNightShader.uniforms.atlasSunDirection.value
+        .copy(state.sun.position)
+        .normalize();
+      state.dayNightShader.uniforms.atlasNightStrength.value=state.lite?.72:1.18;
+    }
+  }
+
   function animatePlanet(){
-    const tick=()=>{if(state.clouds&&state.rotating&&!state.lite)state.clouds.rotation.y+=.00023;if(state.sun){const day=Date.now()/86400000*Math.PI*2;state.sun.position.set(Math.cos(day)*220,60,Math.sin(day)*220)}requestAnimationFrame(tick)};tick();
+    const tick=()=>{
+      if(state.clouds&&state.rotating&&!state.lite)state.clouds.rotation.y+=.00030;
+      updateSunLight();
+      requestAnimationFrame(tick);
+    };
+    tick();
   }
 
   function makeGlobe(){
     if(typeof window.Globe!=="function"||!supportsWebGL())throw new Error("WebGL globe unavailable");
     const world=window.Globe()(ui.stage).width(innerWidth).height(innerHeight).backgroundColor("rgba(0,0,0,0)")
-      .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-night.jpg").bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
-      .showAtmosphere(true).atmosphereColor("#5bc8ff").atmosphereAltitude(.21).pointsData(state.pets).pointLat("latitude").pointLng("longitude").pointColor(pointColor)
+      .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg").bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+       .showAtmosphere(true).atmosphereColor("#7fe8ff").atmosphereAltitude(.27).pointsData(state.pets).pointLat("latitude").pointLng("longitude").pointColor(pointColor)
       .pointAltitude(pointAltitude).pointRadius(p=>p===state.selectedPet?(state.lite?.42:.62):(state.lite?.2:state.quality==="ultra"?.38:.32)).pointsMerge(false).pointsTransitionDuration(900)
       .ringsData(state.rings).ringLat("latitude").ringLng("longitude").ringColor(ringColor).ringMaxRadius("ringMax").ringPropagationSpeed("ringSpeed").ringRepeatPeriod("ringPeriod")
       .pointLabel(point=>`<div class="living-cell-tooltip"><img src="${escapeHtml(petImage(point))}" alt=""><div><b>${escapeHtml(point.name||"Pet")}</b><span>${escapeHtml([point.type,point.city,point.country].filter(Boolean).join(" · "))}</span></div></div>`)
       .onPointClick(point=>{world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:.62},1450);showPetFocus(point);toast(`${point.name||"A pet"} · ${point.city||point.country||"ThePetGrid"}`);playTone(520,.08)})
       .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:1.38},1050));
     world.controls().autoRotate=true;world.controls().autoRotateSpeed=.29;world.controls().enableDamping=true;world.controls().dampingFactor=.075;world.controls().minDistance=118;world.controls().maxDistance=430;
-    world.pointOfView({lat:18,lng:18,altitude:2.25},0);buildLighting(world);buildCloudLayer(world);animatePlanet();addEventListener("resize",()=>world.width(innerWidth).height(innerHeight),{passive:true});state.globe=world;
+    world.pointOfView({lat:18,lng:18,altitude:2.25},0);buildLighting(world);buildDayNightMaterial(world);buildCloudLayer(world);animatePlanet();addEventListener("resize",()=>world.width(innerWidth).height(innerHeight),{passive:true});state.globe=world;
   }
 
   function supportsWebGL(){try{const c=document.createElement("canvas");return !!(window.WebGLRenderingContext&&(c.getContext("webgl")||c.getContext("experimental-webgl")))}catch{return false}}
@@ -212,16 +339,78 @@
   }
 
   function monitorPerformance(){
-    let frames=0,last=performance.now();const loop=now=>{frames++;if(now-last>=1000){const fps=Math.round(frames*1000/(now-last));ui.fps.textContent=`${fps} FPS`;state.frameSamples.push(fps);if(state.frameSamples.length>8)state.frameSamples.shift();const avg=state.frameSamples.reduce((a,b)=>a+b,0)/state.frameSamples.length;if(avg<32&&state.quality!=="lite")setQuality("lite",true);else if(avg<46&&state.quality==="ultra")setQuality("high",true);frames=0;last=now}requestAnimationFrame(loop)};requestAnimationFrame(loop)
+    let frames=0;
+    let last=performance.now();
+
+    const loop=now=>{
+      frames++;
+
+      if(now-last>=1000){
+        const fps=Math.round(frames*1000/(now-last));
+        ui.fps.textContent=`${fps} FPS`;
+
+        state.frameSamples.push(fps);
+        if(state.frameSamples.length>8)state.frameSamples.shift();
+
+        const avg=
+          state.frameSamples.reduce((total,value)=>total+value,0)/
+          state.frameSamples.length;
+
+        if(!state.manualQuality){
+          if(avg<32&&state.quality!=="lite"){
+            setQuality("lite",true);
+          }else if(avg<46&&state.quality==="ultra"){
+            setQuality("high",true);
+          }
+        }
+
+        frames=0;
+        last=now;
+      }
+
+      requestAnimationFrame(loop);
+    };
+
+    requestAnimationFrame(loop);
   }
 
   function ensureAudio(){if(state.audio)return state.audio;const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return null;state.audio=new AudioCtx();return state.audio}
   function playTone(frequency=.2,duration=.1){if(!state.sound)return;const ctx=ensureAudio();if(!ctx)return;const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=frequency;gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.035,ctx.currentTime+.015);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);osc.connect(gain).connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration+.02)}
 
   function bind(){
+    ui.focusLink?.addEventListener("click", () => {
+      if (!state.selectedPet) return;
+
+      try {
+        const view = state.globe?.pointOfView?.() || {};
+
+        sessionStorage.setItem(
+          "thepetgrid_atlas_state",
+          JSON.stringify({
+            petId: state.selectedPet.id ?? null,
+            latitude: Number(state.selectedPet.latitude),
+            longitude: Number(state.selectedPet.longitude),
+            camera: {
+              lat: Number(view.lat),
+              lng: Number(view.lng),
+              altitude: Number(view.altitude)
+            },
+            timestamp: Date.now()
+          })
+        );
+      } catch (error) {
+        console.warn("Atlas state could not be saved.", error);
+      }
+    });
+
     ui.explore.addEventListener("click",()=>{state.globe?.pointOfView({lat:20,lng:12,altitude:1.22},1800);playTone(420,.16)});ui.reset.addEventListener("click",()=>{window.location.href="upload.html"});
     ui.motion.addEventListener("click",()=>{state.rotating=!state.rotating;if(state.globe)state.globe.controls().autoRotate=state.rotating;ui.motion.setAttribute("aria-pressed",String(!state.rotating));ui.motion.textContent=state.rotating?"Pause motion":"Resume motion"});
-    ui.lite.addEventListener("click",()=>{setQuality(state.lite?"high":"lite",true);ui.lite.setAttribute("aria-pressed",String(state.lite));ui.lite.textContent=state.lite?"Full effects":"Lite mode"});
+    ui.lite?.addEventListener("click",()=>{
+      state.manualQuality=true;
+      setQuality(state.lite?"high":"lite",true);
+      ui.lite.setAttribute("aria-pressed",String(state.lite));
+      ui.lite.textContent=state.lite?"Full effects":"Lite mode";
+    });
     ui.sound.addEventListener("click",()=>{state.sound=!state.sound;ui.sound.setAttribute("aria-pressed",String(state.sound));ui.sound.textContent=state.sound?"Sound on":"Sound off";if(state.sound){ensureAudio()?.resume();playTone(440,.12)}toast(state.sound?"Ambient interaction sound enabled":"Sound disabled")});
     ui.modes.forEach(button=>button.addEventListener("click",()=>applyMode(button.dataset.worldMode)));ui.closeFocus?.addEventListener("click",hidePetFocus);ui.exploreNext?.addEventListener("click",exploreNextStory);ui.eventsToggle?.addEventListener("click",toggleWorldEvents);ui.eventsList?.addEventListener("click",event=>{const button=event.target.closest("[data-world-event-id]");if(!button)return;focusWorldEvent(state.events.find(item=>item.id===button.dataset.worldEventId));});document.addEventListener("keydown",event=>{if(event.key==="Escape")hidePetFocus();if(event.key.toLowerCase()==="n"&&!ui.focusCard?.hidden)exploreNextStory()});
   }

@@ -4,6 +4,21 @@
 // ==================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+let atlasState = null;
+
+try {
+
+    atlasState = JSON.parse(
+
+        sessionStorage.getItem("thepetgrid_atlas_state")
+
+    );
+
+} catch (_) {
+
+    atlasState = null;
+
+}
 
     // ==================================================
     // ELEMENTS
@@ -77,6 +92,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const reportLostButton =
         document.getElementById("reportLostPetButton");
+
+    const atlasStoryElement = document.getElementById("atlasPetStory");
+    const atlasStoryTitleElement = document.getElementById("atlasPetStoryTitle");
+    const atlasStoryTextElement = document.getElementById("atlasPetStoryText");
+    const atlasJoinedElement = document.getElementById("atlasPetJoined");
+    const atlasHomeElement = document.getElementById("atlasPetHome");
+    const atlasOwnerElement = document.getElementById("atlasPetOwner");
+    const atlasCommunityElement = document.getElementById("atlasPetCommunity");
+    const atlasTimelineElement = document.getElementById("atlasPetTimeline");
+
+    const atlasConnectionElement = document.getElementById("atlasPetConnection");
+    const atlasConnectionTextElement = document.getElementById("atlasPetConnectionText");
+    const atlasViewButton = document.getElementById("viewPetOnAtlas");
+    const atlasMapTitleElement = document.getElementById("atlasPetMapTitle");
+    const atlasMapFrame = document.getElementById("atlasPetMapFrame");
+    const atlasMapFallback = document.getElementById("atlasPetMapFallback");
+    const atlasMapFallbackTitle = document.getElementById("atlasPetMapFallbackTitle");
+    const atlasMapCaption = document.getElementById("atlasPetMapCaption");
+    const atlasGalleryCard = document.getElementById("atlasPetGalleryCard");
+    const atlasGalleryElement = document.getElementById("atlasPetGallery");
+    const atlasNearbyPetsElement = document.getElementById("atlasNearbyPets");
 
 
     // ==================================================
@@ -192,6 +228,9 @@ document.addEventListener("DOMContentLoaded", () => {
             followers: 0,
             gifts: 0,
             createdAt: row.created_at || "",
+            latitude: Number(row.latitude),
+            longitude: Number(row.longitude),
+            gallery: Array.isArray(row.gallery) ? row.gallery : [],
             isCloudPet: true
         };
     }
@@ -285,6 +324,261 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
     }
+
+
+    function escapeAtlasHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, character => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        })[character]);
+    }
+
+    function formatAtlasDate(value) {
+        if (!value) return "Date unavailable";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "Date unavailable";
+        return new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit", month: "short", year: "numeric"
+        }).format(date);
+    }
+
+    function renderAtlasStory(pet, followers) {
+        if (!atlasStoryElement || !atlasTimelineElement) return;
+
+        const name = pet.name || "This pet";
+        const home = [pet.city, pet.country].filter(Boolean).join(", ") || "Location unavailable";
+        const owner = pet.owner || "ThePetGrid Member";
+        const joined = formatAtlasDate(pet.createdAt);
+        const bio = pet.bio && pet.bio !== "No story has been added yet."
+            ? pet.bio
+            : `${name} is one of the living stories shining from ${home} in the world of ThePetGrid.`;
+
+        atlasStoryTitleElement.textContent = `${name}'s living story`;
+        atlasStoryTextElement.textContent = bio;
+        atlasJoinedElement.textContent = joined;
+        atlasHomeElement.textContent = home;
+        atlasOwnerElement.textContent = owner;
+        atlasCommunityElement.textContent = `${Number(followers || 0).toLocaleString("en-GB")} followers`;
+
+        const timeline = [{
+            title: "Joined ThePetGrid",
+            description: `${name}'s story became part of the living world.`,
+            date: joined,
+            tone: ""
+        }];
+
+        const status = String(pet.status || "new").toLowerCase();
+        if (status === "lost") timeline.push({
+            title: "Lost signal active",
+            description: `The community is helping ${name} find the way home.`,
+            date: "Current",
+            tone: "is-status"
+        });
+        else if (status === "memorial") timeline.push({
+            title: "In loving memory",
+            description: `${name}'s light continues to shine in the Memorial World.`,
+            date: "Forever",
+            tone: "is-memorial"
+        });
+        else if (status === "adopted") timeline.push({
+            title: "A home was found",
+            description: `${name}'s journey reached a new chapter.`,
+            date: "Milestone",
+            tone: "is-status"
+        });
+        else timeline.push({
+            title: "Living story active",
+            description: `${name}'s journey continues with the ThePetGrid community.`,
+            date: "Now",
+            tone: "is-status"
+        });
+
+        atlasTimelineElement.innerHTML = timeline.map(item => `
+            <li class="atlas-pet-timeline__item ${item.tone}">
+                <span class="atlas-pet-timeline__dot" aria-hidden="true"></span>
+                <div class="atlas-pet-timeline__content">
+                    <strong>${escapeAtlasHtml(item.title)}</strong>
+                    <span>${escapeAtlasHtml(item.description)}</span>
+                </div>
+                <time>${escapeAtlasHtml(item.date)}</time>
+            </li>
+        `).join("");
+
+        atlasStoryElement.hidden = false;
+    }
+
+
+    // ==================================================
+    // ATLAS CONNECTION
+    // ==================================================
+
+    function validCoordinate(value) {
+        return Number.isFinite(Number(value));
+    }
+
+    function galleryImagesForPet(pet) {
+        const values = [
+            ...(Array.isArray(pet.gallery) ? pet.gallery : []),
+            ...(Array.isArray(pet.images) ? pet.images : []),
+            pet.image
+        ].map(value => String(value || "").trim()).filter(Boolean);
+
+        return [...new Set(values)];
+    }
+
+    function atlasFocusPayload(pet) {
+        return {
+            id: pet.id,
+            name: pet.name || "Pet",
+            latitude: validCoordinate(pet.latitude) ? Number(pet.latitude) : null,
+            longitude: validCoordinate(pet.longitude) ? Number(pet.longitude) : null,
+            city: pet.city || "",
+            country: pet.country || ""
+        };
+    }
+
+    function renderAtlasMap(pet) {
+        const location = [pet.city, pet.country].filter(Boolean).join(", ") || "Location unavailable";
+        const hasCoordinates = validCoordinate(pet.latitude) && validCoordinate(pet.longitude);
+
+        atlasMapTitleElement.textContent = location;
+        atlasMapCaption.textContent = hasCoordinates ? `Approximate location · ${location}` : location;
+        atlasMapFallbackTitle.textContent = location;
+
+        if (!hasCoordinates) {
+            atlasMapFrame.hidden = true;
+            atlasMapFrame.removeAttribute("src");
+            atlasMapFallback.hidden = false;
+            return;
+        }
+
+        const latitude = Number(pet.latitude);
+        const longitude = Number(pet.longitude);
+        const bbox = [
+            longitude - 0.12, latitude - 0.08,
+            longitude + 0.12, latitude + 0.08
+        ].join(",");
+
+        const params = new URLSearchParams({
+            bbox,
+            layer: "mapnik",
+            marker: `${latitude},${longitude}`
+        });
+
+        atlasMapFrame.src = `https://www.openstreetmap.org/export/embed.html?${params.toString()}`;
+        atlasMapFrame.hidden = false;
+        atlasMapFallback.hidden = true;
+    }
+
+    function renderAtlasGallery(pet) {
+        const images = galleryImagesForPet(pet);
+
+        if (images.length < 2) {
+            atlasGalleryCard.hidden = true;
+            atlasGalleryElement.innerHTML = "";
+            return;
+        }
+
+        atlasGalleryCard.hidden = false;
+        atlasGalleryElement.innerHTML = images.slice(0, 8).map((image, index) => `
+            <button class="atlas-gallery-image" type="button" data-atlas-gallery-image="${escapeAtlasHtml(image)}" aria-label="Open photo ${index + 1}">
+                <img src="${escapeAtlasHtml(image)}" alt="${escapeAtlasHtml(pet.name || "Pet")} photo ${index + 1}" loading="lazy">
+            </button>
+        `).join("");
+    }
+
+    async function loadNearbyPets(pet) {
+        atlasNearbyPetsElement.innerHTML =
+            '<p class="atlas-nearby-pets__empty">Looking for nearby stories…</p>';
+
+        let nearby = [];
+        const client = window.ThePetGridSupabase?.client;
+
+        if (client) {
+            try {
+                let query = client
+                    .from("pets")
+                    .select("id,name,type,city,country,image_url")
+                    .neq("id", String(pet.id))
+                    .limit(6);
+
+                if (pet.city) query = query.eq("city", pet.city);
+                else if (pet.country) query = query.eq("country", pet.country);
+
+                const { data, error } = await query;
+                if (error) throw error;
+                nearby = Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.warn("ThePetGrid: nearby pets could not load.", error);
+            }
+        } else if (window.PetStore?.getAll) {
+            nearby = window.PetStore.getAll()
+                .filter(item =>
+                    String(item.id) !== String(pet.id) &&
+                    ((pet.city && item.city === pet.city) ||
+                     (!pet.city && pet.country && item.country === pet.country))
+                )
+                .slice(0, 6);
+        }
+
+        if (!nearby.length) {
+            atlasNearbyPetsElement.innerHTML =
+                '<p class="atlas-nearby-pets__empty">No nearby pet stories are available yet.</p>';
+            return;
+        }
+
+        atlasNearbyPetsElement.innerHTML = nearby.map(item => {
+            const image = item.image_url || item.image || "../assets/avatar.png";
+            const location = [item.city, item.country].filter(Boolean).join(", ") || "ThePetGrid";
+            return `
+                <a class="atlas-nearby-pet" href="pet.html?id=${encodeURIComponent(item.id)}">
+                    <img src="${escapeAtlasHtml(image)}" alt="${escapeAtlasHtml(item.name || "Pet")}" loading="lazy">
+                    <span>
+                        <strong>${escapeAtlasHtml(item.name || "Pet")}</strong>
+                        <small>${escapeAtlasHtml(location)}</small>
+                    </span>
+                    <b aria-hidden="true">→</b>
+                </a>
+            `;
+        }).join("");
+    }
+
+    function renderAtlasConnection(pet) {
+        const location = [pet.city, pet.country].filter(Boolean).join(", ") || "the world";
+        atlasConnectionTextElement.textContent =
+            `${pet.name || "This pet"} is part of the living world from ${location}.`;
+
+        const atlasUrl = new URL("world-experience.html", window.location.href);
+        atlasUrl.searchParams.set("petId", String(pet.id));
+        atlasViewButton.href = atlasUrl.pathname + atlasUrl.search;
+
+        atlasViewButton.onclick = () => {
+            try {
+                sessionStorage.setItem(
+                    "thepetgrid_atlas_focus_pet",
+                    JSON.stringify(atlasFocusPayload(pet))
+                );
+            } catch (_) {}
+        };
+
+        renderAtlasMap(pet);
+        renderAtlasGallery(pet);
+        loadNearbyPets(pet);
+        atlasConnectionElement.hidden = false;
+    }
+
+    atlasGalleryElement?.addEventListener("click", event => {
+        const button = event.target.closest("[data-atlas-gallery-image]");
+        if (!button) return;
+
+        const image = button.dataset.atlasGalleryImage;
+        if (!image) return;
+
+        imageElement.src = image;
+        window.scrollTo({
+            top: profileElement.getBoundingClientRect().top + window.scrollY - 90,
+            behavior: "smooth"
+        });
+    });
 
 
     // ==================================================
@@ -418,6 +712,9 @@ document.addEventListener("DOMContentLoaded", () => {
         updateFavoriteButton();
 
         updateFollowButton();
+
+        renderAtlasStory(pet, followers);
+        renderAtlasConnection(pet);
 
         document.title =
             `${pet.name || "Pet"} — ThePetGrid`;
