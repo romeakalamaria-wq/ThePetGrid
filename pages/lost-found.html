@@ -118,6 +118,30 @@
   </section>
 </main>
 
+  <div class="lf-simple-sighting" id="lfSimpleSighting" hidden>
+    <div class="lf-simple-sighting__backdrop" data-close-simple-sighting></div>
+    <section class="lf-simple-sighting__card" role="dialog" aria-modal="true" aria-labelledby="lfSimpleSightingTitle">
+      <button class="lf-simple-sighting__close" type="button" aria-label="Close" data-close-simple-sighting>×</button>
+      <span class="lf-eyebrow">👁 Community sighting</span>
+      <h2 id="lfSimpleSightingTitle">I saw this pet</h2>
+      <p class="lf-simple-sighting__intro">Put the point on the map, check the time and submit.</p>
+      <form id="lfSimpleSightingForm">
+        <input type="hidden" id="lfSimpleSightingReportId">
+        <input type="hidden" id="lfSimpleSightingLatitude">
+        <input type="hidden" id="lfSimpleSightingLongitude">
+        <div class="lf-simple-sighting__pet" id="lfSimpleSightingPet">Lost pet</div>
+        <label><span>Where did you see it? *</span><div id="lfSimpleSightingMap" class="lf-simple-sighting__map" aria-label="Choose the sighting location"></div><small id="lfSimpleSightingLocationStatus">Tap the map to place the point.</small></label>
+        <button class="lf-simple-sighting__location" id="lfSimpleUseLocation" type="button">📍 Use my current location</button>
+        <label><span>When? *</span><input id="lfSimpleSightingTime" type="datetime-local" required></label>
+        <label><span>Small note <small>(optional)</small></span><textarea id="lfSimpleSightingNote" rows="3" maxlength="280" placeholder="Example: walking toward the park"></textarea></label>
+        <button class="lf-simple-sighting__photo-toggle" id="lfSimplePhotoToggle" type="button">+ Add photo</button>
+        <label id="lfSimplePhotoField" hidden><span>Photo <small>(optional)</small></span><input id="lfSimpleSightingPhoto" type="file" accept="image/*"></label>
+        <p class="lf-simple-sighting__message" id="lfSimpleSightingMessage" hidden></p>
+        <button class="lf-simple-sighting__submit" type="submit">Submit sighting</button>
+      </form>
+    </section>
+  </div>
+
 <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>

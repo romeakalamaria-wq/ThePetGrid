@@ -1,0 +1,47 @@
+/* ==================================================
+   THEPETGRID — ATLAS STATUS MARKERS
+================================================== */
+
+.atlas-memorial-marker{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:2px solid rgba(255,255,255,.84);
+  border-radius:50%;
+  background:linear-gradient(145deg,#c9ced8,#747d90);
+  color:#fff;
+  font:inherit;
+  font-size:1rem;
+  cursor:pointer;
+  box-shadow:
+    0 0 0 5px rgba(174,181,197,.13),
+    0 10px 28px rgba(0,0,0,.32);
+  transform:translate(-50%,-50%);
+  transition:transform .2s ease,box-shadow .2s ease
+}
+
+.atlas-memorial-marker:hover{
+  transform:translate(-50%,-50%) scale(1.12);
+  box-shadow:
+    0 0 0 7px rgba(174,181,197,.17),
+    0 14px 34px rgba(0,0,0,.4)
+}
+
+.world-experience.is-memorial .atlas-memorial-marker{
+  animation:atlasMemorialPulse 2.8s ease-in-out infinite
+}
+
+@keyframes atlasMemorialPulse{
+  0%,100%{
+    box-shadow:
+      0 0 0 5px rgba(174,181,197,.12),
+      0 10px 28px rgba(0,0,0,.32)
+  }
+  50%{
+    box-shadow:
+      0 0 0 11px rgba(174,181,197,.03),
+      0 12px 32px rgba(0,0,0,.38)
+  }
+}

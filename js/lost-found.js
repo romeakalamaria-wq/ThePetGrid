@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "thepetgrid_lost_found_reports";
   const PET_DRAFT_KEY = "thepetgrid_lost_report_pet";
+  const SIGHTINGS_KEY = "thepetgrid_lost_pet_sightings";
   const PLACEHOLDER = "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=82";
   const DEFAULT_CENTER = [23.7275, 37.9838];
   const demoReports = [
@@ -26,6 +27,19 @@
   const suggestions = document.querySelector("#reportLocationSuggestions");
   const locationStatus = document.querySelector("#reportLocationStatus");
   const params = new URLSearchParams(location.search);
+  const simpleSightingModal = document.querySelector("#lfSimpleSighting");
+  const simpleSightingForm = document.querySelector("#lfSimpleSightingForm");
+  const simpleSightingReportId = document.querySelector("#lfSimpleSightingReportId");
+  const simpleSightingLatitude = document.querySelector("#lfSimpleSightingLatitude");
+  const simpleSightingLongitude = document.querySelector("#lfSimpleSightingLongitude");
+  const simpleSightingPet = document.querySelector("#lfSimpleSightingPet");
+  const simpleSightingTime = document.querySelector("#lfSimpleSightingTime");
+  const simpleSightingNote = document.querySelector("#lfSimpleSightingNote");
+  const simpleSightingPhoto = document.querySelector("#lfSimpleSightingPhoto");
+  const simpleSightingPhotoToggle = document.querySelector("#lfSimplePhotoToggle");
+  const simpleSightingPhotoField = document.querySelector("#lfSimplePhotoField");
+  const simpleSightingMessage = document.querySelector("#lfSimpleSightingMessage");
+  const simpleSightingLocationStatus = document.querySelector("#lfSimpleSightingLocationStatus");
 
   let imageData = "";
   let currentFilter = "all";
@@ -38,6 +52,8 @@
   let cloudReports = [];
   let currentUserId = null;
   let reportsChannel = null;
+  let simpleSightingMap = null;
+  let simpleSightingMarker = null;
 
   const safe = value => String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
   const numberOrNull = value => {
@@ -45,6 +61,20 @@
     const number = Number(value);
     return Number.isFinite(number) ? number : null;
   };
+
+
+  function storedSightings(){try{const value=JSON.parse(localStorage.getItem(SIGHTINGS_KEY)||"[]");return Array.isArray(value)?value:[]}catch(_){return[]}}
+  function saveSighting(sighting){const sightings=storedSightings();sightings.unshift(sighting);localStorage.setItem(SIGHTINGS_KEY,JSON.stringify(sightings));window.dispatchEvent(new CustomEvent("thepetgrid:sightings-changed",{detail:{sighting,sightings}}))}
+  function reportSightings(reportId){return storedSightings().filter(item=>String(item.reportId)===String(reportId)).sort((a,b)=>Date.parse(b.seenAt||0)-Date.parse(a.seenAt||0))}
+  function relativeSightingTime(value){const time=Date.parse(value||"");if(!Number.isFinite(time))return"just now";const diff=Math.max(0,Date.now()-time),minutes=Math.floor(diff/60000),hours=Math.floor(diff/3600000),days=Math.floor(diff/86400000);if(minutes<1)return"just now";if(minutes<60)return`${minutes} min ago`;if(hours<24)return`${hours} hr${hours===1?"":"s"} ago`;return`${days} day${days===1?"":"s"} ago`}
+  function localDateTimeValue(date=new Date()){const offset=date.getTimezoneOffset();return new Date(date.getTime()-offset*60000).toISOString().slice(0,16)}
+  function setSimpleSightingMessage(text,type=""){if(!simpleSightingMessage)return;simpleSightingMessage.textContent=text;simpleSightingMessage.className=`lf-simple-sighting__message${type?` is-${type}`:""}`;simpleSightingMessage.hidden=!text}
+  function simpleSightingMarkerElement(){const element=document.createElement("div");element.className="lf-simple-sighting-marker";element.textContent="👁";return element}
+  function setSimpleSightingPoint(lat,lng,zoom=16){if(!simpleSightingMap)return;const latitude=Number(lat),longitude=Number(lng);if(!Number.isFinite(latitude)||!Number.isFinite(longitude))return;simpleSightingLatitude.value=latitude.toFixed(6);simpleSightingLongitude.value=longitude.toFixed(6);if(!simpleSightingMarker){simpleSightingMarker=new maplibregl.Marker({element:simpleSightingMarkerElement(),anchor:"center"}).setLngLat([longitude,latitude]).addTo(simpleSightingMap)}else simpleSightingMarker.setLngLat([longitude,latitude]);simpleSightingMap.easeTo({center:[longitude,latitude],zoom:Math.max(simpleSightingMap.getZoom(),zoom),duration:450});simpleSightingLocationStatus.textContent="Location selected."}
+  function ensureSimpleSightingMap(report){if(simpleSightingMap){setTimeout(()=>simpleSightingMap.resize(),50);return}if(!window.ThePetGridMapCore?.MapManager)return;const lat=numberOrNull(report?.latitude),lng=numberOrNull(report?.longitude),center=lat!==null&&lng!==null?[lng,lat]:DEFAULT_CENTER;const manager=new window.ThePetGridMapCore.MapManager({container:"lfSimpleSightingMap",center,zoom:lat!==null?14:5,minZoom:2,maxZoom:18,navigation:true});simpleSightingMap=manager.map;simpleSightingMap.on("click",event=>setSimpleSightingPoint(event.lngLat.lat,event.lngLat.lng));simpleSightingMap.on("load",()=>setTimeout(()=>simpleSightingMap.resize(),80))}
+  function openSimpleSighting(reportId){const report=allReports().find(item=>String(item.id)===String(reportId));if(!report||report.status!=="lost"||report.resolved)return;simpleSightingForm.reset();simpleSightingReportId.value=String(report.id);simpleSightingPet.textContent=`👁 Sighting for ${report.name||"this pet"}`;simpleSightingTime.value=localDateTimeValue();simpleSightingLatitude.value="";simpleSightingLongitude.value="";simpleSightingPhotoField.hidden=true;setSimpleSightingMessage("");simpleSightingLocationStatus.textContent="Tap the map to place the point.";if(simpleSightingMarker){simpleSightingMarker.remove();simpleSightingMarker=null}simpleSightingModal.hidden=false;document.body.style.overflow="hidden";setTimeout(()=>{ensureSimpleSightingMap(report);simpleSightingMap?.resize();const lat=numberOrNull(report.latitude),lng=numberOrNull(report.longitude);if(lat!==null&&lng!==null)simpleSightingMap?.easeTo({center:[lng,lat],zoom:14,duration:0})},80)}
+  function closeSimpleSighting(){simpleSightingModal.hidden=true;document.body.style.overflow=""}
+  async function fileToDataUrl(file){if(!file)return"";if(!file.type.startsWith("image/"))throw new Error("Choose an image file.");if(file.size>4*1024*1024)throw new Error("The image must be smaller than 4 MB.");return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||""));reader.onerror=()=>reject(new Error("The photo could not be read."));reader.readAsDataURL(file)})}
 
   function storedReports() {
     try {
@@ -304,6 +334,7 @@
       reportMarkers.push(marker);
       bounds.extend([lng, lat]);
     });
+    storedSightings().forEach(sighting=>{const lat=numberOrNull(sighting.latitude),lng=numberOrNull(sighting.longitude);if(lat===null||lng===null)return;const element=markerElement("lf-sighting-marker","👁");const popup=new maplibregl.Popup({offset:18}).setHTML(`<div class="lf-map-popup"><strong>Community sighting</strong><span>${safe(relativeSightingTime(sighting.seenAt))}</span><span>${safe(sighting.note||"No note added")}</span></div>`);const marker=new maplibregl.Marker({element,anchor:"center"}).setLngLat([lng,lat]).setPopup(popup).addTo(reportsMap);reportMarkers.push(marker);bounds.extend([lng,lat])});
     if (!bounds.isEmpty()) reportsMap.fitBounds(bounds, { padding:60, maxZoom:12, duration:500 });
   }
 
@@ -338,7 +369,7 @@
       const contact = currentUserId && !item.resolved
         ? `${item.phone ? `<a class="lf-card__action" href="tel:${safe(item.phone)}">📞 Call reporter</a>` : ""}${item.email ? `<a class="lf-card__action" href="mailto:${safe(item.email)}?subject=${encodeURIComponent(`ThePetGrid: ${item.name || "pet report"}`)}">✉️ Email</a>` : ""}`
         : (!currentUserId && !item.resolved ? `<a class="lf-card__action" href="./login.html">🔒 Sign in for contact</a>` : "");
-      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${state.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p><div class="lf-card__footer"><span>${item.resolved ? "Alert closed" : "Community alert"}</span><span class="lf-date">${safe(item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" && !item.resolved ? `<button class="lf-card__action lf-card__action--sighting" type="button" data-report-sighting="${safe(item.id)}" data-pet-name="${safe(item.name)}">👁 I saw this pet</button>` : ""}${contact}<button class="lf-card__action lf-card__action--share" type="button" data-share-url="${safe(`${location.origin}${location.pathname}?reportId=${encodeURIComponent(item.id)}#reports`)}" data-share-title="${safe(`Help find ${item.name || "this lost pet"}`)}" data-share-text="${safe(`🚨 ${item.name || "A pet"} is missing near ${item.address || item.city || "this area"}. Please help.`)}">📤 Share</button>${item.status === "lost" && canResolve ? `<button class="lf-card__action lf-card__action--resolved" type="button" data-resolve-report="${safe(item.id)}" ${item.resolved ? "disabled" : ""}>${item.resolved ? "✅ Pet Found" : "✅ Mark Pet Found"}</button>` : ""}</div></div></article>`;
+      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${state.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p>${(() => { const sightings = reportSightings(item.id); return sightings.length ? `<div class="lf-sighting-summary"><span>👁 ${sightings.length} sighting${sightings.length === 1 ? "" : "s"}</span><small>Latest: ${safe(relativeSightingTime(sightings[0].seenAt))}</small></div>` : ""; })()}<div class="lf-card__footer"><span>${item.resolved ? "Alert closed" : "Community alert"}</span><span class="lf-date">${safe(item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" && !item.resolved ? `<button class="lf-card__action lf-card__action--sighting" type="button" data-report-sighting="${safe(item.id)}" data-pet-name="${safe(item.name)}">👁 I saw this pet</button>` : ""}${contact}<button class="lf-card__action lf-card__action--share" type="button" data-share-url="${safe(`${location.origin}${location.pathname}?reportId=${encodeURIComponent(item.id)}#reports`)}" data-share-title="${safe(`Help find ${item.name || "this lost pet"}`)}" data-share-text="${safe(`🚨 ${item.name || "A pet"} is missing near ${item.address || item.city || "this area"}. Please help.`)}">📤 Share</button>${item.status === "lost" && canResolve ? `<button class="lf-card__action lf-card__action--resolved" type="button" data-resolve-report="${safe(item.id)}" ${item.resolved ? "disabled" : ""}>${item.resolved ? "✅ Pet Found" : "✅ Mark Pet Found"}</button>` : ""}</div></div></article>`;
     }).join("") : '<div class="lf-empty"><strong>No reports in this category yet.</strong>New community reports will appear here.</div>';
     renderReportMarkers();
   }
@@ -484,9 +515,17 @@
   grid?.addEventListener("click", event => {
     const mapButton = event.target.closest("[data-view-report-map]");
     const resolveButton = event.target.closest("[data-resolve-report]");
+    const sightingButton = event.target.closest("[data-report-sighting]");
     if (mapButton) focusReportOnMap(mapButton.dataset.viewReportMap);
     if (resolveButton) resolveReport(resolveButton.dataset.resolveReport);
+    if (sightingButton) openSimpleSighting(sightingButton.dataset.reportSighting);
   });
+  document.querySelectorAll("[data-close-simple-sighting]").forEach(button=>button.addEventListener("click",closeSimpleSighting));
+  simpleSightingPhotoToggle?.addEventListener("click",()=>{simpleSightingPhotoField.hidden=!simpleSightingPhotoField.hidden;simpleSightingPhotoToggle.textContent=simpleSightingPhotoField.hidden?"+ Add photo":"− Remove photo";if(simpleSightingPhotoField.hidden)simpleSightingPhoto.value=""});
+  document.querySelector("#lfSimpleUseLocation")?.addEventListener("click",()=>{if(!navigator.geolocation){setSimpleSightingMessage("Location is not available on this device.","error");return}setSimpleSightingMessage("Finding your location…");navigator.geolocation.getCurrentPosition(position=>{setSimpleSightingMessage("");setSimpleSightingPoint(position.coords.latitude,position.coords.longitude)},()=>setSimpleSightingMessage("We could not access your location. Tap the map instead.","error"),{enableHighAccuracy:true,timeout:10000,maximumAge:30000})});
+  simpleSightingForm?.addEventListener("submit",async event=>{event.preventDefault();const latitude=numberOrNull(simpleSightingLatitude.value),longitude=numberOrNull(simpleSightingLongitude.value);if(latitude===null||longitude===null){setSimpleSightingMessage("Tap the map to choose where you saw the pet.","error");return}if(!simpleSightingTime.value){setSimpleSightingMessage("Choose when you saw the pet.","error");return}const submitButton=simpleSightingForm.querySelector('[type="submit"]');submitButton.disabled=true;try{const image=await fileToDataUrl(simpleSightingPhoto.files?.[0]);saveSighting({id:`sighting-${Date.now()}`,reportId:simpleSightingReportId.value,latitude,longitude,seenAt:new Date(simpleSightingTime.value).toISOString(),note:simpleSightingNote.value.trim(),image,createdAt:new Date().toISOString()});setSimpleSightingMessage("Sighting submitted. Thank you for helping.");render();setTimeout(closeSimpleSighting,900)}catch(error){setSimpleSightingMessage(error.message||"The sighting could not be saved.","error")}finally{submitButton.disabled=false}});
+  window.addEventListener("thepetgrid:sightings-changed",render);
+  document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!simpleSightingModal?.hidden)closeSimpleSighting()});
 
   async function initialize() {
     const client = window.ThePetGridSupabase?.client;
