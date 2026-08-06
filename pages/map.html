@@ -11,8 +11,9 @@
   <link rel="stylesheet" href="../design/header.css">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
   <link rel="stylesheet" href="../css/map.css">
+  <link rel="stylesheet" href="../design/atlas-shell.css">
 </head>
-<body>
+<body class="atlas-shell atlas-map-page">
 <header class="main-header">
   <div class="header-container">
     <a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a>
@@ -27,11 +28,11 @@
 <main class="map-shell">
   <section class="map-hero">
     <div>
-      <span class="map-kicker">🌍 MapLibre smart map</span>
-      <h1>Explore the living pet world.</h1>
-      <p>Detailed road map, live pets, clusters and nearby veterinary clinics, shelters and pet services.</p>
+      <span class="map-kicker">🌍 ATLAS · SMART MAP</span>
+      <h1>Explore the living world, closer.</h1>
+      <p>Move from the global Atlas to streets, nearby pets, shelters, clinics and trusted pet services—without leaving the same living world.</p>
     </div>
-    <a class="map-add-button" href="upload.html">📍 Add your pet</a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="map-add-button" href="world-experience.html">✨ Enter World Experience</a><a class="map-add-button" href="upload.html">📍 Add your pet</a></div>
   </section>
 
   <section class="map-stats" aria-label="Map statistics">
@@ -127,5 +128,6 @@
 <script src="../js/auth.js"></script>
 <script src="../js/header.js"></script>
 <script src="../js/header-live.js"></script>
+<script src="../js/atlas-shell.js"></script>
 </body>
 </html>
