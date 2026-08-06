@@ -167,10 +167,67 @@
   }
 
   // =========================================
+  // ATLAS HEADER AUTH
+  // =========================================
+
+  function renderAtlasHeaderAuth() {
+    const account =
+      document.querySelector(".world-header .header-account");
+
+    if (!account) {
+      return;
+    }
+
+    const user =
+      getCurrentUser();
+
+    if (!user) {
+      account.href =
+        pageUrl("login.html");
+
+      account.setAttribute(
+        "aria-label",
+        "Log in"
+      );
+
+      account.innerHTML = `
+        <span aria-hidden="true">🐾</span>
+        <strong>Log In</strong>
+      `;
+
+      account.classList.remove(
+        "is-authenticated"
+      );
+
+      return;
+    }
+
+    account.href =
+      pageUrl("my-profile.html");
+
+    account.setAttribute(
+      "aria-label",
+      `Open ${user.username}'s profile`
+    );
+
+    account.innerHTML = `
+      <span aria-hidden="true">👤</span>
+      <strong>${escapeHtml(user.username).slice(0, 22)}</strong>
+    `;
+
+    account.classList.add(
+      "is-authenticated"
+    );
+  }
+
+
+  // =========================================
   // HEADER AUTH
   // =========================================
 
   function renderHeaderAuth() {
+    renderAtlasHeaderAuth();
+
     const actions =
       document.querySelector(".header-actions");
 
