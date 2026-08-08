@@ -298,6 +298,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentProfilePets =
         [];
 
+    let currentCloudProfile =
+        null;
+
+    let currentCloudPets =
+        null;
+
     let loggedUser =
         null;
 
@@ -669,6 +675,199 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ==========================================
+    // SUPABASE PROFILE / PETS
+    // ==========================================
+
+    function getSupabaseClient() {
+
+        return (
+            window.ThePetGridSupabase?.client ||
+            null
+        );
+    }
+
+
+    function normalizeCloudPet(row) {
+
+        return {
+
+            id:
+                row.id,
+
+            ownerId:
+                row.owner_id || null,
+
+            ownerUsername:
+                currentCloudProfile?.username ||
+                "",
+
+            owner:
+                currentCloudProfile?.display_name ||
+                currentCloudProfile?.username ||
+                "ThePetGrid Member",
+
+            name:
+                row.name ||
+                "Unnamed Pet",
+
+            type:
+                row.type ||
+                "Other",
+
+            breed:
+                row.breed ||
+                "Breed not added",
+
+            age:
+                row.age === null ||
+                row.age === undefined ||
+                row.age === ""
+                    ? "Age not added"
+                    : String(row.age),
+
+            gender:
+                row.gender || "",
+
+            country:
+                row.country || "",
+
+            city:
+                row.city || "",
+
+            bio:
+                row.bio || "",
+
+            image:
+                row.image_url || "",
+
+            verified:
+                Boolean(row.verified),
+
+            status:
+                row.is_memorial
+                    ? "memorial"
+                    : row.is_lost
+                        ? "lost"
+                        : "new",
+
+            likes:
+                safeNumber(
+                    row.pet_likes?.[0]?.count ||
+                    row.likes
+                ),
+
+            followers:
+                safeNumber(
+                    row.followers
+                ),
+
+            gifts:
+                safeNumber(
+                    row.gifts
+                ),
+
+            createdAt:
+                row.created_at || ""
+
+        };
+    }
+
+
+    async function loadCloudProfileAndPets(username) {
+
+        currentCloudProfile =
+            null;
+
+        currentCloudPets =
+            null;
+
+
+        const client =
+            getSupabaseClient();
+
+        if (!client || !username) {
+            return;
+        }
+
+
+        try {
+
+            const {
+                data: profile,
+                error: profileError
+            } = await client
+                .from("profiles")
+                .select("*")
+                .eq("username", username)
+                .maybeSingle();
+
+
+            if (profileError) {
+                throw profileError;
+            }
+
+
+            if (!profile) {
+
+                currentCloudPets =
+                    [];
+
+                return;
+            }
+
+
+            currentCloudProfile =
+                profile;
+
+
+            const {
+                data: petRows,
+                error: petsError
+            } = await client
+                .from("pets")
+                .select("*, pet_likes(count)")
+                .eq(
+                    "owner_id",
+                    profile.id
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
+
+
+            if (petsError) {
+                throw petsError;
+            }
+
+
+            currentCloudPets =
+                Array.isArray(petRows)
+                    ? petRows.map(
+                        normalizeCloudPet
+                    )
+                    : [];
+
+        } catch (error) {
+
+            console.error(
+                "User Profile: Could not load Supabase profile pets.",
+                error
+            );
+
+
+            currentCloudProfile =
+                null;
+
+            currentCloudPets =
+                null;
+        }
+    }
+
+
+    // ==========================================
     // PETSTORE
     // ==========================================
 
@@ -718,6 +917,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!normalizedUsername) {
             return [];
+        }
+
+
+        if (
+            Array.isArray(
+                currentCloudPets
+            ) &&
+            normalizeText(
+                currentCloudProfile?.username
+            ) === normalizedUsername
+        ) {
+
+            return [
+                ...currentCloudPets
+            ];
         }
 
 
@@ -788,6 +1002,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function getDisplayedPetLikes(pet) {
+
+        if (pet?.ownerId) {
+
+            return safeNumber(
+                pet.likes
+            );
+        }
+
 
         if (
             window.PetStore &&
@@ -868,7 +1090,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const profileSource = {
 
             ...(sourceUser || {}),
-            ...(savedProfile || {})
+            ...(savedProfile || {}),
+            ...(currentCloudProfile || {})
 
         };
 
@@ -897,6 +1120,7 @@ document.addEventListener("DOMContentLoaded", () => {
             safeText(
 
                 profileSource.avatar ||
+                profileSource.avatar_url ||
                 profileSource.photo ||
                 profileSource.image
 
@@ -954,6 +1178,7 @@ document.addEventListener("DOMContentLoaded", () => {
             joined:
                 profileSource.joined ||
                 profileSource.memberSince ||
+                profileSource.created_at ||
                 null,
 
             following:
@@ -3126,6 +3351,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return Boolean(
 
+            currentCloudProfile ||
             savedUser ||
             savedProfile ||
             pets.length ||
@@ -3139,7 +3365,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // LOAD PROFILE PAGE
     // ==========================================
 
-    function loadProfilePage() {
+    async function loadProfilePage() {
 
         showLoadingState();
 
@@ -3161,6 +3387,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             return;
         }
+
+
+        await loadCloudProfileAndPets(
+            currentProfileUsername
+        );
 
 
         if (
@@ -3590,24 +3821,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // INITIALIZE PAGE
     // ==========================================
 
-    try {
+    loadProfilePage()
+        .then(() => {
 
-        loadProfilePage();
+            ensureProfileVisibility();
 
-        ensureProfileVisibility();
+        })
+        .catch(error => {
 
-    } catch (error) {
-
-        console.error(
-            "User Profile initialization failed.",
-            error
-        );
+            console.error(
+                "User Profile initialization failed.",
+                error
+            );
 
 
-        showErrorState(
-            "Profile could not load",
-            "The profile page could not be initialized."
-        );
-    }
+            showErrorState(
+                "Profile could not load",
+                "The profile page could not be initialized."
+            );
+        });
 
 });
