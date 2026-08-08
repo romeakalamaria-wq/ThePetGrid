@@ -1897,3 +1897,37 @@
         width:calc(100vw - 18px);
     }
 }
+
+/* ==========================================
+   COMMUNITY MOBILE HEADER FIX
+========================================== */
+
+@media (max-width: 900px) {
+
+    .main-header .main-nav {
+        display: none !important;
+        order: 3;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 0;
+        padding: 8px 0;
+    }
+
+    .main-header .main-nav.is-open {
+        display: flex !important;
+    }
+
+    .main-header .main-nav a {
+        width: 100%;
+    }
+
+}
+
+@media (min-width: 901px) {
+
+    .main-header .main-nav {
+        display: flex !important;
+    }
+
+}
