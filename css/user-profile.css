@@ -1642,3 +1642,250 @@ body.connections-modal-open {
         margin-right: 16px;
     }
 }
+
+/* ==========================================
+   SPRINT 12.1 — PROFILE IDENTITY
+========================================== */
+
+.profile-identity-layer {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 0.85fr)
+        minmax(260px, 1.4fr)
+        minmax(230px, 1.1fr);
+    gap: 12px;
+    max-width: 880px;
+}
+
+.profile-reputation-card,
+.profile-badges-block,
+.profile-contribution-card {
+    min-width: 0;
+    padding: 14px 15px;
+    background: #f8fafc;
+    border: 1px solid #e7edf4;
+    border-radius: 16px;
+}
+
+.profile-reputation-card {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.profile-reputation-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: grid;
+    place-items: center;
+    background:
+        linear-gradient(
+            135deg,
+            #fff7ed,
+            #ffedd5
+        );
+    border: 1px solid #fed7aa;
+    border-radius: 13px;
+    font-size: 1.2rem;
+}
+
+.profile-reputation-copy {
+    min-width: 0;
+}
+
+.profile-reputation-copy span,
+.profile-reputation-copy strong,
+.profile-reputation-copy small {
+    display: block;
+}
+
+.profile-reputation-copy span,
+.profile-badges-label,
+.profile-contribution-label {
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.profile-reputation-copy strong {
+    margin-top: 3px;
+    color: #172033;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.profile-reputation-copy small {
+    margin-top: 5px;
+    color: #f97316;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.profile-badges-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.profile-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 29px;
+    padding: 0 9px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.profile-badge--gold {
+    color: #a16207;
+    background: #fefce8;
+    border-color: #fde68a;
+}
+
+.profile-badge--pet {
+    color: #9a3412;
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.profile-badge--helper {
+    color: #1d4ed8;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.profile-badge--rescue {
+    color: #be123c;
+    background: #fff1f2;
+    border-color: #fecdd3;
+}
+
+.profile-badge--community {
+    color: #6d28d9;
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+}
+
+.profile-badge--love {
+    color: #be185d;
+    background: #fdf2f8;
+    border-color: #fbcfe8;
+}
+
+.profile-contribution-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-contribution-bar {
+    height: 7px;
+    margin-top: 10px;
+    overflow: hidden;
+    background: #e8edf4;
+    border-radius: 999px;
+}
+
+.profile-contribution-bar span {
+    display: block;
+    width: 8%;
+    height: 100%;
+    border-radius: inherit;
+    background:
+        linear-gradient(
+            90deg,
+            #f59e0b,
+            #f97316
+        );
+    box-shadow:
+        0 0 16px
+        rgba(249, 115, 22, 0.25);
+    transition: width 0.45s ease;
+}
+
+.profile-contribution-card small {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
+/* Keep the shared mobile header behavior authoritative on this page. */
+@media (max-width: 900px) {
+    .main-header .main-nav {
+        display: none !important;
+        order: 3;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 0;
+        padding: 8px 0;
+        overflow: visible;
+    }
+
+    .main-header .main-nav.is-open {
+        display: flex !important;
+    }
+
+    .main-header .main-nav a {
+        width: 100%;
+    }
+}
+
+@media (max-width: 980px) {
+    .profile-identity-layer {
+        grid-template-columns:
+            minmax(180px, 0.8fr)
+            minmax(240px, 1.2fr);
+    }
+
+    .profile-contribution-card {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 760px) {
+    .profile-identity-layer {
+        width: 100%;
+        max-width: 620px;
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .profile-contribution-card {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 540px) {
+    .profile-identity-layer {
+        margin-top: 18px;
+    }
+
+    .profile-reputation-card,
+    .profile-badges-block,
+    .profile-contribution-card {
+        padding: 13px;
+        border-radius: 14px;
+    }
+
+    .profile-badges-list {
+        gap: 6px;
+    }
+
+    .profile-badge {
+        font-size: 0.67rem;
+    }
+}

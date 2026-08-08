@@ -30,6 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const COMMUNITY_POSTS_KEY =
         "thePetGridCommunityPosts";
 
+    const LOST_REPORTS_KEY =
+        "thepetgrid_lost_found_reports";
+
+    const SIGHTINGS_KEY =
+        "thepetgrid_lost_pet_sightings";
+
     const DEFAULT_AVATAR =
         "../assets/avatar.png";
 
@@ -140,6 +146,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileActivityList =
         document.getElementById(
             "profileActivityList"
+        );
+
+    const profileIdentityLayer =
+        document.getElementById(
+            "profileIdentityLayer"
+        );
+
+    const profileReputationScore =
+        document.getElementById(
+            "profileReputationScore"
+        );
+
+    const profileReputationLevel =
+        document.getElementById(
+            "profileReputationLevel"
+        );
+
+    const profileBadgesList =
+        document.getElementById(
+            "profileBadgesList"
+        );
+
+    const profileContributionProgress =
+        document.getElementById(
+            "profileContributionProgress"
+        );
+
+    const profileContributionText =
+        document.getElementById(
+            "profileContributionText"
         );
 
     const editProfileButton =
@@ -1146,6 +1182,8 @@ document.addEventListener("DOMContentLoaded", () => {
         renderProfileDetails();
 
         renderProfileActions();
+
+        renderProfileIdentity();
 
         if (
             connectionsModal &&
@@ -2768,6 +2806,362 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ==========================================
+    // PROFILE IDENTITY / REPUTATION
+    // ==========================================
+
+    function getStoredArray(key) {
+
+        const value =
+            parseJson(
+                localStorage.getItem(key),
+                []
+            );
+
+        return Array.isArray(value)
+            ? value
+            : [];
+    }
+
+
+    function getCommunityContributionStats(username) {
+
+        const normalizedUsername =
+            normalizeText(username);
+
+        const posts =
+            getCommunityPostsByUser(username);
+
+        let comments =
+            0;
+
+        let reactionsReceived =
+            0;
+
+        const allPosts =
+            getStoredArray(
+                COMMUNITY_POSTS_KEY
+            );
+
+        allPosts.forEach(post => {
+
+            if (
+                normalizeText(
+                    post.authorUsername ||
+                    post.username
+                ) === normalizedUsername
+            ) {
+
+                reactionsReceived +=
+                    safeNumber(post.likes);
+
+                if (
+                    post.reactions &&
+                    typeof post.reactions ===
+                        "object"
+                ) {
+
+                    reactionsReceived +=
+                        Object.values(
+                            post.reactions
+                        ).reduce(
+                            (total, count) =>
+                                total +
+                                safeNumber(count),
+                            0
+                        );
+                }
+            }
+
+            const postComments =
+                Array.isArray(post.comments)
+                    ? post.comments
+                    : [];
+
+            comments +=
+                postComments.filter(
+                    comment =>
+                        normalizeText(
+                            comment.authorUsername ||
+                            comment.username
+                        ) ===
+                        normalizedUsername
+                ).length;
+        });
+
+        const sightings =
+            getStoredArray(
+                SIGHTINGS_KEY
+            ).filter(
+                sighting =>
+                    normalizeText(
+                        sighting.authorUsername ||
+                        sighting.username
+                    ) ===
+                    normalizedUsername
+            ).length;
+
+        const lostReports =
+            getStoredArray(
+                LOST_REPORTS_KEY
+            );
+
+        const helpedHomeAgain =
+            lostReports.filter(report => {
+
+                if (!report?.resolved) {
+                    return false;
+                }
+
+                const helperCandidates = [
+                    report.foundByUsername,
+                    report.resolvedByUsername,
+                    report.helperUsername,
+                    report.found_by_username,
+                    report.resolved_by_username
+                ]
+                    .map(normalizeText)
+                    .filter(Boolean);
+
+                return helperCandidates.includes(
+                    normalizedUsername
+                );
+            }).length;
+
+        return {
+            posts: posts.length,
+            comments,
+            reactionsReceived,
+            sightings,
+            helpedHomeAgain
+        };
+    }
+
+
+    function buildProfileIdentity() {
+
+        const username =
+            currentProfile?.username ||
+            currentProfileUsername;
+
+        const community =
+            getCommunityContributionStats(
+                username
+            );
+
+        const petsCount =
+            currentProfilePets.length;
+
+        const followersCount =
+            getProfileFollowers(
+                username
+            ).length;
+
+        const petLikes =
+            calculateTotalLikes(
+                currentProfilePets
+            );
+
+        const gifts =
+            currentProfilePets.reduce(
+                (total, pet) =>
+                    total +
+                    safeNumber(pet.gifts),
+                0
+            );
+
+        const score =
+            petsCount * 30 +
+            community.posts * 14 +
+            community.comments * 5 +
+            community.sightings * 35 +
+            community.helpedHomeAgain * 90 +
+            followersCount * 4 +
+            Math.min(petLikes, 300) +
+            Math.min(
+                community.reactionsReceived,
+                300
+            ) +
+            Math.min(gifts * 3, 150);
+
+        let level =
+            "New Member";
+
+        if (score >= 1000) {
+            level = "Community Champion";
+        } else if (score >= 500) {
+            level = "Trusted Helper";
+        } else if (score >= 200) {
+            level = "Active Contributor";
+        } else if (score >= 60) {
+            level = "Growing Member";
+        }
+
+        const badges = [];
+
+        if (
+            currentProfile?.joined
+        ) {
+            badges.push({
+                icon: "🌟",
+                label: "Early Member",
+                tone: "gold"
+            });
+        }
+
+        if (petsCount > 0) {
+            badges.push({
+                icon: "🐾",
+                label: "Pet Parent",
+                tone: "pet"
+            });
+        }
+
+        if (
+            community.comments >= 3 ||
+            community.sightings >= 1
+        ) {
+            badges.push({
+                icon: "🤝",
+                label: "Helper",
+                tone: "helper"
+            });
+        }
+
+        if (
+            community.helpedHomeAgain > 0
+        ) {
+            badges.push({
+                icon: "🏡",
+                label: "Lost & Found Hero",
+                tone: "rescue"
+            });
+        }
+
+        if (
+            community.posts >= 5
+        ) {
+            badges.push({
+                icon: "💬",
+                label: "Community Voice",
+                tone: "community"
+            });
+        }
+
+        if (
+            followersCount >= 10
+        ) {
+            badges.push({
+                icon: "❤️",
+                label: "Loved Member",
+                tone: "love"
+            });
+        }
+
+        if (!badges.length) {
+            badges.push({
+                icon: "🐾",
+                label: "Community Member",
+                tone: "neutral"
+            });
+        }
+
+        const progress =
+            Math.max(
+                8,
+                Math.min(
+                    100,
+                    Math.round(
+                        (score / 1000) *
+                        100
+                    )
+                )
+            );
+
+        let contributionText =
+            "Building a community footprint";
+
+        if (score >= 1000) {
+            contributionText =
+                "Outstanding contribution across ThePetGrid";
+        } else if (score >= 500) {
+            contributionText =
+                "A trusted and active community helper";
+        } else if (score >= 200) {
+            contributionText =
+                "Making a visible difference in the community";
+        } else if (score >= 60) {
+            contributionText =
+                "Growing through pets and community activity";
+        }
+
+        return {
+            score,
+            level,
+            badges: badges.slice(0, 4),
+            progress,
+            contributionText
+        };
+    }
+
+
+    function renderProfileIdentity() {
+
+        if (
+            !profileIdentityLayer ||
+            !currentProfile
+        ) {
+            return;
+        }
+
+        const identity =
+            buildProfileIdentity();
+
+        if (profileReputationScore) {
+            profileReputationScore.textContent =
+                formatNumber(
+                    identity.score
+                );
+        }
+
+        if (profileReputationLevel) {
+            profileReputationLevel.textContent =
+                identity.level;
+        }
+
+        if (profileBadgesList) {
+
+            profileBadgesList.innerHTML =
+                identity.badges
+                    .map(
+                        badge => `
+                            <span
+                                class="profile-badge profile-badge--${escapeHtml(badge.tone)}"
+                            >
+                                <span aria-hidden="true">
+                                    ${escapeHtml(badge.icon)}
+                                </span>
+                                ${escapeHtml(badge.label)}
+                            </span>
+                        `
+                    )
+                    .join("");
+        }
+
+        if (profileContributionProgress) {
+
+            profileContributionProgress.style.width =
+                `${identity.progress}%`;
+        }
+
+        if (profileContributionText) {
+
+            profileContributionText.textContent =
+                identity.contributionText;
+        }
+    }
+
+
+    // ==========================================
     // RECENT ACTIVITY
     // ==========================================
 
@@ -2977,6 +3371,8 @@ document.addEventListener("DOMContentLoaded", () => {
         renderProfileStats();
 
         renderProfileActions();
+
+        renderProfileIdentity();
 
         renderProfilePets();
 
@@ -3400,7 +3796,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             renderProfileDetails();
 
+            renderProfileIdentity();
+
             renderProfilePets();
+
+            renderRecentActivity();
         }
     );
 
@@ -3418,7 +3818,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 LOGGED_USER_KEY,
                 SAVED_USERS_KEY,
                 SAVED_PROFILES_KEY,
-                FOLLOWERS_KEY
+                FOLLOWERS_KEY,
+                COMMUNITY_POSTS_KEY,
+                LOST_REPORTS_KEY,
+                SIGHTINGS_KEY
 
             ];
 
