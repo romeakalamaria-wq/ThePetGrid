@@ -6,10 +6,14 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Community - ThePetGrid</title>
 <link href="../assets/favicon.png" rel="icon" type="image/png"/>
-<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/community.css" rel="stylesheet"/>
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/community.css?v=20260808-community-11-1" rel="stylesheet"/>
 <link href="../design/atlas-shell.css" rel="stylesheet"/></head>
 <body class="atlas-shell">
-<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions">
+<button class="community-notification-button" id="communityNotificationsButton" type="button" aria-expanded="false" aria-controls="communityNotificationsPanel" aria-label="Community notifications">
+<span aria-hidden="true">🔔</span>
+<b id="communityNotificationBadge" hidden>0</b>
+</button><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
 <main class="community-page">
 <section class="community-hero">
 <div>
@@ -41,6 +45,17 @@
 </div>
 <div class="composer-footer">
 <div class="composer-tools">
+<label class="composer-tool composer-tool--category" for="postCategory">🏷️ Category</label>
+<select aria-label="Choose post category" id="postCategory">
+<option value="daily-life">📸 Daily Life</option>
+<option value="lost-found">🆘 Lost &amp; Found</option>
+<option value="adoption">❤️ Adoption</option>
+<option value="health">🏥 Health</option>
+<option value="success">🎉 Success Stories</option>
+<option value="questions">💬 Questions</option>
+<option value="funny">🐾 Funny</option>
+<option value="local">🌍 Local Community</option>
+</select>
 <label class="composer-tool" for="postImageInput">📷 Add photo</label>
 <input accept="image/*" hidden="" id="postImageInput" type="file"/>
 <label class="composer-tool" for="taggedPet">🐾 Tag pet</label>
@@ -56,6 +71,21 @@
 <p aria-live="polite" class="composer-message" id="composerMessage" role="status"></p>
 </form>
 </article>
+
+<section class="community-categories" aria-label="Community categories">
+<div class="community-categories__track" id="communityCategoryFilters">
+<button class="community-category is-active" type="button" data-community-category="all">🏠 All</button>
+<button class="community-category" type="button" data-community-category="lost-found">🆘 Lost &amp; Found</button>
+<button class="community-category" type="button" data-community-category="adoption">❤️ Adoption</button>
+<button class="community-category" type="button" data-community-category="daily-life">📸 Daily Life</button>
+<button class="community-category" type="button" data-community-category="health">🏥 Health</button>
+<button class="community-category" type="button" data-community-category="success">🎉 Success Stories</button>
+<button class="community-category" type="button" data-community-category="questions">💬 Questions</button>
+<button class="community-category" type="button" data-community-category="funny">🐾 Funny</button>
+<button class="community-category" type="button" data-community-category="local">🌍 Local Community</button>
+</div>
+</section>
+
 <div class="feed-header">
 <div>
 <p class="community-eyebrow">LATEST STORIES</p>
@@ -72,30 +102,75 @@
 </section>
 <aside class="community-sidebar">
 <section class="sidebar-card">
+<p class="community-eyebrow">🔥 TRENDING TOPICS</p>
+<h2>What the community is talking about</h2>
+<div class="community-sidebar-list" id="communityTrendingTopics">
+<p class="community-sidebar-empty">Trending topics will appear here.</p>
+</div>
+</section>
+
+<section class="sidebar-card">
+<p class="community-eyebrow">🆘 LOST NEAR YOU</p>
+<h2>Pets that may need help</h2>
+<div class="community-sidebar-list" id="communityLostNearby">
+<p class="community-sidebar-empty">Nearby lost alerts will appear here.</p>
+</div>
+<div class="community-sidebar-actions">
+<button class="community-sidebar-small-button" id="communityUseMyArea" type="button">📍 Use my area</button>
+<a class="community-sidebar-link" href="lost-found.html">Open Lost &amp; Found →</a>
+</div>
+</section>
+
+<section class="sidebar-card">
+<p class="community-eyebrow">🏆 TOP HELPERS</p>
+<h2>People making a difference</h2>
+<div class="community-sidebar-list" id="communityTopHelpers">
+<p class="community-sidebar-empty">Community helpers will appear here.</p>
+</div>
+</section>
+
+<section class="sidebar-card sidebar-highlight">
+<p class="community-eyebrow">🏡 RECENT HOME AGAIN</p>
+<h2>Safely back home</h2>
+<div class="community-sidebar-list" id="communityHomeAgain">
+<p class="community-sidebar-empty">Home Again stories will appear here.</p>
+</div>
+<a class="community-sidebar-link" href="lost-found.html#reports">See Home Again stories →</a>
+</section>
+
+<section class="sidebar-card community-guide-card">
 <p class="community-eyebrow">COMMUNITY GUIDE</p>
-<h2>Make every post count</h2>
+<h2>Keep it simple and helpful</h2>
 <ul>
+<li>Choose the category that best matches your post.</li>
 <li>Share helpful and respectful content.</li>
 <li>Never publish private contact information.</li>
-<li>Contact a veterinarian for urgent medical issues.</li>
 </ul>
-</section>
-<section class="sidebar-card sidebar-highlight">
-<span class="sidebar-icon">💛</span>
-<h2>Support rescue stories</h2>
-<p>Use the community to celebrate adoptions and help pets find safe homes.</p>
-<a href="#">Explore Rescue</a>
 </section>
 </aside>
 </div>
 </main>
+
+<aside class="community-notifications-panel" id="communityNotificationsPanel" hidden aria-label="Community notifications">
+<div class="community-notifications-panel__header">
+<div>
+<p class="community-eyebrow">🔔 NOTIFICATIONS</p>
+<h2>Community activity</h2>
+</div>
+<button id="communityNotificationsClose" type="button" aria-label="Close notifications">×</button>
+</div>
+<div class="community-notifications-panel__list" id="communityNotificationsList"></div>
+<button class="community-notifications-panel__read" id="communityMarkAllRead" type="button">Mark all as read</button>
+</aside>
+
+<div class="community-profile-popover" id="communityProfilePopover" hidden></div>
 <script src="../store/pet-store.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 <script src="../js/supabase-client.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/community-safety.js?v=1"></script>
-<script src="../js/community.js?v=3"></script>
+<script src="../js/community.js?v=20260808-community-11-1"></script>
 <script src="../js/header.js"></script>
 <script src="../js/header-live.js"></script>
 <script src="../js/atlas-shell.js"></script></body>

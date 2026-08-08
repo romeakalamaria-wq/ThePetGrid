@@ -6,6 +6,7 @@
   const SIGHTINGS_KEY = "thepetgrid_lost_pet_sightings";
   const PLACEHOLDER = "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=82";
   const DEFAULT_CENTER = [23.7275, 37.9838];
+  const IS_LOCAL_DEVELOPMENT = ["localhost", "127.0.0.1"].includes(location.hostname);
   const demoReports = [
     { id:"demo-lost-bella", status:"lost", name:"Bella", type:"Dog", breed:"Golden Retriever", city:"Athens, Greece", country:"Greece", area:"National Garden", address:"National Garden, Athens, Greece", latitude:37.9737, longitude:23.7374, date:"2026-07-29", description:"Friendly golden retriever wearing a red collar. Last seen near the National Garden.", image:"https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=82", resolved:false },
     { id:"demo-found-cat", status:"found", name:"Unknown Cat", type:"Cat", breed:"Tabby", city:"Thessaloniki, Greece", country:"Greece", area:"Waterfront", address:"Thessaloniki Waterfront, Greece", latitude:40.6264, longitude:22.9484, date:"2026-07-30", description:"Young tabby found safely near the waterfront.", image:"https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=82", resolved:false }
@@ -88,10 +89,19 @@
   function allReports() {
     const saved = storedReports();
     const merged = new Map();
-    demoReports.forEach(report => merged.set(String(report.id), report));
+
+    if (IS_LOCAL_DEVELOPMENT && !cloudReports.length && !saved.length) {
+      demoReports.forEach(report => merged.set(String(report.id), report));
+    }
+
     cloudReports.forEach(report => merged.set(String(report.id), report));
     saved.forEach(report => merged.set(String(report.id), report));
-    return [...merged.values()].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
+
+    return [...merged.values()].sort(
+      (a, b) =>
+        Date.parse(b.createdAt || b.resolvedAt || b.date || 0) -
+        Date.parse(a.createdAt || a.resolvedAt || a.date || 0)
+    );
   }
 
   function saveOrUpdateReport(report) {
@@ -349,6 +359,56 @@
     reportMarkers[index]?.togglePopup();
   }
 
+  function ensureHomeAgainToast() {
+    let toast = document.querySelector("#homeAgainToast");
+
+    if (toast) {
+      return toast;
+    }
+
+    toast = document.createElement("section");
+    toast.id = "homeAgainToast";
+    toast.className = "lf-home-again-toast";
+    toast.hidden = true;
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+
+    return toast;
+  }
+
+  function showHomeAgainToast(report) {
+    const toast = ensureHomeAgainToast();
+
+    toast.innerHTML = `
+      <span class="lf-home-again-toast__icon" aria-hidden="true">🏡</span>
+      <span>
+        <small>HOME AGAIN</small>
+        <strong>${safe(report.name || "This pet")} is safely back home.</strong>
+        <em>Thank you to everyone who helped.</em>
+      </span>
+    `;
+
+    toast.hidden = false;
+    toast.classList.remove("is-leaving");
+
+    requestAnimationFrame(() => {
+      toast.classList.add("is-visible");
+    });
+
+    window.clearTimeout(showHomeAgainToast.timer);
+
+    showHomeAgainToast.timer = window.setTimeout(() => {
+      toast.classList.remove("is-visible");
+      toast.classList.add("is-leaving");
+
+      window.setTimeout(() => {
+        toast.hidden = true;
+        toast.classList.remove("is-leaving");
+      }, 240);
+    }, 4800);
+  }
+
   function filteredReports() {
     return allReports().filter(item => {
       if (currentFilter === "all") return true;
@@ -369,27 +429,114 @@
       const contact = currentUserId && !item.resolved
         ? `${item.phone ? `<a class="lf-card__action" href="tel:${safe(item.phone)}">📞 Call reporter</a>` : ""}${item.email ? `<a class="lf-card__action" href="mailto:${safe(item.email)}?subject=${encodeURIComponent(`ThePetGrid: ${item.name || "pet report"}`)}">✉️ Email</a>` : ""}`
         : (!currentUserId && !item.resolved ? `<a class="lf-card__action" href="./login.html">🔒 Sign in for contact</a>` : "");
-      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${state.toUpperCase()}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p>${(() => { const sightings = reportSightings(item.id); return sightings.length ? `<div class="lf-sighting-summary"><span>👁 ${sightings.length} sighting${sightings.length === 1 ? "" : "s"}</span><small>Latest: ${safe(relativeSightingTime(sightings[0].seenAt))}</small></div>` : ""; })()}<div class="lf-card__footer"><span>${item.resolved ? "Alert closed" : "Community alert"}</span><span class="lf-date">${safe(item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" && !item.resolved ? `<button class="lf-card__action lf-card__action--sighting" type="button" data-report-sighting="${safe(item.id)}" data-pet-name="${safe(item.name)}">👁 I saw this pet</button>` : ""}${contact}<button class="lf-card__action lf-card__action--share" type="button" data-share-url="${safe(`${location.origin}${location.pathname}?reportId=${encodeURIComponent(item.id)}#reports`)}" data-share-title="${safe(`Help find ${item.name || "this lost pet"}`)}" data-share-text="${safe(`🚨 ${item.name || "A pet"} is missing near ${item.address || item.city || "this area"}. Please help.`)}">📤 Share</button>${item.status === "lost" && canResolve ? `<button class="lf-card__action lf-card__action--resolved" type="button" data-resolve-report="${safe(item.id)}" ${item.resolved ? "disabled" : ""}>${item.resolved ? "✅ Pet Found" : "✅ Mark Pet Found"}</button>` : ""}</div></div></article>`;
+      const statusLabel = item.resolved
+        ? "HOME AGAIN"
+        : state.toUpperCase();
+
+      return `<article id="report-card-${safe(item.id)}" class="lf-card${item.resolved ? " is-resolved" : ""}" data-report-id="${safe(item.id)}"><div class="lf-card__media"><img src="${safe(item.image || PLACEHOLDER)}" alt="${safe(item.name || "Pet report")}" loading="lazy"><span class="lf-status lf-status--${state}">${statusLabel}</span></div><div class="lf-card__body"><h3>${safe(item.name || "Unknown pet")}</h3><div class="lf-meta"><span>🐾 ${safe(item.type || "Pet")}</span><span>📍 ${safe(item.address || item.city || "Location unavailable")}</span></div><p class="lf-description">${safe(item.description || "Community report")}</p>${(() => { const sightings = reportSightings(item.id); return sightings.length ? `<div class="lf-sighting-summary"><span>👁 ${sightings.length} sighting${sightings.length === 1 ? "" : "s"}</span><small>Latest: ${safe(relativeSightingTime(sightings[0].seenAt))}</small></div>` : ""; })()}<div class="lf-card__footer"><span>${item.resolved ? "🏡 Safely home" : "Community alert"}</span><span class="lf-date">${safe(item.resolvedAt ? new Date(item.resolvedAt).toLocaleDateString() : item.date || "")}</span></div><div class="lf-card__actions">${hasLocation ? `<button class="lf-card__action lf-card__action--map" type="button" data-view-report-map="${safe(item.id)}">📍 View on map</button>` : ""}${item.status === "lost" && !item.resolved ? `<button class="lf-card__action lf-card__action--sighting" type="button" data-report-sighting="${safe(item.id)}" data-pet-name="${safe(item.name)}">👁 I saw this pet</button>` : ""}${contact}<button class="lf-card__action lf-card__action--share" type="button" data-share-url="${safe(`${location.origin}${location.pathname}?reportId=${encodeURIComponent(item.id)}#reports`)}" data-share-title="${safe(item.resolved ? `${item.name || "This pet"} is Home Again` : `Help find ${item.name || "this lost pet"}`)}" data-share-text="${safe(item.resolved ? `🏡 Great news — ${item.name || "this pet"} is safely back home.` : `🚨 ${item.name || "A pet"} is missing near ${item.address || item.city || "this area"}. Please help.`)}">📤 Share</button>${item.status === "lost" && !item.resolved && canResolve ? `<button class="lf-card__action lf-card__action--home" type="button" data-resolve-report="${safe(item.id)}">🏡 Home Again</button>` : ""}</div></div></article>`;
     }).join("") : '<div class="lf-empty"><strong>No reports in this category yet.</strong>New community reports will appear here.</div>';
     renderReportMarkers();
   }
 
   async function resolveReport(reportId) {
-    const report = allReports().find(item => String(item.id) === String(reportId));
-    if (!report || report.resolved || report.status !== "lost") return;
-    if (!window.confirm(`Confirm that ${report.name || "this pet"} has been found?`)) return;
+    const report = allReports().find(
+      item => String(item.id) === String(reportId)
+    );
+
+    if (
+      !report ||
+      report.resolved ||
+      report.status !== "lost"
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Has ${report.name || "this pet"} returned home safely?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     const resolvedAt = new Date().toISOString();
-    if (report.isCloudReport && String(report.ownerId) === String(currentUserId)) {
+    const updatedReport = {
+      ...report,
+      resolved: true,
+      resolvedAt,
+      homeAgain: true
+    };
+
+    if (
+      report.isCloudReport &&
+      String(report.ownerId || "") === String(currentUserId || "")
+    ) {
       const client = window.ThePetGridSupabase?.client;
-      const { error } = await client.from("lost_pet_reports").update({ resolved:true, resolved_at:resolvedAt }).eq("id", report.id).eq("reporter_id", currentUserId);
-      if (error) {
-        window.alert(error.message || "The alert could not be closed.");
+
+      if (!client) {
+        window.alert("The connection is unavailable. Try again.");
         return;
       }
-      cloudReports = cloudReports.map(item => String(item.id) === String(report.id) ? { ...item, resolved:true, resolvedAt } : item);
+
+      const { error } = await client
+        .from("lost_pet_reports")
+        .update({
+          resolved: true,
+          resolved_at: resolvedAt
+        })
+        .eq("id", report.id)
+        .eq("reporter_id", currentUserId);
+
+      if (error) {
+        window.alert(
+          error.message ||
+          "The Home Again update could not be saved."
+        );
+        return;
+      }
+
+      cloudReports = cloudReports.map(item =>
+        String(item.id) === String(report.id)
+          ? {
+              ...item,
+              resolved: true,
+              resolvedAt,
+              homeAgain: true
+            }
+          : item
+      );
     }
-    saveOrUpdateReport({ ...report, resolved:true, resolvedAt });
+
+    saveOrUpdateReport(updatedReport);
+
+    currentFilter = "resolved";
+    filters.forEach(item =>
+      item.classList.toggle(
+        "is-active",
+        item.dataset.lfFilter === "resolved"
+      )
+    );
+
     render();
+    showHomeAgainToast(updatedReport);
+
+    window.dispatchEvent(
+      new CustomEvent("thepetgrid:home-again", {
+        detail: {
+          reportId: updatedReport.id,
+          petId: updatedReport.petId || null,
+          petName: updatedReport.name,
+          resolvedAt
+        }
+      })
+    );
+
+    window.setTimeout(() => {
+      document.querySelector("#reports")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }, 350);
   }
 
   function setMode(mode) {

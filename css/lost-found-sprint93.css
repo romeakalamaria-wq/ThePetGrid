@@ -38,3 +38,124 @@
 
 /* SPRINT 13.1 — SIMPLE COMMUNITY SIGHTINGS */
 .lf-simple-sighting[hidden]{display:none!important}.lf-simple-sighting{position:fixed;inset:0;z-index:9900;display:grid;place-items:center;padding:18px}.lf-simple-sighting__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.68);backdrop-filter:blur(6px)}.lf-simple-sighting__card{position:relative;z-index:1;width:min(590px,100%);max-height:calc(100vh - 36px);overflow:auto;padding:28px;border:1px solid rgba(255,255,255,.7);border-radius:25px;background:#fff;box-shadow:0 32px 100px rgba(15,23,42,.42)}.lf-simple-sighting__close{position:absolute;top:13px;right:13px;width:38px;height:38px;border:0;border-radius:50%;background:#f1f5f9;color:#334155;font-size:1.35rem;cursor:pointer}.lf-simple-sighting__card h2{margin:12px 0 6px;font-size:clamp(1.8rem,5vw,2.5rem)}.lf-simple-sighting__intro{margin:0 0 18px;color:#64748b;line-height:1.55}.lf-simple-sighting__card form{display:grid;gap:15px}.lf-simple-sighting__card label{display:grid;gap:7px;color:#334155;font-weight:750}.lf-simple-sighting__card input,.lf-simple-sighting__card textarea{width:100%;padding:12px 13px;border:1px solid #dbe3ee;border-radius:12px;background:#fff;color:#172033;font:inherit;outline:none}.lf-simple-sighting__card input:focus,.lf-simple-sighting__card textarea:focus{border-color:#8b5cf6;box-shadow:0 0 0 4px rgba(139,92,246,.12)}.lf-simple-sighting__pet{padding:12px 14px;border:1px solid #ddd6fe;border-radius:13px;background:#f5f3ff;color:#6d28d9;font-weight:850}.lf-simple-sighting__map{height:245px;overflow:hidden;border:1px solid #dbe3ee;border-radius:16px;background:#e2e8f0}.lf-simple-sighting__card small{color:#94a3b8;font-weight:550}.lf-simple-sighting__location,.lf-simple-sighting__photo-toggle{min-height:42px;border:1px solid #c4b5fd;border-radius:11px;background:#f5f3ff;color:#6d28d9;font:inherit;font-weight:800;cursor:pointer}.lf-simple-sighting__submit{min-height:50px;border:0;border-radius:13px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font:inherit;font-weight:900;cursor:pointer;box-shadow:0 13px 28px rgba(109,40,217,.24)}.lf-simple-sighting__submit:disabled{cursor:not-allowed;opacity:.62}.lf-simple-sighting__message{margin:0;padding:11px 13px;border-radius:11px;background:#ecfdf5;color:#047857;font-weight:750}.lf-simple-sighting__message.is-error{background:#fff1f2;color:#be123c}.lf-sighting-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 0 0;padding:10px 12px;border:1px solid #ddd6fe;border-radius:12px;background:#faf8ff;color:#6d28d9;font-size:.84rem;font-weight:800}.lf-sighting-summary small{color:#7c6aa7;font-weight:650}.lf-simple-sighting-marker{display:grid;width:34px;height:34px;place-items:center;border:3px solid #fff;border-radius:50%;background:#7c3aed;color:#fff;box-shadow:0 7px 18px rgba(76,29,149,.35)}@media(max-width:560px){.lf-simple-sighting__card{padding:24px 16px}.lf-simple-sighting__map{height:220px}}
+
+
+/* ==================================================
+   SPRINT 14 — HOME AGAIN
+================================================== */
+
+.lf-status--resolved{
+  background:linear-gradient(135deg,#059669,#0f766e)
+}
+
+.lf-card.is-resolved{
+  opacity:1;
+  border-color:#bbf7d0;
+  box-shadow:0 15px 38px rgba(5,150,105,.10)
+}
+
+.lf-card.is-resolved .lf-card__media::after{
+  content:"🏡";
+  position:absolute;
+  right:13px;
+  bottom:13px;
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:2px solid rgba(255,255,255,.9);
+  border-radius:50%;
+  background:rgba(5,150,105,.92);
+  box-shadow:0 9px 24px rgba(6,78,59,.28);
+  font-size:1.05rem
+}
+
+.lf-card__action--home{
+  border:1px solid #bbf7d0!important;
+  background:linear-gradient(135deg,#ecfdf5,#d1fae5)!important;
+  color:#047857!important
+}
+
+.lf-card__action--home:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(5,150,105,.12)
+}
+
+.lf-home-again-toast[hidden]{
+  display:none!important
+}
+
+.lf-home-again-toast{
+  position:fixed;
+  right:18px;
+  bottom:22px;
+  z-index:9800;
+  width:min(390px,calc(100vw - 36px));
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  gap:12px;
+  align-items:center;
+  padding:15px;
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:19px;
+  background:linear-gradient(135deg,#ecfdf5,#fff);
+  color:#064e3b;
+  box-shadow:0 24px 70px rgba(6,78,59,.26);
+  opacity:0;
+  transform:translateY(14px) scale(.98);
+  transition:opacity .24s ease,transform .24s ease
+}
+
+.lf-home-again-toast.is-visible{
+  opacity:1;
+  transform:none
+}
+
+.lf-home-again-toast.is-leaving{
+  opacity:0;
+  transform:translateY(10px) scale(.98)
+}
+
+.lf-home-again-toast__icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#d1fae5;
+  font-size:1.25rem
+}
+
+.lf-home-again-toast small,
+.lf-home-again-toast strong,
+.lf-home-again-toast em{
+  display:block
+}
+
+.lf-home-again-toast small{
+  color:#059669;
+  font-size:.65rem;
+  font-weight:900;
+  letter-spacing:.12em
+}
+
+.lf-home-again-toast strong{
+  margin-top:3px;
+  color:#064e3b;
+  font-size:.94rem
+}
+
+.lf-home-again-toast em{
+  margin-top:4px;
+  color:#4b7568;
+  font-size:.75rem;
+  font-style:normal
+}
+
+@media(max-width:560px){
+  .lf-home-again-toast{
+    right:9px;
+    bottom:12px;
+    width:calc(100vw - 18px)
+  }
+}

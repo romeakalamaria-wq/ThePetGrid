@@ -22,7 +22,7 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false
+    realtime:null,lostRealtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false
   };
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
@@ -93,7 +93,7 @@
       const [{data:petRows,error:petError},{data:reportRows,error:reportError}]=await Promise.all([
         client
           .from("pets")
-          .select("id,name,type,city,country,latitude,longitude,image_url,created_at,is_lost,is_memorial")
+          .select("id,name,type,city,country,latitude,longitude,image_url,created_at,is_memorial")
           .not("latitude","is",null)
           .not("longitude","is",null)
           .order("created_at",{ascending:false})
@@ -121,7 +121,7 @@
       const pets=(petRows||[])
         .map(pet=>normalizePet({
           ...pet,
-          is_lost:Boolean(pet.is_lost)||lostPetIds.has(String(pet.id))
+          is_lost:lostPetIds.has(String(pet.id))
         }))
         .filter(pet=>Number.isFinite(pet.latitude)&&Number.isFinite(pet.longitude));
 
@@ -540,25 +540,70 @@
   function updateClock(){ui.clock.textContent=new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"UTC",hour12:false}).format(new Date())+" UTC"}
 
   function pulseRandomPet(){clearInterval(state.pulseTimer);state.pulseTimer=setInterval(()=>{if(!state.pets.length||document.hidden)return;const pet=state.pets[Math.floor(Math.random()*state.pets.length)];ui.liveSignalText.textContent=`${pet.name||"A pet"} is glowing from ${pet.city||pet.country||"the world"}`;ui.liveSignal.hidden=false;clearTimeout(pulseRandomPet.hide);pulseRandomPet.hide=setTimeout(()=>ui.liveSignal.hidden=true,4200)},8500)}
-  function subscribeRealtime(){
-    const client=window.ThePetGridSupabase?.client;if(!client?.channel)return;
-    state.realtime=client.channel("atlas-living-world").on("postgres_changes",{event:"INSERT",schema:"public",table:"pets"},payload=>{
-      const pet=normalizePet(payload.new);
-      if(!Number.isFinite(pet.latitude)||!Number.isFinite(pet.longitude))return;
-
-      state.pets.unshift(pet);
+  async function refreshAtlasPetsFromSources(){
+    try{
+      state.pets=(await loadPets()).map(normalizePet);
       state.globe?.pointsData(visiblePetsForMode());
       refreshMemorialMarkers();
       refreshLivingCells();
       updateStats();
+    }catch(error){
+      console.warn("ThePetGrid: Atlas could not refresh Lost/Home Again state.",error);
+    }
+  }
 
-      pushWorldEvent(
-        createWorldEvent(
-          pet.is_memorial?"memorial":pet.is_lost?"lost":"new_pet",
-          pet
-        )
-      );
-    }).subscribe();
+  function subscribeRealtime(){
+    const client=window.ThePetGridSupabase?.client;
+    if(!client?.channel)return;
+
+    state.realtime=client
+      .channel("atlas-living-world")
+      .on("postgres_changes",{event:"*",schema:"public",table:"pets"},async payload=>{
+        if(payload.eventType==="INSERT"){
+          const pet=normalizePet(payload.new);
+
+          if(
+            Number.isFinite(pet.latitude) &&
+            Number.isFinite(pet.longitude)
+          ){
+            state.pets.unshift(pet);
+
+            pushWorldEvent(
+              createWorldEvent(
+                pet.is_memorial?"memorial":"new_pet",
+                pet
+              )
+            );
+          }
+        }
+
+        await refreshAtlasPetsFromSources();
+      })
+      .subscribe();
+
+    state.lostRealtime=client
+      .channel("atlas-lost-home-again")
+      .on("postgres_changes",{event:"*",schema:"public",table:"lost_pet_reports"},async payload=>{
+        await refreshAtlasPetsFromSources();
+
+        if(
+          payload.eventType==="UPDATE" &&
+          payload.new?.resolved
+        ){
+          toast(`${payload.new.pet_name||"A pet"} is Home Again 🏡`);
+        }
+      })
+      .subscribe();
+
+    window.addEventListener(
+      "thepetgrid:lost-reports-changed",
+      refreshAtlasPetsFromSources
+    );
+
+    window.addEventListener(
+      "thepetgrid:home-again",
+      refreshAtlasPetsFromSources
+    );
   }
 
   function monitorPerformance(){

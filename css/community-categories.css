@@ -1,0 +1,202 @@
+/* ==================================================
+   THEPETGRID — COMMUNITY CATEGORY CHIPS
+================================================== */
+
+.community-categories{
+  margin:18px 0 26px;
+}
+
+.community-categories__track{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+
+.community-category{
+  appearance:none;
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 15px;
+  border:1px solid rgba(148,163,184,.28);
+  border-radius:999px;
+  background:rgba(255,255,255,.96);
+  color:#263248;
+  font:inherit;
+  font-size:.88rem;
+  font-weight:750;
+  line-height:1;
+  white-space:nowrap;
+  cursor:pointer;
+  box-shadow:0 5px 18px rgba(15,23,42,.06);
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    color .18s ease;
+}
+
+.community-category:hover{
+  transform:translateY(-2px);
+  border-color:rgba(245,158,11,.42);
+  box-shadow:0 10px 24px rgba(15,23,42,.10);
+}
+
+.community-category:focus-visible{
+  outline:3px solid rgba(245,158,11,.22);
+  outline-offset:2px;
+}
+
+.community-category.is-active{
+  border-color:transparent;
+  background:linear-gradient(135deg,#ffbe3d,#ff8b11);
+  color:#fff;
+  box-shadow:0 11px 28px rgba(245,158,11,.28);
+}
+
+/* Composer category control */
+.composer-tool--category{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  padding:0 13px;
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:12px;
+  background:#f8fafc;
+  color:#40506b;
+  font-weight:800;
+}
+
+#postCategory{
+  min-height:42px;
+  min-width:190px;
+  padding:0 38px 0 13px;
+  border:1px solid rgba(148,163,184,.26);
+  border-radius:12px;
+  background:#fff;
+  color:#253046;
+  font:inherit;
+  font-size:.88rem;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(15,23,42,.04);
+}
+
+#postCategory:focus{
+  outline:none;
+  border-color:#f59e0b;
+  box-shadow:0 0 0 4px rgba(245,158,11,.12);
+}
+
+/* Make composer tools feel like one design system */
+.composer-tools{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+}
+
+.composer-tool{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 13px;
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:12px;
+  background:#f8fafc;
+  color:#40506b;
+  font-weight:800;
+}
+
+#taggedPet{
+  min-height:42px;
+  padding:0 36px 0 13px;
+  border:1px solid rgba(148,163,184,.26);
+  border-radius:12px;
+  background:#fff;
+  color:#40506b;
+  font:inherit;
+  font-size:.88rem;
+  font-weight:700;
+}
+
+/* Dark Atlas-shell context: keep the filter row clean */
+.atlas-shell .community-categories{
+  position:relative;
+  z-index:2;
+}
+
+@media(max-width:760px){
+  .community-categories{
+    margin:14px 0 22px;
+    overflow:hidden;
+  }
+
+  .community-categories__track{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding:2px 2px 8px;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+  }
+
+  .community-categories__track::-webkit-scrollbar{
+    display:none;
+  }
+
+  .community-category{
+    flex:0 0 auto;
+    scroll-snap-align:start;
+  }
+
+  #postCategory{
+    min-width:170px;
+  }
+}
+
+
+/* Layout fix */
+
+/* Replace the .community-categories block with this */
+
+.community-categories{
+    margin:18px 0 28px;
+    overflow:hidden;
+}
+
+.community-categories__track{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:10px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:4px 2px 10px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+}
+
+.community-categories__track::-webkit-scrollbar{
+    display:none;
+}
+
+.community-category{
+    flex:0 0 auto;
+    min-height:42px;
+    padding:0 16px;
+    border-radius:999px;
+    white-space:nowrap;
+}
+
+@media (max-width:768px){
+    .community-category{
+        min-height:40px;
+        padding:0 14px;
+        font-size:.85rem;
+    }
+}
