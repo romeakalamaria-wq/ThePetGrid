@@ -171,6 +171,240 @@
     }
 
 
+    function parseStoredJson(key, fallback) {
+
+        try {
+
+            const value =
+                JSON.parse(
+                    localStorage.getItem(key)
+                );
+
+            return value ?? fallback;
+
+        } catch (_) {
+
+            return fallback;
+
+        }
+
+    }
+
+
+    function getCachedLoggedUser() {
+
+        const user =
+            parseStoredJson(
+                "loggedUser",
+                null
+            );
+
+        return (
+            user &&
+            typeof user === "object"
+        )
+            ? user
+            : null;
+
+    }
+
+
+    function getKnownUsers() {
+
+        const users = [];
+
+        [
+            "thepetgrid_users",
+            "registeredUsers",
+            "users"
+        ].forEach(key => {
+
+            const stored =
+                parseStoredJson(
+                    key,
+                    []
+                );
+
+            if (Array.isArray(stored)) {
+                stored.forEach(user => {
+                    if (
+                        user &&
+                        typeof user === "object"
+                    ) {
+                        users.push(user);
+                    }
+                });
+            }
+
+        });
+
+
+        const profiles =
+            parseStoredJson(
+                "thepetgrid_user_profiles",
+                {}
+            );
+
+        if (
+            profiles &&
+            typeof profiles === "object" &&
+            !Array.isArray(profiles)
+        ) {
+
+            Object.entries(profiles)
+                .forEach(
+                    ([username, profile]) => {
+
+                        if (
+                            profile &&
+                            typeof profile === "object"
+                        ) {
+
+                            users.push({
+                                ...profile,
+                                username:
+                                    profile.username ||
+                                    username
+                            });
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        const loggedUser =
+            getCachedLoggedUser();
+
+        if (loggedUser) {
+            users.push(loggedUser);
+        }
+
+
+        return users;
+
+    }
+
+
+    function getUserUsername(user) {
+
+        return String(
+            user?.username ||
+            user?.userName ||
+            user?.name ||
+            user?.email?.split("@")[0] ||
+            ""
+        ).trim();
+
+    }
+
+
+    function resolveOwnerUsername(
+        ownerName,
+        explicitUsername = ""
+    ) {
+
+        const explicit =
+            String(
+                explicitUsername || ""
+            ).trim();
+
+        if (explicit) {
+            return explicit;
+        }
+
+
+        const normalizedOwner =
+            normalizeText(ownerName);
+
+        if (!normalizedOwner) {
+            return "";
+        }
+
+
+        const matchingUser =
+            getKnownUsers().find(user => {
+
+                const aliases = [
+                    user.username,
+                    user.userName,
+                    user.displayName,
+                    user.fullName,
+                    user.name,
+                    user.email
+                ]
+                    .map(normalizeText)
+                    .filter(Boolean);
+
+                return aliases.includes(
+                    normalizedOwner
+                );
+
+            });
+
+
+        return matchingUser
+            ? getUserUsername(matchingUser)
+            : "";
+
+    }
+
+
+    function migratePetOwnerIdentity(pet) {
+
+        if (
+            !pet ||
+            typeof pet !== "object"
+        ) {
+            return false;
+        }
+
+
+        const existingUsername =
+            String(
+                pet.ownerUsername ||
+                pet.owner_username ||
+                ""
+            ).trim();
+
+        if (existingUsername) {
+
+            if (!pet.ownerUsername) {
+                pet.ownerUsername =
+                    existingUsername;
+
+                return true;
+            }
+
+            return false;
+        }
+
+
+        const resolved =
+            resolveOwnerUsername(
+                pet.owner,
+                pet.username ||
+                pet.createdBy ||
+                pet.userName ||
+                ""
+            );
+
+
+        if (!resolved) {
+            return false;
+        }
+
+
+        pet.ownerUsername =
+            resolved;
+
+        return true;
+
+    }
+
+
     function createPetId() {
 
         return (
@@ -237,6 +471,15 @@
             ) {
 
                 pets = storedPets;
+
+                const migrated =
+                    pets.some(
+                        migratePetOwnerIdentity
+                    );
+
+                if (migrated) {
+                    savePets();
+                }
 
                 return;
 
@@ -485,6 +728,16 @@
             owner:
                 String(petData.owner ?? "Unknown").trim(),
 
+            ownerUsername:
+                resolveOwnerUsername(
+                    petData.owner,
+                    petData.ownerUsername ||
+                    petData.owner_username ||
+                    petData.username ||
+                    petData.createdBy ||
+                    petData.userName
+                ),
+
             likes:
                 Number(petData.likes) || 0,
 
@@ -555,6 +808,40 @@
             ...updates,
             id: currentPet.id
         };
+
+
+        if (
+            updates &&
+            (
+                Object.prototype.hasOwnProperty.call(
+                    updates,
+                    "owner"
+                ) ||
+                Object.prototype.hasOwnProperty.call(
+                    updates,
+                    "ownerUsername"
+                ) ||
+                Object.prototype.hasOwnProperty.call(
+                    updates,
+                    "owner_username"
+                )
+            )
+        ) {
+
+            updatedPet.ownerUsername =
+                resolveOwnerUsername(
+                    updatedPet.owner,
+                    updatedPet.ownerUsername ||
+                    updatedPet.owner_username
+                );
+
+        } else {
+
+            migratePetOwnerIdentity(
+                updatedPet
+            );
+
+        }
 
         pets[petIndex] =
             updatedPet;
@@ -756,6 +1043,27 @@
 
         isLiked,
         toggleLike,
+
+        migrateOwnerIdentity() {
+
+            const changed =
+                pets.some(
+                    migratePetOwnerIdentity
+                );
+
+            if (changed) {
+
+                savePets();
+
+                notifyChange(
+                    "owner-identity-migration"
+                );
+
+            }
+
+            return getAll();
+
+        },
 
         reset
 

@@ -8,7 +8,7 @@
 <link href="../assets/favicon.png" rel="icon" type="image/png"/>
 
 
-<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/user-profile.css?v=20260808-profile-12-1" rel="stylesheet"/>
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/user-profile.css?v=20260808-profile-sync" rel="stylesheet"/>
 <link href="../css/pet-card.css" rel="stylesheet"/>
 </head>
 <body>
@@ -81,32 +81,6 @@
 <p class="profile-bio" id="profileBio">
                                 This user has not added a bio yet.
                             </p>
-<div class="profile-identity-layer" id="profileIdentityLayer" aria-label="Community identity">
-    <div class="profile-reputation-card">
-        <div class="profile-reputation-icon" aria-hidden="true">⭐</div>
-        <div class="profile-reputation-copy">
-            <span>Reputation</span>
-            <strong id="profileReputationScore">0</strong>
-            <small id="profileReputationLevel">New Member</small>
-        </div>
-    </div>
-
-    <div class="profile-badges-block">
-        <span class="profile-badges-label">Badges</span>
-        <div class="profile-badges-list" id="profileBadgesList">
-            <span class="profile-badge profile-badge--neutral">🐾 Community Member</span>
-        </div>
-    </div>
-
-    <div class="profile-contribution-card">
-        <span class="profile-contribution-label">Community contribution</span>
-        <div class="profile-contribution-bar" aria-hidden="true">
-            <span id="profileContributionProgress"></span>
-        </div>
-        <small id="profileContributionText">Building a community footprint</small>
-    </div>
-</div>
-
 </div>
 <div class="profile-actions" id="profileActions">
 <button class="profile-action-btn follow-btn" id="followButton" type="button">
@@ -428,13 +402,13 @@
 <!-- ==========================================
      SCRIPTS
 =========================================== -->
-<script src="../store/pet-store.js?v=3"></script>
+<script src="../store/pet-store.js?v=4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 <script src="../js/supabase-client.js"></script>
-<script src="../js/auth.js"></script>
+<script src="../js/auth.js?v=20260808-profile-sync"></script>
 <script src="../js/community-safety.js?v=1"></script>
-<script src="../js/user-profile.js?v=20260808-profile-12-1"></script>
+<script src="../js/user-profile.js?v=20260808-profile-sync"></script>
 <script src="../js/profile-privacy.js?v=1"></script>
 <script src="../js/profile-follows.js?v=1"></script>
 <script src="../js/header.js"></script>
