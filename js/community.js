@@ -23,7 +23,12 @@
         emptyFeed: document.getElementById("emptyFeed"),
         postCount: document.getElementById("communityPostCount"),
         clearPostsButton: document.getElementById("clearPostsButton"),
-        userArea: document.getElementById("userArea")
+        userArea: document.getElementById("userArea"),
+        trendingTopics: document.getElementById("communityTrendingTopics"),
+        lostNearby: document.getElementById("communityLostNearby"),
+        topHelpers: document.getElementById("communityTopHelpers"),
+        homeAgain: document.getElementById("communityHomeAgain"),
+        useMyArea: document.getElementById("communityUseMyArea")
     };
 
     let selectedImage = "";
@@ -40,6 +45,13 @@
         funny: { label: "Funny", icon: "🐾" },
         local: { label: "Local Community", icon: "🌍" }
     });
+
+    const LOST_REPORTS_KEY = "thepetgrid_lost_found_reports";
+    const SIGHTINGS_KEY = "thepetgrid_lost_pet_sightings";
+
+    let communityUserLocation = null;
+    let communityAlertRadiusKm = null;
+    let communityCloudLostReports = [];
 
     const openCommentPostIds = new Set();
     const currentUser = getLoggedUser();
@@ -559,6 +571,753 @@
         );
     }
 
+    function getStoredArray(key) {
+        try {
+            const value = JSON.parse(
+                localStorage.getItem(key) || "[]"
+            );
+
+            return Array.isArray(value)
+                ? value
+                : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function calculateDistanceKm(lat1, lng1, lat2, lng2) {
+        const values = [lat1, lng1, lat2, lng2]
+            .map(Number);
+
+        if (!values.every(Number.isFinite)) {
+            return null;
+        }
+
+        const [aLat, aLng, bLat, bLng] = values;
+        const toRadians = value =>
+            value * Math.PI / 180;
+        const earthRadius = 6371;
+
+        const deltaLat =
+            toRadians(bLat - aLat);
+
+        const deltaLng =
+            toRadians(bLng - aLng);
+
+        const part =
+            Math.sin(deltaLat / 2) ** 2 +
+            Math.cos(toRadians(aLat)) *
+            Math.cos(toRadians(bLat)) *
+            Math.sin(deltaLng / 2) ** 2;
+
+        return (
+            earthRadius *
+            2 *
+            Math.atan2(
+                Math.sqrt(part),
+                Math.sqrt(1 - part)
+            )
+        );
+    }
+
+    function categoryActivity() {
+        const activity = new Map();
+
+        posts.forEach(post => {
+            const category =
+                normalizeCategory(post.category);
+
+            const ageHours = Math.max(
+                0,
+                (
+                    Date.now() -
+                    new Date(post.createdAt).getTime()
+                ) / 3600000
+            );
+
+            const recencyBoost =
+                Math.max(0, 36 - ageHours) / 9;
+
+            const score =
+                Number(post.likes || 0) * 2 +
+                getCommentCount(post) * 3 +
+                recencyBoost;
+
+            const current =
+                activity.get(category) || {
+                    category,
+                    score: 0,
+                    posts: 0
+                };
+
+            current.score += score;
+            current.posts += 1;
+
+            activity.set(category, current);
+        });
+
+        return [...activity.values()]
+            .sort(
+                (a, b) =>
+                    b.score - a.score ||
+                    b.posts - a.posts
+            );
+    }
+
+    function renderTrendingTopics() {
+        if (!elements.trendingTopics) {
+            return;
+        }
+
+        const items =
+            categoryActivity().slice(0, 4);
+
+        if (!items.length) {
+            elements.trendingTopics.innerHTML =
+                '<p class="community-sidebar-empty">Trending topics will appear here.</p>';
+            return;
+        }
+
+        elements.trendingTopics.innerHTML =
+            items.map(item => {
+                const meta =
+                    CATEGORY_META[item.category];
+
+                return `
+                    <button
+                        class="community-live-item"
+                        type="button"
+                        data-sidebar-category="${escapeHtml(item.category)}"
+                    >
+                        <span class="community-live-item__icon">
+                            ${escapeHtml(meta?.icon || "🐾")}
+                        </span>
+
+                        <span class="community-live-item__body">
+                            <strong>
+                                ${escapeHtml(meta?.label || "Community")}
+                            </strong>
+                            <small>
+                                ${item.posts} post${item.posts === 1 ? "" : "s"} · trending now
+                            </small>
+                        </span>
+
+                        <span class="community-live-item__arrow">
+                            →
+                        </span>
+                    </button>
+                `;
+            }).join("");
+    }
+
+    function normalizeCommunityLostReport(report) {
+        if (!report || typeof report !== "object") {
+            return null;
+        }
+
+        return {
+            ...report,
+            id: report.id,
+            petId: report.petId ?? report.pet_id ?? null,
+            ownerId: report.ownerId ?? report.reporter_id ?? null,
+            status: String(report.status || "").toLowerCase(),
+            name: report.name || report.pet_name || "Lost pet",
+            type: report.type || report.pet_type || "",
+            area: report.area || "",
+            city: report.city || "",
+            country: report.country || "",
+            address: report.address || "",
+            latitude: report.latitude,
+            longitude: report.longitude,
+            image: report.image || report.image_url || "",
+            resolved: Boolean(report.resolved),
+            createdAt:
+                report.createdAt ||
+                report.created_at ||
+                report.event_date ||
+                report.date ||
+                "",
+            resolvedAt:
+                report.resolvedAt ||
+                report.resolved_at ||
+                null
+        };
+    }
+
+    async function loadCommunityLostContext() {
+        const client = window.ThePetGridSupabase?.client;
+
+        if (!client) {
+            communityCloudLostReports = [];
+            return;
+        }
+
+        try {
+            const reportRequest = client
+                .from("lost_pet_reports")
+                .select("*")
+                .eq("status", "lost")
+                .eq("resolved", false)
+                .order("created_at", { ascending: false });
+
+            const authUser =
+                window.ThePetGridAuth?.getCurrentUser?.() ||
+                null;
+
+            const userId =
+                authUser?.id ||
+                currentUser.id ||
+                currentUser.userId ||
+                null;
+
+            const [reportResult, preferenceResult] =
+                await Promise.all([
+                    reportRequest,
+                    userId
+                        ? client
+                            .from("nearby_alert_preferences")
+                            .select("enabled,radius_km,latitude,longitude")
+                            .eq("user_id", userId)
+                            .maybeSingle()
+                        : Promise.resolve({
+                            data: null,
+                            error: null
+                        })
+                ]);
+
+            if (reportResult.error) {
+                throw reportResult.error;
+            }
+
+            communityCloudLostReports =
+                Array.isArray(reportResult.data)
+                    ? reportResult.data
+                        .map(normalizeCommunityLostReport)
+                        .filter(Boolean)
+                    : [];
+
+            const preference =
+                preferenceResult?.error
+                    ? null
+                    : preferenceResult?.data;
+
+            if (
+                preference &&
+                preference.enabled !== false &&
+                Number.isFinite(Number(preference.latitude)) &&
+                Number.isFinite(Number(preference.longitude))
+            ) {
+                communityUserLocation = {
+                    latitude: Number(preference.latitude),
+                    longitude: Number(preference.longitude)
+                };
+
+                communityAlertRadiusKm =
+                    Number.isFinite(Number(preference.radius_km))
+                        ? Number(preference.radius_km)
+                        : 10;
+
+                if (elements.useMyArea) {
+                    elements.useMyArea.textContent =
+                        "📍 My area active";
+                }
+            }
+        } catch (error) {
+            console.warn(
+                "Community Lost Near You could not load shared Lost reports.",
+                error
+            );
+
+            communityCloudLostReports = [];
+        }
+    }
+
+    function activeLostReports() {
+        const merged = new Map();
+
+        communityCloudLostReports.forEach(report => {
+            const normalized =
+                normalizeCommunityLostReport(report);
+
+            if (!normalized) {
+                return;
+            }
+
+            const key =
+                normalized.id != null
+                    ? String(normalized.id)
+                    : `cloud-${normalized.name}-${normalized.createdAt}`;
+
+            merged.set(key, normalized);
+        });
+
+        getStoredArray(LOST_REPORTS_KEY)
+            .forEach(report => {
+                const normalized =
+                    normalizeCommunityLostReport(report);
+
+                if (!normalized) {
+                    return;
+                }
+
+                const key =
+                    normalized.id != null
+                        ? String(normalized.id)
+                        : `local-${normalized.name}-${normalized.createdAt}`;
+
+                // Supabase is the shared source of truth when the same report
+                // also exists in this browser's localStorage.
+                if (!merged.has(key)) {
+                    merged.set(key, normalized);
+                }
+            });
+
+        return [...merged.values()]
+            .filter(
+                report =>
+                    report.status === "lost" &&
+                    !report.resolved
+            )
+            .sort(
+                (a, b) =>
+                    Date.parse(
+                        b.createdAt ||
+                        b.date ||
+                        0
+                    ) -
+                    Date.parse(
+                        a.createdAt ||
+                        a.date ||
+                        0
+                    )
+            );
+    }
+
+    function formatSidebarDistance(value) {
+        if (!Number.isFinite(value)) {
+            return "";
+        }
+
+        if (value < 1) {
+            return `${Math.max(
+                1,
+                Math.round(value * 1000)
+            )} m away`;
+        }
+
+        if (value < 10) {
+            return `${value.toFixed(1)} km away`;
+        }
+
+        return `${Math.round(value)} km away`;
+    }
+
+    function renderLostNearby() {
+        if (!elements.lostNearby) {
+            return;
+        }
+
+        let reports =
+            activeLostReports().map(report => ({
+                ...report,
+                distance: communityUserLocation
+                    ? calculateDistanceKm(
+                        communityUserLocation.latitude,
+                        communityUserLocation.longitude,
+                        report.latitude,
+                        report.longitude
+                    )
+                    : null
+            }));
+
+        if (
+            communityUserLocation &&
+            Number.isFinite(communityAlertRadiusKm)
+        ) {
+            reports = reports.filter(
+                report =>
+                    !Number.isFinite(report.distance) ||
+                    report.distance <= communityAlertRadiusKm
+            );
+        }
+
+        if (communityUserLocation) {
+            reports.sort((a, b) => {
+                const aValid =
+                    Number.isFinite(a.distance);
+
+                const bValid =
+                    Number.isFinite(b.distance);
+
+                if (aValid && bValid) {
+                    return a.distance - b.distance;
+                }
+
+                if (aValid) return -1;
+                if (bValid) return 1;
+
+                return 0;
+            });
+        }
+
+        reports = reports.slice(0, 4);
+
+        if (!reports.length) {
+            elements.lostNearby.innerHTML =
+                '<p class="community-sidebar-empty">No active lost alerts right now.</p>';
+            return;
+        }
+
+        elements.lostNearby.innerHTML =
+            reports.map(report => {
+                const detail =
+                    formatSidebarDistance(
+                        report.distance
+                    ) ||
+                    report.area ||
+                    report.city ||
+                    report.country ||
+                    "Active lost alert";
+
+                return `
+                    <a
+                        class="community-live-item community-live-item--lost"
+                        href="lost-found.html?reportId=${encodeURIComponent(report.id)}#reports"
+                    >
+                        <span class="community-live-item__icon">
+                            🆘
+                        </span>
+
+                        <span class="community-live-item__body">
+                            <strong>
+                                ${escapeHtml(
+                                    report.name ||
+                                    report.pet_name ||
+                                    "Lost pet"
+                                )}
+                            </strong>
+                            <small>
+                                ${escapeHtml(detail)}
+                            </small>
+                        </span>
+
+                        <span class="community-live-item__arrow">
+                            →
+                        </span>
+                    </a>
+                `;
+            }).join("");
+    }
+
+    function buildHelperRanking() {
+        const helpers = new Map();
+
+        const addPoints = (
+            username,
+            name,
+            avatar,
+            points
+        ) => {
+            const key =
+                String(username || "")
+                    .trim()
+                    .toLowerCase();
+
+            if (!key || key === "guest") {
+                return;
+            }
+
+            const current =
+                helpers.get(key) || {
+                    username: key,
+                    name:
+                        name ||
+                        username ||
+                        "Pet Lover",
+                    avatar:
+                        avatar ||
+                        DEFAULT_AVATAR,
+                    points: 0
+                };
+
+            current.points += points;
+
+            if (name) {
+                current.name = name;
+            }
+
+            if (avatar) {
+                current.avatar = avatar;
+            }
+
+            helpers.set(key, current);
+        };
+
+        posts.forEach(post => {
+            addPoints(
+                post.authorUsername,
+                post.authorName,
+                post.authorAvatar,
+                2
+            );
+
+            (post.comments || [])
+                .forEach(comment => {
+                    addPoints(
+                        comment.authorUsername,
+                        comment.authorName,
+                        comment.authorAvatar,
+                        1
+                    );
+                });
+        });
+
+        getStoredArray(SIGHTINGS_KEY)
+            .forEach(sighting => {
+                addPoints(
+                    sighting.authorUsername ||
+                    sighting.username,
+                    sighting.authorName ||
+                    sighting.username,
+                    sighting.authorAvatar,
+                    4
+                );
+            });
+
+        return [...helpers.values()]
+            .sort(
+                (a, b) =>
+                    b.points - a.points ||
+                    a.name.localeCompare(b.name)
+            )
+            .slice(0, 4);
+    }
+
+    function renderTopHelpers() {
+        if (!elements.topHelpers) {
+            return;
+        }
+
+        const ranking =
+            buildHelperRanking();
+
+        if (!ranking.length) {
+            elements.topHelpers.innerHTML =
+                '<p class="community-sidebar-empty">Community helpers will appear here.</p>';
+            return;
+        }
+
+        const medals =
+            ["🥇", "🥈", "🥉", "⭐"];
+
+        elements.topHelpers.innerHTML =
+            ranking.map((helper, index) => `
+                <a
+                    class="community-live-item"
+                    href="user-profile.html?username=${encodeURIComponent(helper.username)}"
+                >
+                    <span class="community-helper-rank">
+                        ${medals[index] || "⭐"}
+                    </span>
+
+                    <span class="community-live-item__body">
+                        <strong>
+                            ${escapeHtml(helper.name)}
+                        </strong>
+                        <small>
+                            ${helper.points} help point${helper.points === 1 ? "" : "s"}
+                        </small>
+                    </span>
+
+                    <span class="community-live-item__arrow">
+                        →
+                    </span>
+                </a>
+            `).join("");
+    }
+
+    function recentHomeAgainReports() {
+        return getStoredArray(LOST_REPORTS_KEY)
+            .filter(
+                report =>
+                    Boolean(report?.resolved) &&
+                    (
+                        report?.homeAgain ||
+                        report?.status === "lost"
+                    )
+            )
+            .sort(
+                (a, b) =>
+                    Date.parse(
+                        b.resolvedAt ||
+                        b.createdAt ||
+                        b.date ||
+                        0
+                    ) -
+                    Date.parse(
+                        a.resolvedAt ||
+                        a.createdAt ||
+                        a.date ||
+                        0
+                    )
+            )
+            .slice(0, 3);
+    }
+
+    function renderHomeAgain() {
+        if (!elements.homeAgain) {
+            return;
+        }
+
+        const reports =
+            recentHomeAgainReports();
+
+        if (!reports.length) {
+            elements.homeAgain.innerHTML =
+                '<p class="community-sidebar-empty">Home Again stories will appear here.</p>';
+            return;
+        }
+
+        elements.homeAgain.innerHTML =
+            reports.map(report => `
+                <a
+                    class="community-live-item community-live-item--home"
+                    href="lost-found.html?reportId=${encodeURIComponent(report.id)}#reports"
+                >
+                    <span class="community-live-item__icon">
+                        🏡
+                    </span>
+
+                    <span class="community-live-item__body">
+                        <strong>
+                            ${escapeHtml(
+                                report.name ||
+                                report.pet_name ||
+                                "Pet"
+                            )}
+                        </strong>
+                        <small>
+                            Safely back home
+                        </small>
+                    </span>
+
+                    <span class="community-live-item__arrow">
+                        →
+                    </span>
+                </a>
+            `).join("");
+    }
+
+    function renderLiveSidebar() {
+        renderTrendingTopics();
+        renderLostNearby();
+        renderTopHelpers();
+        renderHomeAgain();
+    }
+
+    function useCommunityLocation() {
+        if (!navigator.geolocation) {
+            window.alert(
+                "Location is not available on this device."
+            );
+            return;
+        }
+
+        if (elements.useMyArea) {
+            elements.useMyArea.disabled = true;
+            elements.useMyArea.textContent =
+                "📍 Finding you…";
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                communityUserLocation = {
+                    latitude:
+                        position.coords.latitude,
+                    longitude:
+                        position.coords.longitude
+                };
+
+                if (!Number.isFinite(communityAlertRadiusKm)) {
+                    communityAlertRadiusKm = 10;
+                }
+
+                if (elements.useMyArea) {
+                    elements.useMyArea.disabled = false;
+                    elements.useMyArea.textContent =
+                        "📍 My area active";
+                }
+
+                renderLostNearby();
+            },
+            () => {
+                communityUserLocation = null;
+
+                if (elements.useMyArea) {
+                    elements.useMyArea.disabled = false;
+                    elements.useMyArea.textContent =
+                        "📍 Use my area";
+                }
+
+                window.alert(
+                    "Location permission was not granted."
+                );
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 9000,
+                maximumAge: 300000
+            }
+        );
+    }
+
+    function handleSidebarCategory(event) {
+        const button =
+            event.target.closest(
+                "[data-sidebar-category]"
+            );
+
+        if (!button) {
+            return;
+        }
+
+        const category =
+            normalizeCategory(
+                button.dataset.sidebarCategory
+            );
+
+        currentCategory = category;
+
+        elements.categoryFilters
+            ?.querySelectorAll(
+                "[data-community-category]"
+            )
+            .forEach(item => {
+                const active =
+                    item.dataset.communityCategory ===
+                    category;
+
+                item.classList.toggle(
+                    "is-active",
+                    active
+                );
+
+                item.setAttribute(
+                    "aria-pressed",
+                    String(active)
+                );
+            });
+
+        renderPosts();
+
+        document.querySelector(
+            ".community-categories"
+        )?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+
     function renderPosts() {
         elements.feed.innerHTML = "";
 
@@ -625,6 +1384,8 @@
                 createPostElement(post)
             );
         });
+
+        renderLiveSidebar();
     }
 
     function createPostElement(post) {
@@ -1688,6 +2449,57 @@
             "click",
             handleCategoryFilter
         );
+
+        elements.trendingTopics?.addEventListener(
+            "click",
+            handleSidebarCategory
+        );
+
+        elements.useMyArea?.addEventListener(
+            "click",
+            useCommunityLocation
+        );
+
+        window.addEventListener(
+            "thepetgrid:lost-reports-changed",
+            async () => {
+                await loadCommunityLostContext();
+                renderLiveSidebar();
+            }
+        );
+
+        window.addEventListener(
+            "thepetgrid:sightings-changed",
+            renderLiveSidebar
+        );
+
+        window.addEventListener(
+            "thepetgrid:home-again",
+            async () => {
+                await loadCommunityLostContext();
+                renderLiveSidebar();
+            }
+        );
+
+        window.addEventListener(
+            "storage",
+            event => {
+                if (
+                    [
+                        STORAGE_KEY,
+                        LOST_REPORTS_KEY,
+                        SIGHTINGS_KEY
+                    ].includes(event.key)
+                ) {
+                    if (event.key === STORAGE_KEY) {
+                        loadPosts();
+                        renderPosts();
+                    } else {
+                        renderLiveSidebar();
+                    }
+                }
+            }
+        );
     }
 
     async function init() {
@@ -1705,6 +2517,7 @@
         loadPosts();
         await window.ThePetGridSafety?.ready;
         await hydrateCurrentUserProfile();
+        await loadCommunityLostContext();
         renderHeaderUser();
         renderComposerIdentity();
         populatePetOptions();
