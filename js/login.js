@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const usernameField = document.querySelector("#usernameField");
   const emailField = document.querySelector("#emailField");
   const authNote = document.querySelector(".auth-note");
+  const forgotActions = document.querySelector("#forgotPasswordActions");
   const forgotButton = document.querySelector("#forgotPasswordButton");
   const forgotForm = document.querySelector("#forgotPasswordForm");
   const forgotSubmit = document.querySelector("#forgotPasswordSubmit");
@@ -41,6 +42,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     message.textContent = "";
   }
 
+  function setForgotVisible(visible) {
+    if (!forgotActions) return;
+    forgotActions.style.display = visible ? "" : "none";
+  }
+
   function setBusy(value) {
     busy = value;
     submitButton.disabled = value;
@@ -70,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     form.elements.password.autocomplete = registering
       ? "new-password"
       : "current-password";
+    setForgotVisible(false);
     hideMessage();
 
     modeButtons.forEach((button) => {
@@ -115,6 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   forgotButton?.addEventListener("click", () => {
     if (busy) return;
     hideMessage();
+    setForgotVisible(false);
     form.hidden = true;
     forgotForm.hidden = false;
     document.querySelector(".auth-tabs").hidden = true;
@@ -156,6 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     event.preventDefault();
     if (busy) return;
     hideMessage();
+    setForgotVisible(false);
 
     if (!client) {
       showMessage("Supabase did not load. Check the internet connection and configuration.", "error");
@@ -227,7 +236,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.setTimeout(redirectAfterLogin, 450);
     } catch (error) {
       console.error("ThePetGrid authentication error:", error);
-      showMessage(friendlyError(error), "error");
+
+      const friendly = friendlyError(error);
+      showMessage(friendly, "error");
+
+      if (
+        mode === "login" &&
+        friendly === "Incorrect username or password."
+      ) {
+        setForgotVisible(true);
+      }
     } finally {
       setBusy(false);
     }

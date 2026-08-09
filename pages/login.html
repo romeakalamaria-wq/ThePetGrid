@@ -34,7 +34,9 @@
         <label class="field" id="usernameField">Username<input name="username" required autocomplete="username"></label>
         <label class="field" id="emailField" hidden>Email<input type="email" name="email" autocomplete="email"></label>
         <label class="field">Password<input type="password" name="password" required autocomplete="current-password"></label>
-        <div class="auth-password-actions"><button id="forgotPasswordButton" type="button">Forgot your password?</button></div>
+        <div class="auth-password-actions" id="forgotPasswordActions" style="display:none">
+          <button id="forgotPasswordButton" type="button">Forgot your password?</button>
+        </div>
         <button class="auth-submit" id="authSubmit" type="submit">Log In</button>
       </form>
       <form id="forgotPasswordForm" hidden>
