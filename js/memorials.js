@@ -551,10 +551,11 @@
     document.getElementById("memoryMessageForm")?.addEventListener("submit", async event => {
       event.preventDefault();
 
+      const form = event.currentTarget;
+
       const user = await ensureSignedIn(showToast);
       if (!user) return;
 
-      const form = event.currentTarget;
       const formData = new FormData(form);
 
       const author = String(formData.get("author") || "").trim();
