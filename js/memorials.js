@@ -93,11 +93,9 @@
       caption: `Forever loved, ${pet.name || "beautiful soul"}`,
       signature:
         "Your family will carry you with them, always. 🤍",
-      gallery: [
-        pet.image_url || "../assets/avatar.png",
-        pet.image_url || "../assets/avatar.png",
-        pet.image_url || "../assets/avatar.png"
-      ],
+      gallery: pet.image_url
+        ? [pet.image_url]
+        : [],
       candles: tributeCount(row.id, "candle"),
       flowers: tributeCount(row.id, "flower"),
       isCloud: true,
@@ -392,15 +390,51 @@
     document.getElementById("memoryPortraitCaption").textContent =
       item.caption || `Forever loved, ${item.name}`;
 
-    const gallery = item.gallery?.length
-      ? item.gallery
-      : [item.image, item.image, item.image];
+    const gallery = [
+      ...new Set(
+        (Array.isArray(item.gallery) ? item.gallery : [])
+          .filter(Boolean)
+      )
+    ];
 
-    [1, 2, 3].forEach((number, index) => {
-      const image = document.getElementById(`memoryGalleryImage${number}`);
-      image.src = gallery[index] || item.image;
-      image.alt = `${item.name} — treasured memory ${number}`;
+    if (!gallery.length && item.image) {
+      gallery.push(item.image);
+    }
+
+    const gallerySection = document.querySelector(".atlas-memory-gallery");
+    const galleryGrid = document.querySelector(".atlas-memory-gallery__grid");
+
+    const galleryImages = [1, 2, 3]
+      .map(number =>
+        document.getElementById(`memoryGalleryImage${number}`)
+      )
+      .filter(Boolean);
+
+    galleryImages.forEach((image, index) => {
+      const src = gallery[index];
+
+      if (src) {
+        image.src = src;
+        image.alt =
+          `${item.name} — treasured memory ${index + 1}`;
+
+        image.closest("figure, div")?.removeAttribute("hidden");
+      } else {
+        const holder = image.closest("figure, div");
+
+        if (holder) {
+          holder.hidden = true;
+        }
+      }
     });
+
+    if (galleryGrid) {
+      galleryGrid.dataset.count = String(gallery.length);
+    }
+
+    if (gallerySection) {
+      gallerySection.dataset.count = String(gallery.length);
+    }
   }
 
   async function refreshTributeRowsForMemorial(memorialId) {

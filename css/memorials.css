@@ -786,15 +786,90 @@ body.atlas-memorial-body::before{
 .atlas-memory-gallery__quote{grid-column:1/-1;margin:14px 0 0;padding:30px;border:1px solid rgba(203,184,255,.13);border-radius:20px;background:rgba(203,184,255,.035);color:#d6e0eb;font-family:Georgia,serif;font-size:1.3rem;font-style:italic;line-height:1.6;text-align:center}
 
 /* Community memories */
-.atlas-memory-messages{padding:105px 0;border-bottom:1px solid var(--mg-line-dark)}
-.atlas-memory-write-secondary{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:9px;padding:0 17px;border:1px solid var(--mg-line-dark);border-radius:14px;background:rgba(255,255,255,.045);color:#fff;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer}
-.atlas-memory-message-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.atlas-memory-message-list article{display:flex;gap:18px;min-height:150px;padding:24px;border:1px solid var(--mg-line-dark);border-radius:21px;background:linear-gradient(145deg,rgba(18,36,58,.82),rgba(9,23,41,.9));box-shadow:var(--mg-shadow-dark)}
-.atlas-memory-message-avatar{display:grid;width:48px;height:48px;flex:0 0 auto;place-items:center;border:1px solid var(--mg-line-dark);border-radius:15px;background:rgba(255,255,255,.04);font-size:1.3rem}
-.atlas-memory-message-list p{display:grid;gap:8px;margin:0}
-.atlas-memory-message-list strong{color:#fff}
-.atlas-memory-message-list span{color:#b6c5d6;line-height:1.65}
-.atlas-memory-message-list small{color:#71869f;font-size:.75rem}
+.atlas-memory-messages{
+  padding:105px 0;
+  border-bottom:1px solid var(--mg-line-dark);
+}
+.atlas-memory-write-secondary{
+  display:inline-flex;
+  min-height:48px;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:0 17px;
+  border:1px solid var(--mg-line-dark);
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+  color:#fff;
+  font:inherit;
+  font-size:.82rem;
+  font-weight:800;
+  cursor:pointer;
+  transition:.22s ease;
+}
+.atlas-memory-write-secondary:hover{
+  transform:translateY(-2px);
+  border-color:rgba(119,217,232,.32);
+  background:rgba(255,255,255,.065);
+}
+
+/* Compact, scalable remembrance feed */
+.atlas-memory-message-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:16px;
+}
+.atlas-memory-message-list article{
+  display:flex;
+  align-items:flex-start;
+  gap:15px;
+  min-height:0;
+  padding:19px 20px;
+  border:1px solid var(--mg-line-dark);
+  border-radius:19px;
+  background:linear-gradient(145deg,rgba(18,36,58,.82),rgba(9,23,41,.9));
+  box-shadow:0 16px 42px rgba(0,0,0,.20);
+}
+.atlas-memory-message-avatar,
+.atlas-memory-message-list article>div:first-child{
+  display:grid;
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  place-items:center;
+  border:1px solid var(--mg-line-dark);
+  border-radius:13px;
+  background:rgba(255,255,255,.045);
+  font-size:1.15rem;
+}
+.atlas-memory-message-list p{
+  min-width:0;
+  display:grid;
+  gap:6px;
+  margin:0;
+}
+.atlas-memory-message-list strong{
+  color:#fff;
+  font-size:.95rem;
+}
+.atlas-memory-message-list span{
+  color:#b6c5d6;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.atlas-memory-message-list small{
+  margin-top:2px;
+  color:#71869f;
+  font-size:.73rem;
+}
+
+/* Empty state should stay compact too */
+.atlas-memory-message-list>.memorial-empty{
+  grid-column:1/-1;
+  padding:28px;
+  margin:0;
+}
 
 /* Final tribute */
 .atlas-memory-final-tribute{position:relative;padding:130px 0;overflow:hidden;text-align:center;background:radial-gradient(circle at 50% 45%,rgba(203,184,255,.09),transparent 25rem)}
@@ -931,6 +1006,10 @@ body.atlas-memorial-body::before{
   .atlas-memory-gallery__quote{grid-column:auto;font-size:1.05rem}
   .atlas-memory-section-heading h2{font-size:2.7rem}
   .atlas-memory-write-secondary{width:100%}
+  .atlas-memory-message-list{gap:12px}
+  .atlas-memory-message-list article{padding:17px 16px;gap:13px;border-radius:17px}
+  .atlas-memory-message-avatar,
+  .atlas-memory-message-list article>div:first-child{width:38px;height:38px;flex-basis:38px;border-radius:12px;font-size:1rem}
   .atlas-memory-final-tribute{padding:95px 0}
   .atlas-memory-final-tribute h2{font-size:3rem}
   .atlas-memory-modal__card{padding:30px 20px 22px}
