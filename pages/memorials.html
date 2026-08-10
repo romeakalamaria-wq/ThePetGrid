@@ -15,14 +15,26 @@
   <link rel="stylesheet" href="../css/memorials.css">
 </head>
 <body>
-<header class="main-header">
+<header class="main-header memorial-atlas-header">
   <div class="header-container">
-    <a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a>
+    <a class="logo" href="../index.html" aria-label="ThePetGrid Atlas">
+      <span class="logo-icon">🐾</span>
+      <span class="memorial-brand"><strong>ThePetGrid</strong><small>PROJECT ATLAS · PLANET ALIVE</small></span>
+    </a>
     <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
     <nav class="main-nav" aria-label="Main navigation">
-      <a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a><a href="memorials.html" aria-current="page">Memorials</a>
+      <a href="../index.html">Atlas</a>
+      <a href="pets.html">Pets</a>
+      <a href="community.html">Community</a>
+      <a href="lost-found.html">Rescue</a>
+      <a href="messages.html">Messages</a>
+      <a href="memorials.html" class="memorials-nav-link" aria-current="page">Memorials</a>
     </nav>
-    <div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div>
+    <div class="header-actions">
+      <a class="atlas-return-btn" href="../index.html">🌍 Global</a>
+      <a class="add-pet-btn" href="upload.html">+ Add Pet</a>
+      <a class="login-btn" href="login.html">Log In</a>
+    </div>
   </div>
 </header>
 
@@ -55,9 +67,9 @@
 
   <section class="memorial-intro">
     <div class="memorial-shell memorial-intro__grid">
-      <div><strong id="memorialCount">3</strong><span>Beloved companions remembered</span></div>
-      <div><strong id="candleCount">148</strong><span>Candles glowing with love</span></div>
-      <div><strong id="flowerCount">93</strong><span>Flowers left by the community</span></div>
+      <div><strong id="memorialCount">0</strong><span>Beloved companions remembered</span></div>
+      <div><strong id="candleCount">0</strong><span>Candles glowing with love</span></div>
+      <div><strong id="flowerCount">0</strong><span>Flowers left by the community</span></div>
     </div>
   </section>
 
