@@ -109,3 +109,91 @@
 .notification-center__item--gift.is-unread{background:#fff7df}
 .notification-center__item--gift .notification-center__icon{background:#ffedb8}
 .notification-center__item--gift .notification-center__dot{background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.14)}
+
+
+/* =========================================================
+   HEADER LAYOUT POLISH — Atlas + global pages
+   Keeps the brand readable and prevents action labels wrapping.
+========================================================= */
+.header-container{
+  width:min(1320px,calc(100% - 32px));
+  gap:clamp(14px,1.6vw,28px);
+}
+
+.logo{
+  flex:0 0 auto;
+  min-width:0;
+}
+
+/* Memorial Garden Atlas signature: two deliberately separated lines. */
+.memorial-brand{
+  display:grid;
+  gap:4px;
+  line-height:1;
+  white-space:nowrap;
+}
+.memorial-brand strong{
+  display:block;
+  color:#172033;
+  font-size:1.06rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+.memorial-brand small{
+  display:block;
+  margin:0;
+  color:#718096;
+  font-size:.55rem;
+  font-weight:800;
+  line-height:1.15;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.main-nav{
+  min-width:0;
+  gap:6px;
+}
+.main-nav a{
+  white-space:nowrap;
+}
+
+.header-actions{
+  flex:0 0 auto;
+  min-width:0;
+}
+.header-actions > a,
+.header-actions > button,
+.login-btn,
+.add-pet-btn,
+.lost-found-btn,
+.atlas-return-btn,
+.user-menu__toggle{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+.login-btn{
+  min-width:78px;
+  line-height:1;
+}
+
+/* Give the Atlas Memorial header enough room before switching to mobile. */
+@media(max-width:1180px) and (min-width:901px){
+  .memorial-atlas-header .header-container{gap:12px}
+  .memorial-atlas-header .main-nav{gap:3px}
+  .memorial-atlas-header .main-nav a{padding:9px 8px;font-size:.86rem}
+  .memorial-atlas-header .atlas-return-btn{display:none}
+  .memorial-atlas-header .add-pet-btn{padding-inline:12px}
+  .memorial-atlas-header .login-btn{padding-inline:13px}
+}
+
+@media(max-width:1020px) and (min-width:901px){
+  .memorial-brand small{display:none}
+}
+
+@media(max-width:900px){
+  .header-container{width:min(100% - 24px,1320px);gap:10px}
+  .memorial-brand{gap:3px}
+  .memorial-brand small{font-size:.5rem}
+  .login-btn{min-width:72px;padding-inline:13px}
+}

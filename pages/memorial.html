@@ -1,65 +1,1070 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="A pet memorial on ThePetGrid.">
-  <title>Remembering Luna — ThePetGrid</title>
-  <link rel="icon" href="../assets/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../design/theme.css"><link rel="stylesheet" href="../design/style.css"><link rel="stylesheet" href="../design/header.css"><link rel="stylesheet" href="../css/memorials.css">
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta
+        name="description"
+        content="A pet memorial on ThePetGrid."
+    >
+
+    <title>Remembering Luna — ThePetGrid</title>
+
+    <link
+        rel="icon"
+        href="../assets/favicon.png"
+    >
+
+    <!-- =========================
+         GOOGLE FONT
+    ========================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- =========================
+         GLOBAL DESIGN
+    ========================== -->
+
+    <link
+        rel="stylesheet"
+        href="../design/theme.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../design/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../design/header.css"
+    >
+
+
+    <!-- =========================
+         MEMORIAL / ATLAS DESIGN
+    ========================== -->
+
+    <link
+        rel="stylesheet"
+        href="../css/memorials.css"
+    >
+
 </head>
-<body class="memorial-detail-body">
-<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav class="main-nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a><a href="memorials.html" aria-current="page">Memorials</a></nav><div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span>🆘</span> Lost &amp; Found</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
 
-<main class="memory-page" id="memoryPage">
-  <section class="memory-cover" id="memoryCover">
-    <div class="memory-cover__shade"></div>
-    <a class="memory-back" href="memorials.html">← Memorial Garden</a>
-    <div class="memory-cover__content"><span>In loving memory of</span><h1 id="memoryName">Luna</h1><p id="memoryDates">2011 — 2025</p><blockquote>“If love could have saved you, you would have lived forever.”</blockquote><small id="memoryCoverNote">You were our hello every morning and our safe place every night.</small></div>
-  </section>
 
-  <section class="memory-actions-wrap">
-    <div class="memorial-shell memory-actions">
-      <button type="button" data-memory-action="candle"><span>🕯️</span><strong>Light a Candle</strong><small><b id="detailCandleCount">64</b> glowing</small></button>
-      <button type="button" data-memory-action="flower"><span>🌸</span><strong>Leave a Flower</strong><small><b id="detailFlowerCount">41</b> flowers</small></button>
-      <button type="button" id="writeMemoryButton"><span>💌</span><strong>Write a Memory</strong><small>Share a kind message</small></button>
-      <button type="button" data-share-current-page><span>↗</span><strong>Share Memorial</strong><small>Keep the story alive</small></button>
-    </div>
-  </section>
+<body class="memorial-detail-body atlas-memorial-body">
 
-  <section class="memory-story">
-    <div class="memorial-shell memory-story__grid">
-      <article>
-        <span class="memorial-eyebrow">A beautiful story</span><h2 id="memoryStoryTitle">A lifetime of sunshine</h2>
-        <div id="memoryStoryText"></div>
-        <div class="memory-signature"><span id="memorySignatureLead">Sleep peacefully, beautiful soul.</span><strong id="memorySignatureText">Your family will carry you in every step, always. 🤍</strong></div>
-      </article>
-      <aside class="memory-portrait" aria-label="Memorial portrait">
-        <div class="memory-portrait__frame">
-          <div class="memory-portrait__photo"><img id="memoryPortrait" src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=85" alt="Luna, a golden retriever"></div>
-          <div class="memory-portrait__inscription">
-            <span id="memoryPortraitName">Luna</span>
-            <div><small>Born</small><strong id="memoryBirthDate">2011</strong><i aria-hidden="true">✦</i><small>Rested</small><strong id="memoryDeathDate">2025</strong></div>
-            <em id="memoryPortraitCaption">Our forever sunshine</em>
-          </div>
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="main-header">
+
+    <div class="header-container">
+
+        <a
+            class="logo"
+            href="../index.html"
+            aria-label="ThePetGrid home"
+        >
+
+            <span class="logo-icon">
+                🐾
+            </span>
+
+            <span>
+                ThePetGrid
+            </span>
+
+        </a>
+
+
+        <button
+            class="nav-toggle"
+            type="button"
+            aria-label="Open navigation"
+            aria-expanded="false"
+        >
+            ☰
+        </button>
+
+
+        <nav
+            class="main-nav"
+            aria-label="Main navigation"
+        >
+
+            <a href="../index.html">
+                Home
+            </a>
+
+            <a href="pets.html">
+                Pets
+            </a>
+
+            <a href="map.html">
+                Map
+            </a>
+
+            <a href="community.html">
+                Community
+            </a>
+
+            <a href="messages.html">
+                Messages
+            </a>
+
+            <a
+                href="memorials.html"
+                aria-current="page"
+            >
+                Memorials
+            </a>
+
+        </nav>
+
+
+        <div class="header-actions">
+
+            <a
+                class="lost-found-btn"
+                href="lost-found.html"
+            >
+                <span>
+                    🆘
+                </span>
+
+                Lost &amp; Found
+            </a>
+
+            <a
+                class="login-btn"
+                href="login.html"
+            >
+                Log In
+            </a>
+
         </div>
-      </aside>
+
     </div>
-  </section>
 
-  <section class="memory-gallery-section"><div class="memorial-shell"><div class="memorial-section-heading"><div><span class="memorial-eyebrow">The moments we keep</span><h2>Every photograph holds a heartbeat</h2></div></div><div class="memory-gallery"><img id="memoryGalleryImage1" src="" alt="A treasured memory"><img id="memoryGalleryImage2" src="" alt="A treasured memory"><img id="memoryGalleryImage3" src="" alt="A treasured memory"><div class="memory-gallery__quote" id="memoryGalleryQuote">“How lucky we were to have something that makes saying goodbye so hard.”</div></div></div></section>
+</header>
 
-  <section class="memory-final-tribute"><div class="memorial-shell"><div class="memory-final-tribute__glow">🕯️</div><span class="memorial-eyebrow">Forever part of our story</span><h2>Gone from our sight,<br>but never from our love.</h2><p>Thank you for every day, every quiet moment and every memory. Until we meet again.</p><div class="memory-final-tribute__stars" aria-hidden="true">✦ &nbsp; ✧ &nbsp; ✦</div></div></section>
 
-  <section class="memory-messages"><div class="memorial-shell"><div class="memorial-section-heading"><div><span class="memorial-eyebrow">Community remembrance</span><h2 id="memoryMessagesTitle">Messages for Luna</h2></div></div><div id="memoryMessageList" class="memory-message-list"><article><div>💛</div><p><strong>Maria</strong><span>A gentle companion who made every day brighter. Always remembered.</span><small>2 days ago</small></p></article><article><div>🌸</div><p><strong>Nikos</strong><span>Run free, beautiful soul. You were deeply loved.</span><small>5 days ago</small></p></article></div></div></section>
+
+<!-- =========================================================
+     ATLAS MEMORIAL PAGE
+========================================================= -->
+
+<main
+    class="memory-page atlas-memory-page"
+    id="memoryPage"
+>
+
+
+    <!-- =====================================================
+         ATLAS HERO
+    ====================================================== -->
+
+    <section
+        class="atlas-memory-hero memory-cover"
+        id="memoryCover"
+    >
+
+        <div class="memory-cover__shade"></div>
+
+        <div
+            class="atlas-memory-hero__ambient"
+            aria-hidden="true"
+        >
+
+            <span class="atlas-star atlas-star--1">
+                ✦
+            </span>
+
+            <span class="atlas-star atlas-star--2">
+                ✧
+            </span>
+
+            <span class="atlas-star atlas-star--3">
+                ✦
+            </span>
+
+        </div>
+
+
+        <div class="atlas-memory-container">
+
+
+            <!-- BACK -->
+
+            <a
+                class="memory-back atlas-memory-back"
+                href="memorials.html"
+            >
+                <span aria-hidden="true">
+                    ←
+                </span>
+
+                Memorial Garden
+            </a>
+
+
+
+            <div class="atlas-memory-hero__grid">
+
+
+                <!-- =========================
+                     HERO TEXT
+                ========================== -->
+
+                <div class="memory-cover__content atlas-memory-hero__content">
+
+                    <span class="atlas-memory-kicker">
+                        In loving memory of
+                    </span>
+
+
+                    <h1 id="memoryName">
+                        Luna
+                    </h1>
+
+
+                    <p
+                        class="atlas-memory-years"
+                        id="memoryDates"
+                    >
+                        2011 — 2025
+                    </p>
+
+
+                    <div
+                        class="atlas-memory-divider"
+                        aria-hidden="true"
+                    >
+                        <span></span>
+
+                        <i>
+                            ✦
+                        </i>
+
+                        <span></span>
+                    </div>
+
+
+                    <blockquote>
+                        “If love could have saved you,
+                        you would have lived forever.”
+                    </blockquote>
+
+
+                    <small
+                        class="atlas-memory-note"
+                        id="memoryCoverNote"
+                    >
+                        You were our hello every morning
+                        and our safe place every night.
+                    </small>
+
+
+                </div>
+
+
+
+                <!-- =========================
+                     PORTRAIT
+                ========================== -->
+
+                <aside
+                    class="memory-portrait atlas-memory-portrait"
+                    aria-label="Memorial portrait"
+                >
+
+                    <div class="memory-portrait__frame atlas-memory-portrait__frame">
+
+
+                        <div
+                            class="atlas-memory-portrait__halo"
+                            aria-hidden="true"
+                        ></div>
+
+
+                        <div class="memory-portrait__photo atlas-memory-portrait__photo">
+
+                            <img
+                                id="memoryPortrait"
+                                src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=85"
+                                alt="Luna, a golden retriever"
+                            >
+
+                        </div>
+
+
+                        <div class="memory-portrait__inscription atlas-memory-portrait__inscription">
+
+
+                            <span id="memoryPortraitName">
+                                Luna
+                            </span>
+
+
+                            <div class="atlas-memory-dates">
+
+
+                                <div>
+
+                                    <small>
+                                        Born
+                                    </small>
+
+                                    <strong id="memoryBirthDate">
+                                        2011
+                                    </strong>
+
+                                </div>
+
+
+                                <i aria-hidden="true">
+                                    ✦
+                                </i>
+
+
+                                <div>
+
+                                    <small>
+                                        Rested
+                                    </small>
+
+                                    <strong id="memoryDeathDate">
+                                        2025
+                                    </strong>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <em id="memoryPortraitCaption">
+                                Our forever sunshine
+                            </em>
+
+
+                        </div>
+
+                    </div>
+
+                </aside>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MEMORY ACTIONS
+    ====================================================== -->
+
+    <section class="memory-actions-wrap atlas-memory-actions-wrap">
+
+        <div class="memorial-shell">
+
+
+            <div class="atlas-memory-actions-intro">
+
+                <span class="memorial-eyebrow">
+                    A small gesture of love
+                </span>
+
+                <h2>
+                    Keep their memory glowing
+                </h2>
+
+                <p>
+                    Leave a quiet sign that this beautiful
+                    life is remembered.
+                </p>
+
+            </div>
+
+
+
+            <div class="memory-actions atlas-memory-actions">
+
+
+                <!-- CANDLE -->
+
+                <button
+                    class="atlas-memory-action"
+                    type="button"
+                    data-memory-action="candle"
+                >
+
+                    <span
+                        class="atlas-memory-action__icon"
+                        aria-hidden="true"
+                    >
+                        🕯️
+                    </span>
+
+
+                    <span class="atlas-memory-action__text">
+
+                        <strong>
+                            Light a Candle
+                        </strong>
+
+                        <small>
+                            <b id="detailCandleCount">
+                                64
+                            </b>
+
+                            glowing
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+
+                <!-- FLOWER -->
+
+                <button
+                    class="atlas-memory-action"
+                    type="button"
+                    data-memory-action="flower"
+                >
+
+                    <span
+                        class="atlas-memory-action__icon"
+                        aria-hidden="true"
+                    >
+                        🌸
+                    </span>
+
+
+                    <span class="atlas-memory-action__text">
+
+                        <strong>
+                            Leave a Flower
+                        </strong>
+
+                        <small>
+                            <b id="detailFlowerCount">
+                                41
+                            </b>
+
+                            flowers
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+
+                <!-- WRITE MEMORY -->
+
+                <button
+                    class="atlas-memory-action"
+                    type="button"
+                    id="writeMemoryButton"
+                >
+
+                    <span
+                        class="atlas-memory-action__icon"
+                        aria-hidden="true"
+                    >
+                        💌
+                    </span>
+
+
+                    <span class="atlas-memory-action__text">
+
+                        <strong>
+                            Leave a Memory
+                        </strong>
+
+                        <small>
+                            Share a kind message
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+
+                <!-- SHARE -->
+
+                <button
+                    class="atlas-memory-action"
+                    type="button"
+                    data-share-current-page
+                >
+
+                    <span
+                        class="atlas-memory-action__icon"
+                        aria-hidden="true"
+                    >
+                        ↗
+                    </span>
+
+
+                    <span class="atlas-memory-action__text">
+
+                        <strong>
+                            Share Memorial
+                        </strong>
+
+                        <small>
+                            Keep the story alive
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STORY
+    ====================================================== -->
+
+    <section class="memory-story atlas-memory-story">
+
+        <div class="memorial-shell">
+
+
+            <div class="atlas-memory-section-header">
+
+                <span class="memorial-eyebrow">
+                    Their story
+                </span>
+
+                <span
+                    class="atlas-memory-section-symbol"
+                    aria-hidden="true"
+                >
+                    ✦
+                </span>
+
+            </div>
+
+
+
+            <div class="memory-story__grid atlas-memory-story__grid">
+
+
+                <article class="atlas-memory-story__article">
+
+                    <span class="atlas-memory-story__chapter">
+                        A beautiful story
+                    </span>
+
+
+                    <h2 id="memoryStoryTitle">
+                        A lifetime of sunshine
+                    </h2>
+
+
+                    <div
+                        class="atlas-memory-story__body"
+                        id="memoryStoryText"
+                    ></div>
+
+
+                    <div class="memory-signature atlas-memory-signature">
+
+                        <span id="memorySignatureLead">
+                            Sleep peacefully, beautiful soul.
+                        </span>
+
+                        <strong id="memorySignatureText">
+                            Your family will carry you
+                            in every step, always. 🤍
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- ATLAS SIDE QUOTE -->
+
+                <aside class="atlas-memory-story__aside">
+
+                    <div class="atlas-memory-quote-card">
+
+                        <span
+                            class="atlas-memory-quote-mark"
+                            aria-hidden="true"
+                        >
+                            “
+                        </span>
+
+                        <p>
+                            Some souls leave footprints
+                            on our hearts forever.
+                        </p>
+
+                        <div
+                            class="atlas-memory-quote-stars"
+                            aria-hidden="true"
+                        >
+                            ✦ &nbsp; ✧ &nbsp; ✦
+                        </div>
+
+                    </div>
+
+                </aside>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         GALLERY
+    ====================================================== -->
+
+    <section class="memory-gallery-section atlas-memory-gallery-section">
+
+        <div class="memorial-shell">
+
+
+            <div class="memorial-section-heading atlas-memory-section-heading">
+
+                <div>
+
+                    <span class="memorial-eyebrow">
+                        The moments we keep
+                    </span>
+
+                    <h2>
+                        Every photograph
+                        holds a heartbeat
+                    </h2>
+
+                </div>
+
+
+                <span
+                    class="atlas-memory-section-number"
+                    aria-hidden="true"
+                >
+                    02
+                </span>
+
+            </div>
+
+
+
+            <div class="memory-gallery atlas-memory-gallery">
+
+
+                <figure class="atlas-memory-gallery__item atlas-memory-gallery__item--large">
+
+                    <img
+                        id="memoryGalleryImage1"
+                        src=""
+                        alt="A treasured memory"
+                    >
+
+                </figure>
+
+
+                <figure class="atlas-memory-gallery__item">
+
+                    <img
+                        id="memoryGalleryImage2"
+                        src=""
+                        alt="A treasured memory"
+                    >
+
+                </figure>
+
+
+                <figure class="atlas-memory-gallery__item">
+
+                    <img
+                        id="memoryGalleryImage3"
+                        src=""
+                        alt="A treasured memory"
+                    >
+
+                </figure>
+
+
+                <blockquote
+                    class="memory-gallery__quote atlas-memory-gallery__quote"
+                    id="memoryGalleryQuote"
+                >
+                    “How lucky we were to have something
+                    that makes saying goodbye so hard.”
+                </blockquote>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         COMMUNITY MEMORIES
+    ====================================================== -->
+
+    <section class="memory-messages atlas-memory-messages">
+
+        <div class="memorial-shell">
+
+
+            <div class="memorial-section-heading atlas-memory-section-heading">
+
+                <div>
+
+                    <span class="memorial-eyebrow">
+                        Community remembrance
+                    </span>
+
+
+                    <h2 id="memoryMessagesTitle">
+                        Messages for Luna
+                    </h2>
+
+                </div>
+
+
+                <button
+                    class="atlas-memory-write-secondary"
+                    type="button"
+                    data-open-memory-form
+                    aria-label="Leave a memory"
+                >
+                    <span>
+                        💌
+                    </span>
+
+                    Leave a Memory
+                </button>
+
+            </div>
+
+
+
+            <div
+                id="memoryMessageList"
+                class="memory-message-list atlas-memory-message-list"
+            >
+
+
+                <article>
+
+                    <div class="atlas-memory-message-avatar">
+                        💛
+                    </div>
+
+
+                    <p>
+
+                        <strong>
+                            Maria
+                        </strong>
+
+                        <span>
+                            A gentle companion who made every day
+                            brighter. Always remembered.
+                        </span>
+
+                        <small>
+                            2 days ago
+                        </small>
+
+                    </p>
+
+                </article>
+
+
+
+                <article>
+
+                    <div class="atlas-memory-message-avatar">
+                        🌸
+                    </div>
+
+
+                    <p>
+
+                        <strong>
+                            Nikos
+                        </strong>
+
+                        <span>
+                            Run free, beautiful soul.
+                            You were deeply loved.
+                        </span>
+
+                        <small>
+                            5 days ago
+                        </small>
+
+                    </p>
+
+                </article>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FINAL TRIBUTE
+    ====================================================== -->
+
+    <section class="memory-final-tribute atlas-memory-final-tribute">
+
+        <div class="memorial-shell">
+
+
+            <div class="atlas-memory-final-tribute__inner">
+
+
+                <div
+                    class="memory-final-tribute__glow atlas-memory-final-candle"
+                    aria-hidden="true"
+                >
+                    🕯️
+                </div>
+
+
+                <span class="memorial-eyebrow">
+                    Forever part of our story
+                </span>
+
+
+                <h2>
+                    Gone from our sight,
+                    <br>
+                    but never from our love.
+                </h2>
+
+
+                <p>
+                    Thank you for every day,
+                    every quiet moment and every memory.
+                    Until we meet again.
+                </p>
+
+
+                <div
+                    class="memory-final-tribute__stars"
+                    aria-hidden="true"
+                >
+                    ✦ &nbsp;&nbsp; ✧ &nbsp;&nbsp; ✦
+                </div>
+
+
+                <a
+                    class="atlas-memory-return"
+                    href="memorials.html"
+                >
+                    Return to Memorial Garden
+                </a>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
 </main>
 
-<div class="memorial-modal" id="memoryMessageModal" hidden><div class="memorial-modal__backdrop" data-close-memory></div><form class="memorial-modal__card" id="memoryMessageForm"><button class="memorial-modal__close" type="button" data-close-memory aria-label="Close">×</button><span class="memorial-eyebrow">A message from the heart</span><h2>Write a Memory</h2><label>Your name<input name="author" maxlength="40" required placeholder="Your name"></label><label>Your memory<textarea name="message" maxlength="280" rows="5" required placeholder="Share a kind memory…"></textarea></label><button class="memorial-button memorial-button--primary" type="submit">Leave this Memory</button></form></div>
-<div class="memory-toast" id="memoryToast" role="status" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/memorials.js"></script><script src="../js/share.js"></script><script src="../js/auth.js"></script><script src="../js/header.js"></script><script src="../js/header-live.js"></script>
+
+<!-- =========================================================
+     WRITE MEMORY MODAL
+========================================================= -->
+
+<div
+    class="memorial-modal atlas-memory-modal"
+    id="memoryMessageModal"
+    hidden
+>
+
+    <div
+        class="memorial-modal__backdrop"
+        data-close-memory
+    ></div>
+
+
+    <form
+        class="memorial-modal__card atlas-memory-modal__card"
+        id="memoryMessageForm"
+    >
+
+
+        <button
+            class="memorial-modal__close"
+            type="button"
+            data-close-memory
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+
+        <span class="memorial-eyebrow">
+            A message from the heart
+        </span>
+
+
+        <h2>
+            Leave a Memory
+        </h2>
+
+
+        <p class="atlas-memory-modal__intro">
+            Share a few kind words that will
+            become part of this memorial.
+        </p>
+
+
+        <label>
+
+            Your name
+
+            <input
+                name="author"
+                maxlength="40"
+                required
+                placeholder="Your name"
+            >
+
+        </label>
+
+
+        <label>
+
+            Your memory
+
+            <textarea
+                name="message"
+                maxlength="280"
+                rows="5"
+                required
+                placeholder="Share a kind memory…"
+            ></textarea>
+
+        </label>
+
+
+        <div class="atlas-memory-modal__footer">
+
+            <span>
+                Written with love 🤍
+            </span>
+
+
+            <button
+                class="memorial-button memorial-button--primary"
+                type="submit"
+            >
+                Leave this Memory
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+
+<div
+    class="memory-toast"
+    id="memoryToast"
+    role="status"
+    aria-live="polite"
+></div>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../js/supabase-config.js"></script>
+
+<script src="../js/supabase-client.js"></script>
+
+<script src="../js/memorials.js"></script>
+
+<script src="../js/share.js"></script>
+
+<script src="../js/auth.js"></script>
+
+<script src="../js/header.js"></script>
+
+<script src="../js/header-live.js"></script>
+
+
 </body>
+
 </html>
