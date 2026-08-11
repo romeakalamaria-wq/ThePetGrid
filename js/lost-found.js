@@ -165,7 +165,17 @@
 
   async function publishCloudReport(report) {
     const client = window.ThePetGridSupabase?.client;
-    if (!client || !currentUserId) return report;
+
+    if (!client) {
+      throw new Error("The server connection is unavailable. Please try again.");
+    }
+
+    if (!currentUserId) {
+      const error = new Error("Sign in is required to publish a Lost & Found alert.");
+      error.code = "AUTH_REQUIRED";
+      throw error;
+    }
+
     const petId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(report.petId || "")) ? report.petId : null;
     const row = {
       reporter_id:currentUserId, pet_id:petId, status:report.status, pet_name:report.name,
@@ -176,14 +186,19 @@
       reward:report.reward, description:report.description,
       image_url:String(report.image || "").startsWith("data:") ? null : report.image
     };
-    try {
-      const { data, error } = await client.from("lost_pet_reports").insert(row).select("*").single();
-      if (error) throw error;
-      return normalizeCloudReport(data);
-    } catch (error) {
-      console.warn("ThePetGrid: report saved locally; nearby alerts require the Sprint 9.4 SQL setup.", error.message || error);
-      return report;
+
+    const { data, error } = await client
+      .from("lost_pet_reports")
+      .insert(row)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("ThePetGrid: Lost & Found cloud publish failed.", error);
+      throw new Error(error.message || "The alert could not be published.");
     }
+
+    return normalizeCloudReport(data);
   }
 
   function getDraftPet(id) {
@@ -547,6 +562,13 @@
   }
 
   function openForm(mode = "lost") {
+    if (!currentUserId && !IS_LOCAL_DEVELOPMENT) {
+      const returnTo = `${location.pathname}?mode=${encodeURIComponent(mode)}${params.get("petId") ? `&petId=${encodeURIComponent(params.get("petId"))}` : ""}`;
+      sessionStorage.setItem("thepetgrid_after_login", returnTo);
+      location.href = `login.html?returnTo=${encodeURIComponent(returnTo)}`;
+      return;
+    }
+
     setMode(mode);
     formSection.hidden = false;
     formSection.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -636,21 +658,47 @@
       description:data.get("description").trim(), reward:data.get("reward").trim(), image:imageData || PLACEHOLDER,
       createdAt:new Date().toISOString(), resolved:false
     };
-    report = await publishCloudReport(report);
-    saveOrUpdateReport(report);
-    message.textContent = report.status === "lost" ? "Lost pet alert published successfully." : "Found pet report published successfully.";
-    message.hidden = false;
-    currentFilter = report.status;
-    filters.forEach(item => item.classList.toggle("is-active", item.dataset.lfFilter === currentFilter));
-    form.reset();
-    imageData = "";
-    imagePreview.hidden = true;
-    latitudeInput.value = "";
-    longitudeInput.value = "";
-    addressInput.value = "";
-    if (pickerMarker) { pickerMarker.remove(); pickerMarker = null; }
-    render();
-    setTimeout(() => document.querySelector("#reports")?.scrollIntoView({ behavior:"smooth" }), 500);
+    const submitButton = form.querySelector('[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      report = await publishCloudReport(report);
+      saveOrUpdateReport(report);
+
+      message.textContent = report.status === "lost"
+        ? "Lost pet alert published successfully. It is now visible across ThePetGrid."
+        : "Found pet report published successfully. It is now visible across ThePetGrid.";
+      message.hidden = false;
+
+      currentFilter = report.status;
+      filters.forEach(item => item.classList.toggle("is-active", item.dataset.lfFilter === currentFilter));
+
+      form.reset();
+      imageData = "";
+      imagePreview.hidden = true;
+      latitudeInput.value = "";
+      longitudeInput.value = "";
+      addressInput.value = "";
+      if (pickerMarker) { pickerMarker.remove(); pickerMarker = null; }
+
+      await loadCloudReports();
+      render();
+      setTimeout(() => document.querySelector("#reports")?.scrollIntoView({ behavior:"smooth" }), 500);
+    } catch (error) {
+      console.error("ThePetGrid Lost & Found publish:", error);
+
+      if (error?.code === "AUTH_REQUIRED") {
+        const returnTo = `${location.pathname}?mode=${encodeURIComponent(report.status)}${report.petId ? `&petId=${encodeURIComponent(report.petId)}` : ""}`;
+        sessionStorage.setItem("thepetgrid_after_login", returnTo);
+        location.href = `login.html?returnTo=${encodeURIComponent(returnTo)}`;
+        return;
+      }
+
+      message.textContent = error?.message || "The alert could not be published. Please try again.";
+      message.hidden = false;
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 
   filters.forEach(button => button.addEventListener("click", () => {
@@ -679,6 +727,11 @@
     if (client) {
       const { data } = await client.auth.getSession();
       currentUserId = data?.session?.user?.id || null;
+
+      client.auth.onAuthStateChange((_event, session) => {
+        currentUserId = session?.user?.id || null;
+      });
+
       await loadCloudReports();
       subscribeCloudReports();
     }
