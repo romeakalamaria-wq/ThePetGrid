@@ -22,7 +22,7 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lostRealtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false,clusterTimer:null,lastClusterBand:null
+    realtime:null,lostRealtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false,clusterTimer:null,lastClusterBand:null,visualSignalTimer:null,localRefreshTimer:null
   };
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
@@ -230,7 +230,7 @@
     if(!event)return;
     const pet=event.pet;
     if(pet&&Number.isFinite(Number(pet.latitude))&&Number.isFinite(Number(pet.longitude))){
-      state.globe?.pointOfView({lat:Number(pet.latitude),lng:Number(pet.longitude),altitude:.68},1450);showPetFocus(pet);refreshLivingCells();
+      state.globe?.pointOfView({lat:Number(pet.latitude),lng:Number(pet.longitude),altitude:.68},1450);showPetFocus(pet);refreshLivingCells();triggerAtlasVisualSignal(pet);
     }
     toast(event.message);playTone(event.tone,.1);
   }
@@ -285,12 +285,90 @@
     return state.pets;
   }
 
+  function pulseMemorialMarker(marker){
+    if(!marker)return;
+
+    marker.style.position="relative";
+    marker.style.overflow="visible";
+    marker.style.isolation="isolate";
+
+    marker.querySelectorAll(".atlas-memorial-click-pulse").forEach(node=>node.remove());
+
+    [0,180,360].forEach((delay,index)=>{
+      const pulse=document.createElement("span");
+      pulse.className="atlas-memorial-click-pulse";
+      Object.assign(pulse.style,{
+        position:"absolute",
+        left:"50%",
+        top:"50%",
+        width:index===0?"30px":"34px",
+        height:index===0?"30px":"34px",
+        border:"2px solid rgba(231,232,255,.95)",
+        borderRadius:"999px",
+        boxShadow:"0 0 18px rgba(231,232,255,.72), inset 0 0 12px rgba(167,124,255,.18)",
+        transform:"translate(-50%,-50%) scale(.35)",
+        transformOrigin:"center",
+        opacity:"0",
+        pointerEvents:"none",
+        zIndex:"-1"
+      });
+      marker.appendChild(pulse);
+
+      const animation=pulse.animate(
+        [
+          {transform:"translate(-50%,-50%) scale(.35)",opacity:0},
+          {transform:"translate(-50%,-50%) scale(.65)",opacity:.95,offset:.12},
+          {transform:"translate(-50%,-50%) scale(3.6)",opacity:0}
+        ],
+        {
+          duration:1850,
+          delay,
+          easing:"cubic-bezier(.16,.8,.25,1)",
+          fill:"forwards"
+        }
+      );
+
+      animation.onfinish=()=>pulse.remove();
+    });
+
+    marker.animate(
+      [
+        {filter:"drop-shadow(0 0 0 rgba(231,232,255,0))",transform:"scale(1)"},
+        {filter:"drop-shadow(0 0 18px rgba(231,232,255,.95))",transform:"scale(1.13)",offset:.28},
+        {filter:"drop-shadow(0 0 8px rgba(167,124,255,.55))",transform:"scale(1)"}
+      ],
+      {duration:1200,easing:"ease-out"}
+    );
+  }
+
   function makeMemorialMarker(pet){
     const marker=document.createElement("button");
     marker.type="button";
     marker.className="atlas-memorial-marker";
     marker.setAttribute("aria-label",`Open memorial for ${pet.name||"pet"}`);
     marker.innerHTML='<span aria-hidden="true">🕊️</span>';
+    marker.style.position="relative";
+    marker.style.overflow="visible";
+    marker.style.isolation="isolate";
+
+    // Gentle continuous breathing halo while this individual Memorial marker is visible.
+    const breath=document.createElement("span");
+    breath.className="atlas-memorial-breath";
+    Object.assign(breath.style,{
+      position:"absolute",left:"50%",top:"50%",width:"34px",height:"34px",
+      border:"1.5px solid rgba(231,232,255,.72)",borderRadius:"999px",
+      boxShadow:"0 0 16px rgba(231,232,255,.38), inset 0 0 10px rgba(167,124,255,.12)",
+      transform:"translate(-50%,-50%) scale(.72)",transformOrigin:"center",
+      opacity:".24",pointerEvents:"none",zIndex:"-1"
+    });
+    marker.appendChild(breath);
+    if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      breath.animate([
+        {transform:"translate(-50%,-50%) scale(.72)",opacity:.22},
+        {transform:"translate(-50%,-50%) scale(1.55)",opacity:.62},
+        {transform:"translate(-50%,-50%) scale(.72)",opacity:.22}
+      ],{duration:2600,iterations:Infinity,easing:"ease-in-out"});
+    }
 
     marker.addEventListener("click",event=>{
       event.stopPropagation();
@@ -300,20 +378,17 @@
         altitude:.62
       },1250);
       showPetFocus(pet);
+      pulseMemorialMarker(marker);
+      triggerAtlasVisualSignal(pet,{duration:4200});
     });
 
     return marker;
   }
 
   function refreshMemorialMarkers(){
-    if(!state.globe?.htmlElementsData)return;
-
-    const markers=
-      state.mode==="lost"||state.mode==="pets"
-        ? []
-        : memorialPets();
-
-    state.globe.htmlElementsData(markers);
+    // Memorials are rendered as native soft-violet Globe points.
+    // Keeping the HTML layer empty preserves drag/rotation performance.
+    if(state.globe?.htmlElementsData)state.globe.htmlElementsData([]);
   }
 
 
@@ -388,6 +463,7 @@
     if(!force&&band===state.lastClusterBand)return;
     state.lastClusterBand=band;
     state.globe.pointsData(atlasPointData()).pointRadius(atlasPointRadius).pointAltitude(atlasPointAltitude);
+    refreshAtlasDashboard();
   }
   function bindClusterCamera(){
     const controls=state.globe?.controls?.();
@@ -398,15 +474,67 @@
     });
   }
 
+  // =====================================================
+  // ATLAS WORLD EVENTS — VISUAL SIGNALS
+  // Lost = radar, Memorial = starlight, New pet = cyan birth pulse
+  // =====================================================
+  function atlasSignalKind(pet){
+    if(pet?.is_lost)return "lost";
+    if(pet?.is_memorial)return "memorial";
+    return "new_pet";
+  }
+  function triggerAtlasVisualSignal(pet,{duration=3200}={}){
+    if(!pet||pet._isCluster||!state.globe)return;
+    const lat=Number(pet.latitude),lng=Number(pet.longitude);
+    if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+    const kind=atlasSignalKind(pet);
+    const signal={...pet,_atlasSignal:true,_signalKind:kind,
+      ringMax:kind==="lost"?4.6:kind==="memorial"?2.7:2.15,
+      ringSpeed:kind==="lost"?.95:kind==="memorial"?.34:.62,
+      ringPeriod:kind==="lost"?430:kind==="memorial"?1180:720};
+    const base=makeRings(visiblePetsForMode().filter(item=>!item.is_memorial));
+    state.rings=[signal,...base.filter(item=>petKey(item)!==petKey(pet))];
+    state.globe.ringsData(state.rings)
+      .ringColor(item=>{
+        if(item?._atlasSignal){
+          return t=>{
+            const a=Math.max(0,1-t);
+            if(item._signalKind==="lost")return `rgba(255,82,110,${a*.92})`;
+            if(item._signalKind==="memorial")return `rgba(231,232,255,${a*.72})`;
+            return `rgba(105,232,255,${a*.86})`;
+          };
+        }
+        return ringColor(item);
+      })
+      .ringMaxRadius("ringMax").ringPropagationSpeed("ringSpeed").ringRepeatPeriod("ringPeriod");
+    ui.app.dataset.atlasSignal=kind;
+    clearTimeout(state.visualSignalTimer);
+    state.visualSignalTimer=setTimeout(()=>{delete ui.app.dataset.atlasSignal;refreshLivingCells()},duration);
+  }
+
+  function refreshAtlasDashboard(){
+    const list=document.getElementById("atlasTopCountries");
+    if(!list)return;
+    const counts=new Map();
+    state.pets.forEach(pet=>{
+      const country=String(pet?.country||"").trim();
+      if(country)counts.set(country,(counts.get(country)||0)+1);
+    });
+    const rows=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
+    list.innerHTML=rows.length
+      ? rows.map(([country,count],i)=>`<li><span class="atlas-rank">${i+1}</span><span class="atlas-country-name">${escapeHtml(country)}</span><strong>${count.toLocaleString()}</strong></li>`).join("")
+      : '<li class="atlas-country-empty">Country activity will appear here.</li>';
+  }
+
   function pointColor(point){
     if(point.is_lost)return "#ff526e";
-    if(point.is_memorial)return "#aeb5c5";
+    if(point.is_memorial)return "#d8c8ff";
     const palette={Dog:"#68e8ff",Cat:"#a77cff",Bird:"#ffc85d",Rabbit:"#72ffb0"};
     return palette[point.type]||"#ffffff";
   }
 
   function pointAltitude(point){
-    return point.is_lost?.2:point.is_memorial?.135:.095;
+    return point.is_lost?.2:point.is_memorial?.15:.095;
   }
 
   function updateModeAtmosphere(mode){
@@ -610,7 +738,7 @@
        .showAtmosphere(true).atmosphereColor("#7fe8ff").atmosphereAltitude(.27).pointsData(atlasPointData()).pointLat("latitude").pointLng("longitude").pointColor(pointColor)
       .pointAltitude(atlasPointAltitude).pointRadius(atlasPointRadius).pointsMerge(false).pointsTransitionDuration(650)
       .ringsData(state.rings).ringLat("latitude").ringLng("longitude").ringColor(ringColor).ringMaxRadius("ringMax").ringPropagationSpeed("ringSpeed").ringRepeatPeriod("ringPeriod")
-      .htmlElementsData(memorialPets()).htmlLat("latitude").htmlLng("longitude").htmlAltitude(.14).htmlElement(makeMemorialMarker)
+      .htmlElementsData([]).htmlLat("latitude").htmlLng("longitude").htmlAltitude(.14).htmlElement(makeMemorialMarker)
       .pointLabel(atlasPointLabel)
       .onPointClick(point=>{
         if(point?._isCluster){
@@ -622,7 +750,7 @@
           playTone(470,.07);
           return;
         }
-        world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:.62},1050);showPetFocus(point);toast(`${point.name||"A pet"} · ${point.city||point.country||"ThePetGrid"}`);playTone(520,.08)
+        world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:.62},1050);showPetFocus(point);triggerAtlasVisualSignal(point);toast(`${point.name||"A pet"} · ${point.city||point.country||"ThePetGrid"}`);playTone(520,.08)
       })
       .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:1.38},1050));
     world.controls().autoRotate=true;world.controls().autoRotateSpeed=.29;world.controls().enableDamping=true;world.controls().dampingFactor=.075;world.controls().minDistance=118;world.controls().maxDistance=430;
@@ -650,6 +778,29 @@
     const client=window.ThePetGridSupabase?.client;
     if(!client?.channel)return;
 
+    // Local Live Server is often unreliable with Supabase WebSockets.
+    // Keep Atlas fully functional locally using periodic refresh instead
+    // of opening reconnecting realtime sockets.
+    const isLocal =
+      location.hostname === "127.0.0.1" ||
+      location.hostname === "localhost";
+
+    if(isLocal){
+      clearInterval(state.localRefreshTimer);
+      state.localRefreshTimer=setInterval(
+        refreshAtlasPetsFromSources,
+        30000
+      );
+      console.info("Atlas: local mode — Supabase Realtime disabled; using 30s refresh.");
+      return;
+    }
+
+    // Prevent duplicate channels if init/subscription is ever invoked again.
+    try{
+      if(state.realtime)client.removeChannel(state.realtime);
+      if(state.lostRealtime)client.removeChannel(state.lostRealtime);
+    }catch(_){}
+
     state.realtime=client
       .channel("atlas-living-world")
       .on("postgres_changes",{event:"*",schema:"public",table:"pets"},async payload=>{
@@ -673,7 +824,11 @@
 
         await refreshAtlasPetsFromSources();
       })
-      .subscribe();
+      .subscribe(status=>{
+        if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+          console.warn("Atlas: pets realtime unavailable; live data will refresh normally on reload.");
+        }
+      });
 
     state.lostRealtime=client
       .channel("atlas-lost-home-again")
@@ -687,7 +842,19 @@
           toast(`${payload.new.pet_name||"A pet"} is Home Again 🏡`);
         }
       })
-      .subscribe();
+      .subscribe(status=>{
+        if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+          console.warn("Atlas: Lost & Found realtime unavailable; page remains usable.");
+        }
+      });
+
+    window.addEventListener("beforeunload",()=>{
+      try{
+        if(state.realtime)client.removeChannel(state.realtime);
+        if(state.lostRealtime)client.removeChannel(state.lostRealtime);
+      }catch(_){}
+      clearInterval(state.localRefreshTimer);
+    },{once:true});
 
     window.addEventListener(
       "thepetgrid:lost-reports-changed",

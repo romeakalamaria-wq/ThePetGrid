@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#020611">
-  <title>The Living World — ThePetGrid</title>
+  <title>Global Live Map — ThePetGrid</title>
   <link rel="icon" href="../assets/favicon.png">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="stylesheet" href="../css/world-experience.css">
+  <link rel="stylesheet" href="../css/world-experience.css?v=20260811-global-dashboard">
   <link rel="stylesheet" href="../css/lost-alert.css">
   <link rel="stylesheet" href="../css/atlas-status-markers.css">
 </head>
@@ -31,7 +31,7 @@
     <header class="world-header">
       <a class="world-brand" href="../index.html" aria-label="Back to ThePetGrid home">
         <span class="world-brand__paw">🐾</span>
-        <span><strong>ThePetGrid</strong><small>Project Atlas · Planet Alive</small></span>
+        <span><strong>ThePetGrid</strong><small>Global Live Map</small></span>
       </a>
 
       <nav class="world-primary-nav" aria-label="Atlas navigation">
@@ -50,12 +50,12 @@
     </header>
 
     <section class="world-intro" aria-labelledby="worldTitle">
-      <p class="world-kicker"><span></span> THE PLANET IS ALIVE</p>
-      <h1 id="worldTitle">Every light<br>tells a <em>story.</em></h1>
-      <p>Discover pets, follow their stories and help every light shine brighter in the living world of ThePetGrid.</p>
+      <p class="world-kicker"><span></span> GLOBAL LIVE MAP</p>
+      <h1 id="worldTitle">The world of pets,<br><em>alive now.</em></h1>
+      <p>New pets, lost alerts and memorial lights — connected across one living planet.</p>
       <div class="world-intro__actions">
-        <button id="exploreWorld" class="primary-action" type="button">Explore Pets <span>→</span></button>
-        <button id="returnHome" class="secondary-action" type="button">Add Your Pet</button>
+        <button id="exploreWorld" class="primary-action" type="button">Explore World <span>→</span></button>
+        <button id="returnHome" class="secondary-action" type="button">Add Pet</button>
       </div>
     </section>
 
@@ -68,6 +68,10 @@
         <div><strong id="worldPetCount">0</strong><span>living stories</span></div>
         <div><strong id="worldCountryCount">0</strong><span>countries</span></div>
         <div><strong id="worldCityCount">0</strong><span>cities</span></div>
+      </div>
+      <div class="atlas-top-countries">
+        <div class="atlas-panel-title"><span>TOP COUNTRIES</span><small>LIVE</small></div>
+        <ol id="atlasTopCountries" class="atlas-country-list" aria-label="Top countries by pet activity"></ol>
       </div>
       <div class="world-activity">
         <span>NOW GLOWING</span>
@@ -85,10 +89,10 @@
     </section>
 
     <nav class="world-dock" aria-label="World modes">
-      <button class="is-active" type="button" data-world-mode="all"><span>🌍</span><small>World</small></button>
-      <button type="button" data-world-mode="pets"><span>🐾</span><small>Pets</small></button>
-      <button type="button" data-world-mode="lost"><span>🆘</span><small>Lost</small></button>
-      <button type="button" data-world-mode="memorial"><span>🕊️</span><small>Memorial</small></button>
+      <button class="is-active" type="button" data-world-mode="all"><span>◎</span><small>World</small></button>
+      <button type="button" data-world-mode="pets"><span>●</span><small>Pets</small></button>
+      <button type="button" data-world-mode="lost"><span>●</span><small>Lost</small></button>
+      <button type="button" data-world-mode="memorial"><span>●</span><small>Memorial</small></button>
     </nav>
 
     <aside class="atlas-controls" aria-label="Atlas controls">
@@ -138,6 +142,15 @@
       <p id="worldEventsEmpty" class="world-events-empty" hidden>No world events yet.</p>
     </aside>
 
+    <aside class="atlas-legend" aria-label="Map legend">
+      <strong>LEGEND</strong>
+      <span><i class="is-pet"></i> New Pet</span>
+      <span><i class="is-lost"></i> Lost Pet</span>
+      <span><i class="is-memorial"></i> Memorial</span>
+    </aside>
+
+    <div class="atlas-livebar"><i></i><strong>Realtime updates active</strong><span>Connecting pet lovers worldwide</span><b>♥</b></div>
+
     <div id="worldToast" class="world-toast" hidden></div>
     <div id="globeFallback" class="globe-fallback" hidden>
       <span>🌍</span><h2>Your browser could not start the 3D world.</h2>
@@ -151,7 +164,7 @@
   <script src="../js/supabase-config.js"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/auth.js?v=20260807-atlas-login-sync"></script>
-  <script src="../js/world-experience.js?v=20260807-atlas-login-sync"></script>
+  <script src="../js/world-experience.js?v=20260811-global-dashboard"></script>
   <script src="../js/lost-alert.js"></script>
 </body>
 </html>
