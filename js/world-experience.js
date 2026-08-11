@@ -22,7 +22,7 @@
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,
-    realtime:null,lostRealtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false
+    realtime:null,lostRealtime:null,lastFrame:performance.now(),frameSamples:[],pulseTimer:null,clockTimer:null,audio:null,rings:[],selectedPet:null,storyHistory:[],exploredPets:new Set(),exploredCountries:new Set(),exploredCities:new Set(),events:[],eventsCollapsed:false,dayNightShader:null,nightTexture:null,manualQuality:false,clusterTimer:null,lastClusterBand:null
   };
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const setBoot = (percent, text) => { ui.bootProgress.style.width = `${percent}%`; ui.bootStatus.textContent = text; };
@@ -267,12 +267,12 @@
     ui.focusImage.src=petImage(pet);ui.focusImage.alt=pet.name||"Pet";ui.focusType.textContent=String(pet.type||"Pet").toUpperCase();ui.focusName.textContent=pet.name||"Pet story";ui.focusLocation.textContent=[pet.city,pet.country].filter(Boolean).join(", ")||"Somewhere in the world";ui.focusSignal.textContent=pet.is_lost?"Lost signal — priority":pet.is_memorial?"Memorial light":"Living signal active";ui.focusLink.href=profileHref(pet);
     if(ui.focusFlag)ui.focusFlag.textContent=countryFlag(pet.country);if(ui.focusTime)ui.focusTime.textContent=relativeTime(pet.created_at);if(ui.focusStory)ui.focusStory.textContent=storyText(pet);
     ui.focusCard.hidden=false;if(animate){ui.focusCard.classList.remove("is-transitioning");void ui.focusCard.offsetWidth;ui.focusCard.classList.add("is-transitioning");}
-    if(state.globe)state.globe.pointRadius(p=>p===state.selectedPet?(state.lite?.42:.62):(state.lite?.2:state.quality==="ultra"?.38:.32));
+    if(state.globe)state.globe.pointRadius(atlasPointRadius);
   }
   function exploreNextStory(){
     const next=nextStoryPet();if(!next)return;state.globe?.pointOfView({lat:Number(next.latitude),lng:Number(next.longitude),altitude:.62},1550);showPetFocus(next);toast(`Next story · ${next.name||"A pet"}`);playTone(560,.09);
   }
-  function hidePetFocus(){state.selectedPet=null;if(ui.focusCard)ui.focusCard.hidden=true;if(state.globe)state.globe.pointRadius(state.lite?.2:state.quality==="ultra"?.38:.32)}
+  function hidePetFocus(){state.selectedPet=null;if(ui.focusCard)ui.focusCard.hidden=true;if(state.globe)state.globe.pointRadius(atlasPointRadius)}
 
   function memorialPets(){
     return state.pets.filter(pet=>pet.is_memorial);
@@ -316,6 +316,88 @@
     state.globe.htmlElementsData(markers);
   }
 
+
+  // =====================================================
+  // ATLAS SMART CLUSTERS — keeps the globe usable at scale
+  // =====================================================
+  function clusterPriority(pet){
+    if(pet?.is_lost)return 4;
+    if(pet?.is_home_again||pet?.resolved)return 3;
+    if(pet?.is_memorial)return 2;
+    return 1;
+  }
+
+  function clusterBand(){
+    const altitude=Number(state.globe?.pointOfView?.()?.altitude||2.25);
+    if(altitude<=.92)return {name:"individual",cell:0};
+    if(altitude<=1.45)return {name:"near",cell:5};
+    if(altitude<=2.15)return {name:"mid",cell:11};
+    return {name:"far",cell:20};
+  }
+
+  function clusterPets(pets){
+    const band=clusterBand();
+    if(!band.cell)return pets;
+    const buckets=new Map();
+    for(const pet of pets){
+      const lat=Number(pet.latitude),lng=Number(pet.longitude);
+      if(!Number.isFinite(lat)||!Number.isFinite(lng))continue;
+      const key=`${Math.floor((lat+90)/band.cell)}:${Math.floor((lng+180)/band.cell)}`;
+      if(!buckets.has(key))buckets.set(key,[]);
+      buckets.get(key).push(pet);
+    }
+    return [...buckets.values()].map(group=>{
+      if(group.length===1)return group[0];
+      const priority=[...group].sort((a,b)=>clusterPriority(b)-clusterPriority(a))[0];
+      return {
+        _isCluster:true,
+        _clusterMembers:group,
+        latitude:group.reduce((n,p)=>n+Number(p.latitude),0)/group.length,
+        longitude:group.reduce((n,p)=>n+Number(p.longitude),0)/group.length,
+        name:`${group.length} stories`,
+        type:"Cluster",
+        is_lost:Boolean(priority?.is_lost),
+        is_memorial:!priority?.is_lost&&Boolean(priority?.is_memorial),
+        _priority:clusterPriority(priority),
+        _count:group.length
+      };
+    });
+  }
+
+  function atlasPointData(){return clusterPets(visiblePetsForMode())}
+  function atlasPointRadius(point){
+    if(point?._isCluster)return Math.min(1.15,.46+Math.log2(point._count+1)*.12);
+    if(point===state.selectedPet)return state.lite?.42:.62;
+    return state.lite?.24:state.quality==="ultra"?.42:.36;
+  }
+  function atlasPointAltitude(point){
+    if(point?._isCluster)return .16+Math.min(.08,Math.log10(point._count+1)*.035);
+    return pointAltitude(point);
+  }
+  function atlasPointLabel(point){
+    if(point?._isCluster){
+      const lost=point._clusterMembers.filter(p=>p.is_lost).length;
+      const memorial=point._clusterMembers.filter(p=>p.is_memorial).length;
+      return `<div class="living-cell-tooltip atlas-cluster-tooltip"><div class="atlas-cluster-count">${point._count}</div><div><b>${point._count} stories here</b><span>${lost?`${lost} lost · `:""}${memorial?`${memorial} memorial · `:""}Click to explore</span></div></div>`;
+    }
+    return `<div class="living-cell-tooltip"><img src="${escapeHtml(petImage(point))}" alt=""><div><b>${escapeHtml(point.name||"Pet")}</b><span>${escapeHtml([point.type,point.city,point.country].filter(Boolean).join(" · "))}</span></div></div>`;
+  }
+  function refreshAtlasClusters(force=false){
+    if(!state.globe)return;
+    const band=clusterBand().name;
+    if(!force&&band===state.lastClusterBand)return;
+    state.lastClusterBand=band;
+    state.globe.pointsData(atlasPointData()).pointRadius(atlasPointRadius).pointAltitude(atlasPointAltitude);
+  }
+  function bindClusterCamera(){
+    const controls=state.globe?.controls?.();
+    if(!controls?.addEventListener)return;
+    controls.addEventListener("change",()=>{
+      clearTimeout(state.clusterTimer);
+      state.clusterTimer=setTimeout(()=>refreshAtlasClusters(false),90);
+    });
+  }
+
   function pointColor(point){
     if(point.is_lost)return "#ff526e";
     if(point.is_memorial)return "#aeb5c5";
@@ -356,9 +438,10 @@
 
     if(state.globe){
       state.globe
-        .pointsData(visiblePetsForMode())
+        .pointsData(atlasPointData())
         .pointColor(pointColor)
-        .pointAltitude(pointAltitude)
+        .pointAltitude(atlasPointAltitude)
+        .pointRadius(atlasPointRadius)
         .pointsTransitionDuration(650);
 
       refreshMemorialMarkers();
@@ -524,15 +607,26 @@
     if(typeof window.Globe!=="function"||!supportsWebGL())throw new Error("WebGL globe unavailable");
     const world=window.Globe()(ui.stage).width(innerWidth).height(innerHeight).backgroundColor("rgba(0,0,0,0)")
       .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg").bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
-       .showAtmosphere(true).atmosphereColor("#7fe8ff").atmosphereAltitude(.27).pointsData(state.pets).pointLat("latitude").pointLng("longitude").pointColor(pointColor)
-      .pointAltitude(pointAltitude).pointRadius(p=>p===state.selectedPet?(state.lite?.42:.62):(state.lite?.2:state.quality==="ultra"?.38:.32)).pointsMerge(false).pointsTransitionDuration(900)
+       .showAtmosphere(true).atmosphereColor("#7fe8ff").atmosphereAltitude(.27).pointsData(atlasPointData()).pointLat("latitude").pointLng("longitude").pointColor(pointColor)
+      .pointAltitude(atlasPointAltitude).pointRadius(atlasPointRadius).pointsMerge(false).pointsTransitionDuration(650)
       .ringsData(state.rings).ringLat("latitude").ringLng("longitude").ringColor(ringColor).ringMaxRadius("ringMax").ringPropagationSpeed("ringSpeed").ringRepeatPeriod("ringPeriod")
       .htmlElementsData(memorialPets()).htmlLat("latitude").htmlLng("longitude").htmlAltitude(.14).htmlElement(makeMemorialMarker)
-      .pointLabel(point=>`<div class="living-cell-tooltip"><img src="${escapeHtml(petImage(point))}" alt=""><div><b>${escapeHtml(point.name||"Pet")}</b><span>${escapeHtml([point.type,point.city,point.country].filter(Boolean).join(" · "))}</span></div></div>`)
-      .onPointClick(point=>{world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:.62},1450);showPetFocus(point);toast(`${point.name||"A pet"} · ${point.city||point.country||"ThePetGrid"}`);playTone(520,.08)})
+      .pointLabel(atlasPointLabel)
+      .onPointClick(point=>{
+        if(point?._isCluster){
+          const current=Number(world.pointOfView()?.altitude||2);
+          const next=Math.max(.72,current*.58);
+          world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:next},900);
+          toast(`${point._count} stories · zooming closer`);
+          setTimeout(()=>refreshAtlasClusters(true),950);
+          playTone(470,.07);
+          return;
+        }
+        world.pointOfView({lat:Number(point.latitude),lng:Number(point.longitude),altitude:.62},1050);showPetFocus(point);toast(`${point.name||"A pet"} · ${point.city||point.country||"ThePetGrid"}`);playTone(520,.08)
+      })
       .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:1.38},1050));
     world.controls().autoRotate=true;world.controls().autoRotateSpeed=.29;world.controls().enableDamping=true;world.controls().dampingFactor=.075;world.controls().minDistance=118;world.controls().maxDistance=430;
-    world.pointOfView({lat:18,lng:18,altitude:2.25},0);buildLighting(world);buildDayNightMaterial(world);buildCloudLayer(world);animatePlanet();addEventListener("resize",()=>world.width(innerWidth).height(innerHeight),{passive:true});state.globe=world;
+    world.pointOfView({lat:18,lng:18,altitude:2.25},0);state.globe=world;bindClusterCamera();refreshAtlasClusters(true);buildLighting(world);buildDayNightMaterial(world);buildCloudLayer(world);animatePlanet();addEventListener("resize",()=>{world.width(innerWidth).height(innerHeight);refreshAtlasClusters(true)},{passive:true});
   }
 
   function supportsWebGL(){try{const c=document.createElement("canvas");return !!(window.WebGLRenderingContext&&(c.getContext("webgl")||c.getContext("experimental-webgl")))}catch{return false}}
@@ -543,7 +637,7 @@
   async function refreshAtlasPetsFromSources(){
     try{
       state.pets=(await loadPets()).map(normalizePet);
-      state.globe?.pointsData(visiblePetsForMode());
+      refreshAtlasClusters(true);
       refreshMemorialMarkers();
       refreshLivingCells();
       updateStats();
