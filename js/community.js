@@ -34,17 +34,38 @@
     let selectedImage = "";
     let posts = [];
     let currentCategory = "all";
+    let currentFeedMode = "latest";
 
     const CATEGORY_META = Object.freeze({
-        "daily-life": { label: "Daily Life", icon: "📸" },
-        "lost-found": { label: "Lost & Found", icon: "🆘" },
-        adoption: { label: "Adoption", icon: "❤️" },
-        health: { label: "Health", icon: "🏥" },
-        success: { label: "Success Stories", icon: "🎉" },
-        questions: { label: "Questions", icon: "💬" },
-        funny: { label: "Funny", icon: "🐾" },
-        local: { label: "Local Community", icon: "🌍" }
+        "daily-life": { label: "Daily Life", icon: "🐾" },
+        "health-care": { label: "Health & Care", icon: "🩺" },
+        "training-advice": { label: "Training & Advice", icon: "🎓" },
+        "adoption-rescue": { label: "Adoption & Rescue", icon: "❤️" },
+        "lost-found": { label: "Lost & Found", icon: "🚨" },
+        memorials: { label: "Memorials", icon: "🌈" },
+
+        /* Legacy categories stay readable for posts already stored in browsers. */
+        adoption: { label: "Adoption & Rescue", icon: "❤️" },
+        health: { label: "Health & Care", icon: "🩺" },
+        success: { label: "Daily Life", icon: "🐾" },
+        questions: { label: "Training & Advice", icon: "🎓" },
+        funny: { label: "Daily Life", icon: "🐾" },
+        local: { label: "Daily Life", icon: "🐾" }
     });
+
+    const LEGACY_CATEGORY_MAP = Object.freeze({
+        adoption: "adoption-rescue",
+        health: "health-care",
+        success: "daily-life",
+        questions: "training-advice",
+        funny: "daily-life",
+        local: "daily-life"
+    });
+
+    function normalizeCommunityCategory(value) {
+        const category = String(value || "daily-life").trim().toLowerCase();
+        return LEGACY_CATEGORY_MAP[category] || category;
+    }
 
     const LOST_REPORTS_KEY = "thepetgrid_lost_found_reports";
     const SIGHTINGS_KEY = "thepetgrid_lost_pet_sightings";
@@ -1249,6 +1270,7 @@
                 }
 
                 renderLostNearby();
+                if (currentFeedMode === "nearby") renderPosts();
             },
             () => {
                 communityUserLocation = null;
@@ -1318,6 +1340,116 @@
         });
     }
 
+    function getTrendingScore(post) {
+        const ageHours = Math.max(
+            0,
+            (Date.now() - new Date(post.createdAt).getTime()) / 3600000
+        );
+
+        const recencyBoost = Math.max(0, 72 - ageHours) / 6;
+
+        return (
+            Number(post.likes || 0) * 2 +
+            getCommentCount(post) * 3 +
+            recencyBoost
+        );
+    }
+
+    function postDistanceKm(post) {
+        if (!communityUserLocation) return null;
+
+        const latitude = Number(
+            post.latitude ??
+            post.lat ??
+            post.location?.latitude ??
+            post.location?.lat
+        );
+        const longitude = Number(
+            post.longitude ??
+            post.lng ??
+            post.lon ??
+            post.location?.longitude ??
+            post.location?.lng ??
+            post.location?.lon
+        );
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            return null;
+        }
+
+        return calculateDistanceKm(
+            communityUserLocation.latitude,
+            communityUserLocation.longitude,
+            latitude,
+            longitude
+        );
+    }
+
+    function ensureFeedModeTabs() {
+        if (!elements.feed || document.getElementById("communityFeedModes")) {
+            return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.id = "communityFeedModes";
+        wrapper.className = "community-feed-modes";
+        wrapper.setAttribute("aria-label", "Community feed order");
+        wrapper.innerHTML = `
+            <button type="button" class="community-feed-mode is-active" data-feed-mode="latest">🕒 Latest</button>
+            <button type="button" class="community-feed-mode" data-feed-mode="trending">🔥 Trending</button>
+            <button type="button" class="community-feed-mode" data-feed-mode="nearby">📍 Nearby</button>
+        `;
+
+        const style = document.createElement("style");
+        style.textContent = `
+            .community-feed-modes{
+                display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+                margin:0 0 16px;padding:6px;background:#fff;
+                border:1px solid #e8edf3;border-radius:16px;
+                box-shadow:0 8px 24px rgba(15,23,42,.05)
+            }
+            .community-feed-mode{
+                border:0;background:transparent;color:#64748b;
+                border-radius:11px;padding:10px 15px;font:inherit;
+                font-weight:800;cursor:pointer;transition:.18s ease
+            }
+            .community-feed-mode:hover{background:#f8fafc;color:#334155}
+            .community-feed-mode.is-active{
+                background:#fff7ed;color:#c2410c;
+                box-shadow:0 0 0 1px #fed7aa inset
+            }
+            @media(max-width:560px){
+                .community-feed-modes{display:grid;grid-template-columns:repeat(3,1fr)}
+                .community-feed-mode{padding:10px 6px;font-size:13px}
+            }
+        `;
+        document.head.appendChild(style);
+
+        elements.feed.parentNode.insertBefore(wrapper, elements.feed);
+
+        wrapper.addEventListener("click", event => {
+            const button = event.target.closest("[data-feed-mode]");
+            if (!button) return;
+
+            const mode = button.dataset.feedMode;
+            if (!["latest", "trending", "nearby"].includes(mode)) return;
+
+            if (mode === "nearby" && !communityUserLocation) {
+                useCommunityLocation();
+            }
+
+            currentFeedMode = mode;
+
+            wrapper.querySelectorAll("[data-feed-mode]").forEach(item => {
+                const active = item.dataset.feedMode === currentFeedMode;
+                item.classList.toggle("is-active", active);
+                item.setAttribute("aria-pressed", String(active));
+            });
+
+            renderPosts();
+        });
+    }
+
     function renderPosts() {
         elements.feed.innerHTML = "";
 
@@ -1344,11 +1476,27 @@
                         currentCategory
             )
             .slice()
-            .sort(
-                (a, b) =>
-                    new Date(b.createdAt) -
-                    new Date(a.createdAt)
-            );
+            .filter(post => {
+                if (currentFeedMode !== "nearby") return true;
+                return Number.isFinite(postDistanceKm(post));
+            })
+            .sort((a, b) => {
+                if (currentFeedMode === "trending") {
+                    return (
+                        getTrendingScore(b) - getTrendingScore(a) ||
+                        new Date(b.createdAt) - new Date(a.createdAt)
+                    );
+                }
+
+                if (currentFeedMode === "nearby") {
+                    return (
+                        postDistanceKm(a) - postDistanceKm(b) ||
+                        new Date(b.createdAt) - new Date(a.createdAt)
+                    );
+                }
+
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
 
         elements.emptyFeed.hidden =
             visiblePosts.length !== 0;
@@ -2513,6 +2661,8 @@
 
             return;
         }
+
+        ensureFeedModeTabs();
 
         loadPosts();
         await window.ThePetGridSafety?.ready;

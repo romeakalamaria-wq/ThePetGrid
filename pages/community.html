@@ -6,7 +6,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Community - ThePetGrid</title>
 <link href="../assets/favicon.png" rel="icon" type="image/png"/>
-<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/community.css?v=20260808-community-11-1" rel="stylesheet"/>
+<link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="../css/community.css?v=20260813-categories-1" rel="stylesheet"/>
 <link href="../design/atlas-shell.css" rel="stylesheet"/><link rel="stylesheet" href="../design/header-unified.css?v=20260812-1">
 </head>
 <body class="atlas-shell">
@@ -70,14 +70,12 @@
 <div class="composer-tools">
 <label class="composer-tool composer-tool--category" for="postCategory">🏷️ Category</label>
 <select aria-label="Choose post category" id="postCategory">
-<option value="daily-life">📸 Daily Life</option>
-<option value="lost-found">🆘 Lost &amp; Found</option>
-<option value="adoption">❤️ Adoption</option>
-<option value="health">🏥 Health</option>
-<option value="success">🎉 Success Stories</option>
-<option value="questions">💬 Questions</option>
-<option value="funny">🐾 Funny</option>
-<option value="local">🌍 Local Community</option>
+<option value="daily-life">🐾 Daily Life</option>
+<option value="health-care">🩺 Health &amp; Care</option>
+<option value="training-advice">🎓 Training &amp; Advice</option>
+<option value="adoption-rescue">❤️ Adoption &amp; Rescue</option>
+<option value="lost-found">🚨 Lost &amp; Found</option>
+<option value="memorials">🌈 Memorials</option>
 </select>
 <label class="composer-tool" for="postImageInput">📷 Add photo</label>
 <input accept="image/*" hidden="" id="postImageInput" type="file"/>
@@ -98,14 +96,12 @@
 <section class="community-categories" aria-label="Community categories">
 <div class="community-categories__track" id="communityCategoryFilters">
 <button class="community-category is-active" type="button" data-community-category="all">🏠 All</button>
-<button class="community-category" type="button" data-community-category="lost-found">🆘 Lost &amp; Found</button>
-<button class="community-category" type="button" data-community-category="adoption">❤️ Adoption</button>
-<button class="community-category" type="button" data-community-category="daily-life">📸 Daily Life</button>
-<button class="community-category" type="button" data-community-category="health">🏥 Health</button>
-<button class="community-category" type="button" data-community-category="success">🎉 Success Stories</button>
-<button class="community-category" type="button" data-community-category="questions">💬 Questions</button>
-<button class="community-category" type="button" data-community-category="funny">🐾 Funny</button>
-<button class="community-category" type="button" data-community-category="local">🌍 Local Community</button>
+<button class="community-category" type="button" data-community-category="daily-life">🐾 Daily Life</button>
+<button class="community-category" type="button" data-community-category="health-care">🩺 Health &amp; Care</button>
+<button class="community-category" type="button" data-community-category="training-advice">🎓 Training &amp; Advice</button>
+<button class="community-category" type="button" data-community-category="adoption-rescue">❤️ Adoption &amp; Rescue</button>
+<button class="community-category" type="button" data-community-category="lost-found">🚨 Lost &amp; Found</button>
+<button class="community-category" type="button" data-community-category="memorials">🌈 Memorials</button>
 </div>
 </section>
 
@@ -193,7 +189,7 @@
 <script src="../js/supabase-client.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/community-safety.js?v=1"></script>
-<script src="../js/community.js?v=20260808-community-11-1"></script>
+<script src="../js/community.js?v=20260813-categories-1"></script>
 <script src="../js/header.js?v=20260812-unified-header"></script>
 <script src="../js/header-live.js?v=20260812-unified-header"></script>
 <script src="../js/atlas-shell.js"></script></body>

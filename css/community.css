@@ -1931,3 +1931,27 @@
     }
 
 }
+/* ==================================================
+   COMMUNITY — SIX CORE CATEGORIES
+   Added 2026-08-13. Keeps the feed simple as it grows.
+================================================== */
+.post-category--health-care{
+    background:#f5f3ff;
+    color:#6d28d9;
+    border-color:#ddd6fe;
+}
+.post-category--training-advice{
+    background:#eff6ff;
+    color:#1d4ed8;
+    border-color:#bfdbfe;
+}
+.post-category--adoption-rescue{
+    background:#ecfdf5;
+    color:#047857;
+    border-color:#bbf7d0;
+}
+.post-category--memorials{
+    background:#faf5ff;
+    color:#7e22ce;
+    border-color:#e9d5ff;
+}
