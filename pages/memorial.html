@@ -72,6 +72,7 @@
         href="../css/memorials.css"
     >
 
+<link rel="stylesheet" href="../design/header-unified.css?v=20260812-1">
 </head>
 
 
@@ -82,96 +83,32 @@
      HEADER
 ========================================================= -->
 
-<header class="main-header">
+<header class="main-header" data-unified-header="true">
+  <div class="header-container">
+    <a class="logo" href="../index.html" aria-label="ThePetGrid home">
+      <span class="logo-icon" aria-hidden="true">🐾</span>
+      <span class="logo-wordmark">ThePetGrid</span>
+    </a>
 
-    <div class="header-container">
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
 
-        <a
-            class="logo"
-            href="../index.html"
-            aria-label="ThePetGrid home"
-        >
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a>
+      <a href="pets.html">Pets</a>
+      <a href="map.html">Map</a>
+      <a href="community.html">Community</a>
+      <a href="messages.html">Messages</a>
+      <a href="memorials.html">Memorials</a>
+    </nav>
 
-            <span class="logo-icon">
-                🐾
-            </span>
-
-            <span>
-                ThePetGrid
-            </span>
-
-        </a>
-
-
-        <button
-            class="nav-toggle"
-            type="button"
-            aria-label="Open navigation"
-            aria-expanded="false"
-        >
-            ☰
-        </button>
-
-
-        <nav
-            class="main-nav"
-            aria-label="Main navigation"
-        >
-
-            <a href="../index.html">
-                Home
-            </a>
-
-            <a href="pets.html">
-                Pets
-            </a>
-
-            <a href="map.html">
-                Map
-            </a>
-
-            <a href="community.html">
-                Community
-            </a>
-
-            <a href="messages.html">
-                Messages
-            </a>
-
-            <a
-                href="memorials.html"
-                aria-current="page"
-            >
-                Memorials
-            </a>
-
-        </nav>
-
-
-        <div class="header-actions">
-
-            <a
-                class="lost-found-btn"
-                href="lost-found.html"
-            >
-                <span>
-                    🆘
-                </span>
-
-                Lost &amp; Found
-            </a>
-
-            <a
-                class="login-btn"
-                href="login.html"
-            >
-                Log In
-            </a>
-
-        </div>
-
+    <div class="header-actions">
+      <a class="lost-found-btn" href="lost-found.html">
+        <span aria-hidden="true">🆘</span>
+        <span class="header-action-label">Lost &amp; Found</span>
+      </a>
+      <a class="login-btn" href="login.html">Log In</a>
     </div>
-
+  </div>
 </header>
 
 
@@ -1051,9 +988,9 @@
 
 <script src="../js/auth.js"></script>
 
-<script src="../js/header.js"></script>
+<script src="../js/header.js?v=20260812-unified-header"></script>
 
-<script src="../js/header-live.js"></script>
+<script src="../js/header-live.js?v=20260812-unified-header"></script>
 
 
 </body>

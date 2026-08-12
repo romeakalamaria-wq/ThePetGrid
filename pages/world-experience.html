@@ -8,9 +8,11 @@
   <link rel="icon" href="../assets/favicon.png">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="stylesheet" href="../design/header.css">
   <link rel="stylesheet" href="../css/world-experience.css?v=20260811-global-dashboard">
   <link rel="stylesheet" href="../css/lost-alert.css">
   <link rel="stylesheet" href="../css/atlas-status-markers.css">
+<link rel="stylesheet" href="../design/header-unified.css?v=20260812-1">
 </head>
 <body>
   <div id="worldBoot" class="world-boot" aria-live="polite">
@@ -28,26 +30,33 @@
     <div id="globeStage" class="globe-stage" aria-label="Interactive three-dimensional pet world"></div>
     <div class="space-vignette" aria-hidden="true"></div>
 
-    <header class="world-header">
-      <a class="world-brand" href="../index.html" aria-label="Back to ThePetGrid home">
-        <span class="world-brand__paw">🐾</span>
-        <span><strong>ThePetGrid</strong><small>Global Live Map</small></span>
+    <header class="main-header" data-unified-header="true">
+  <div class="header-container">
+    <a class="logo" href="../index.html" aria-label="ThePetGrid home">
+      <span class="logo-icon" aria-hidden="true">🐾</span>
+      <span class="logo-wordmark">ThePetGrid</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a>
+      <a href="pets.html">Pets</a>
+      <a href="map.html">Map</a>
+      <a href="community.html">Community</a>
+      <a href="messages.html">Messages</a>
+      <a href="memorials.html">Memorials</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="lost-found-btn" href="lost-found.html">
+        <span aria-hidden="true">🆘</span>
+        <span class="header-action-label">Lost &amp; Found</span>
       </a>
-
-      <nav class="world-primary-nav" aria-label="Atlas navigation">
-        <a class="is-active" href="world-experience.html" aria-current="page">Atlas</a>
-        <a href="pets.html">Pets</a>
-        <a href="community.html">Community</a>
-        <a href="lost-found.html">Rescue</a>
-        <a href="messages.html">Messages</a>
-      </nav>
-
-      <div class="world-header__actions">
-        <a class="header-search" href="pets.html" aria-label="Search pets">⌕</a>
-        <a class="header-add-pet" href="upload.html">+ Add Pet</a>
-        <a class="header-account" href="login.html"><span aria-hidden="true">🐾</span><strong>Log In</strong></a>
-      </div>
-    </header>
+      <a class="login-btn" href="login.html">Log In</a>
+    </div>
+  </div>
+</header>
 
     <section class="world-intro" aria-labelledby="worldTitle">
       <p class="world-kicker"><span></span> GLOBAL LIVE MAP</p>
@@ -164,6 +173,8 @@
   <script src="../js/supabase-config.js"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/auth.js?v=20260807-atlas-login-sync"></script>
+  <script src="../js/header.js?v=20260812-unified-header"></script>
+  <script src="../js/header-live.js?v=20260812-unified-header"></script>
   <script src="../js/world-experience.js?v=20260812-lost-exact-location"></script>
   <script src="../js/lost-alert.js"></script>
 </body>

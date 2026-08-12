@@ -11,12 +11,39 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="../design/header.css" rel="stylesheet"/><link href="../design/style.css" rel="stylesheet"/><link href="../design/theme.css" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="../css/pet-profile.css" rel="stylesheet"/>
-<link href="../design/atlas-shell.css" rel="stylesheet"/></head>
+<link href="../design/atlas-shell.css" rel="stylesheet"/><link rel="stylesheet" href="../design/header-unified.css?v=20260812-1">
+</head>
 <body class="atlas-shell">
 <!-- =========================================
          HEADER
     ========================================== -->
-<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<header class="main-header" data-unified-header="true">
+  <div class="header-container">
+    <a class="logo" href="../index.html" aria-label="ThePetGrid home">
+      <span class="logo-icon" aria-hidden="true">🐾</span>
+      <span class="logo-wordmark">ThePetGrid</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a>
+      <a href="pets.html">Pets</a>
+      <a href="map.html">Map</a>
+      <a href="community.html">Community</a>
+      <a href="messages.html">Messages</a>
+      <a href="memorials.html">Memorials</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="lost-found-btn" href="lost-found.html">
+        <span aria-hidden="true">🆘</span>
+        <span class="header-action-label">Lost &amp; Found</span>
+      </a>
+      <a class="login-btn" href="login.html">Log In</a>
+    </div>
+  </div>
+</header>
 <!-- =========================================
          MAIN
     ========================================== -->
@@ -336,6 +363,6 @@
 <script src="../js/pet-gifts.js"></script>
 <script src="../js/memorial-flow.js"></script>
 <script src="../js/pet-profile.js"></script>
-<script src="../js/header.js"></script><script src="../js/header-live.js"></script>
+<script src="../js/header.js?v=20260812-unified-header"></script><script src="../js/header-live.js?v=20260812-unified-header"></script>
 <script src="../js/atlas-shell.js"></script></body>
 </html>

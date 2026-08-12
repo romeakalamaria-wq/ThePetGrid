@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", function () {
 
-        if (window.innerWidth > 900) {
+        if (window.innerWidth > 1240) {
 
             closeMenu();
 

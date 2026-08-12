@@ -13,12 +13,39 @@
 <link href="../css/edit-pet.css" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css"/>
 <link rel="stylesheet" href="../css/premium-map-ui.css"/>
+<link rel="stylesheet" href="../design/header-unified.css?v=20260812-1">
 </head>
 <body>
 <!-- =========================================
          HEADER
     ========================================== -->
-<header class="main-header"><div class="header-container"><a class="logo" href="../index.html"><span class="logo-icon">🐾</span><span>ThePetGrid</span></a><button aria-expanded="false" aria-label="Open navigation" class="nav-toggle" type="button">☰</button><nav aria-label="Main navigation" class="main-nav"><a href="../index.html">Home</a><a href="pets.html">Pets</a><a href="map.html">Map</a><a href="community.html">Community</a><a href="messages.html">Messages</a></nav><div class="header-actions"><a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span> Lost &amp; Found</a><a class="add-pet-btn" href="upload.html">+ Add Pet</a><a class="login-btn" href="login.html">Log In</a></div></div></header>
+<header class="main-header" data-unified-header="true">
+  <div class="header-container">
+    <a class="logo" href="../index.html" aria-label="ThePetGrid home">
+      <span class="logo-icon" aria-hidden="true">🐾</span>
+      <span class="logo-wordmark">ThePetGrid</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a>
+      <a href="pets.html">Pets</a>
+      <a href="map.html">Map</a>
+      <a href="community.html">Community</a>
+      <a href="messages.html">Messages</a>
+      <a href="memorials.html">Memorials</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="lost-found-btn" href="lost-found.html">
+        <span aria-hidden="true">🆘</span>
+        <span class="header-action-label">Lost &amp; Found</span>
+      </a>
+      <a class="login-btn" href="login.html">Log In</a>
+    </div>
+  </div>
+</header>
 <!-- =========================================
          MAIN
     ========================================== -->
@@ -411,7 +438,7 @@
 <script src="../js/location-data.js"></script>
 <script src="../js/location-picker.js"></script>
 <script src="../js/edit-pet.js"></script>
-<script src="../js/header.js"></script>
-<script src="../js/header-live.js"></script>
+<script src="../js/header.js?v=20260812-unified-header"></script>
+<script src="../js/header-live.js?v=20260812-unified-header"></script>
 </body>
 </html>

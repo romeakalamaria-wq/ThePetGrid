@@ -1,0 +1,418 @@
+
+/* =========================================================
+   THEPETGRID — UNIFIED HEADER v1
+   One header on every page. Loaded after page CSS on purpose.
+   ========================================================= */
+
+.main-header,
+body.atlas-shell .main-header,
+.memorial-atlas-header{
+  position:sticky !important;
+  top:0 !important;
+  z-index:7000 !important;
+  width:100% !important;
+  min-height:76px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(148,163,184,.16) !important;
+  border-radius:0 !important;
+  background:rgba(5,10,28,.97) !important;
+  color:#f8fafc !important;
+  box-shadow:0 12px 34px rgba(2,6,23,.20) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+}
+
+.header-container,
+body.atlas-shell .header-container,
+.memorial-atlas-header .header-container{
+  width:min(1540px,calc(100% - 32px)) !important;
+  min-height:76px !important;
+  margin:0 auto !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:nowrap !important;
+  gap:14px !important;
+}
+
+.logo,
+body.atlas-shell .logo{
+  flex:0 0 auto !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  min-width:max-content !important;
+  color:#f8fafc !important;
+  text-decoration:none !important;
+  font-family:inherit !important;
+  font-size:1.12rem !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+.logo-icon,
+body.atlas-shell .logo-icon{
+  display:grid !important;
+  place-items:center !important;
+  width:42px !important;
+  height:42px !important;
+  flex:0 0 42px !important;
+  border-radius:13px !important;
+  background:linear-gradient(135deg,#ffb703,#fb8500) !important;
+  color:#172033 !important;
+  box-shadow:0 8px 22px rgba(251,133,0,.24) !important;
+}
+
+.logo-wordmark{display:inline !important}
+
+.main-nav,
+body.atlas-shell .main-nav{
+  min-width:0 !important;
+  margin-left:auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:2px !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+}
+
+.main-nav a,
+body.atlas-shell .main-nav a{
+  position:relative !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:42px !important;
+  padding:0 10px !important;
+  border-radius:11px !important;
+  color:#b8c4da !important;
+  background:transparent !important;
+  text-decoration:none !important;
+  font-family:inherit !important;
+  font-size:.91rem !important;
+  font-weight:700 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+.main-nav a:hover,
+.main-nav a.active,
+.main-nav a[aria-current="page"],
+body.atlas-shell .main-nav a:hover,
+body.atlas-shell .main-nav a.active,
+body.atlas-shell .main-nav a[aria-current="page"]{
+  color:#fff !important;
+  background:#10273a !important;
+  box-shadow:inset 0 -2px 0 #ffb703 !important;
+}
+
+.main-nav a::after,
+body.atlas-shell .main-nav a::after{
+  display:none !important;
+  content:none !important;
+}
+
+.header-actions,
+body.atlas-shell .header-actions{
+  flex:0 0 auto !important;
+  min-width:0 !important;
+  margin:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:8px !important;
+  white-space:nowrap !important;
+}
+
+.header-actions > *,
+body.atlas-shell .header-actions > *{
+  flex:0 0 auto !important;
+}
+
+.lost-found-btn{
+  order:1 !important;
+  min-height:42px !important;
+  padding:0 13px !important;
+  border:1px solid rgba(251,113,133,.22) !important;
+  border-radius:12px !important;
+  background:linear-gradient(135deg,#fb7185,#e11d48) !important;
+  color:#fff !important;
+  font-size:.86rem !important;
+  font-weight:800 !important;
+  text-decoration:none !important;
+  box-shadow:0 8px 20px rgba(225,29,72,.20) !important;
+}
+
+.nearby-alert-settings-button{
+  order:2 !important;
+  min-height:42px !important;
+  padding:0 11px !important;
+  border:1px solid rgba(96,165,250,.28) !important;
+  border-radius:12px !important;
+  background:#eef5ff !important;
+  color:#1d4ed8 !important;
+  font-size:.80rem !important;
+  font-weight:800 !important;
+}
+
+.notification-center-button{
+  order:3 !important;
+  width:42px !important;
+  min-width:42px !important;
+  height:42px !important;
+  min-height:42px !important;
+  padding:0 !important;
+  display:grid !important;
+  place-items:center !important;
+  border:1px solid rgba(148,163,184,.26) !important;
+  border-radius:12px !important;
+  background:#111b31 !important;
+  color:#fff !important;
+}
+
+.login-btn{
+  order:4 !important;
+  min-width:78px !important;
+  min-height:42px !important;
+  padding:0 14px !important;
+  border:1px solid rgba(148,163,184,.25) !important;
+  border-radius:12px !important;
+  background:#111827 !important;
+  color:#fff !important;
+  font-size:.88rem !important;
+  font-weight:800 !important;
+  text-decoration:none !important;
+}
+
+.user-menu{
+  order:4 !important;
+  position:relative !important;
+}
+
+.user-menu__toggle{
+  min-height:42px !important;
+  padding:0 12px !important;
+  border:1px solid rgba(148,163,184,.25) !important;
+  border-radius:12px !important;
+  background:#171d31 !important;
+  color:#fff !important;
+  font-size:.88rem !important;
+  font-weight:800 !important;
+}
+
+.user-menu__avatar{
+  width:28px !important;
+  height:28px !important;
+  background:#fff4da !important;
+  color:#4c1d95 !important;
+}
+
+.user-menu__dropdown{
+  z-index:8000 !important;
+  top:calc(100% + 10px) !important;
+}
+
+.nav-toggle{
+  display:none !important;
+  width:42px !important;
+  height:42px !important;
+  flex:0 0 42px !important;
+  margin-left:auto !important;
+  border:1px solid rgba(148,163,184,.22) !important;
+  border-radius:12px !important;
+  background:#111b31 !important;
+  color:#fff !important;
+  font-size:1.2rem !important;
+}
+
+/* No page-specific notification control inside the shared header. */
+.main-header .community-notification-button{
+  display:none !important;
+}
+
+/* Medium desktop: keep everything on one line without collisions. */
+@media (max-width:1450px) and (min-width:1241px){
+  .header-container,
+  body.atlas-shell .header-container{
+    width:calc(100% - 22px) !important;
+    gap:8px !important;
+  }
+
+  .main-nav a,
+  body.atlas-shell .main-nav a{
+    padding:0 7px !important;
+    font-size:.82rem !important;
+  }
+
+  .lost-found-btn{
+    width:42px !important;
+    min-width:42px !important;
+    padding:0 !important;
+    font-size:0 !important;
+  }
+  .lost-found-btn > span:first-child{font-size:1rem !important}
+  .lost-found-btn .header-action-label,
+  .lost-found-btn > span:nth-child(2){display:none !important}
+
+  .nearby-alert-settings-button{
+    width:42px !important;
+    min-width:42px !important;
+    padding:0 !important;
+    font-size:0 !important;
+  }
+  .nearby-alert-settings-button > span:first-child{font-size:1rem !important}
+
+  .user-menu__name{display:none !important}
+}
+
+/* Tablet / narrow desktop: switch to hamburger before overlap can happen. */
+@media (max-width:1240px){
+  .main-header,
+  body.atlas-shell .main-header{
+    min-height:68px !important;
+  }
+
+  .header-container,
+  body.atlas-shell .header-container{
+    width:min(100% - 22px,1540px) !important;
+    min-height:68px !important;
+    display:grid !important;
+    grid-template-columns:auto 1fr auto !important;
+    gap:9px !important;
+  }
+
+  .nav-toggle{
+    display:grid !important;
+    place-items:center !important;
+    grid-column:2 !important;
+    justify-self:end !important;
+    margin:0 !important;
+  }
+
+  .header-actions,
+  body.atlas-shell .header-actions{
+    grid-column:3 !important;
+    margin:0 !important;
+    gap:6px !important;
+  }
+
+  .main-nav,
+  body.atlas-shell .main-nav{
+    display:none !important;
+    position:absolute !important;
+    top:calc(100% + 8px) !important;
+    left:11px !important;
+    right:11px !important;
+    width:auto !important;
+    max-height:calc(100vh - 92px) !important;
+    overflow:auto !important;
+    margin:0 !important;
+    padding:10px !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:4px !important;
+    border:1px solid rgba(148,163,184,.20) !important;
+    border-radius:16px !important;
+    background:rgba(5,10,28,.985) !important;
+    box-shadow:0 24px 60px rgba(2,6,23,.42) !important;
+  }
+
+  .main-nav.is-open,
+  body.atlas-shell .main-nav.is-open{
+    display:flex !important;
+  }
+
+  .main-nav a,
+  body.atlas-shell .main-nav a{
+    width:100% !important;
+    justify-content:flex-start !important;
+    min-height:46px !important;
+    padding:0 14px !important;
+    font-size:.94rem !important;
+  }
+
+  .lost-found-btn,
+  .nearby-alert-settings-button,
+  .notification-center-button{
+    width:40px !important;
+    min-width:40px !important;
+    height:40px !important;
+    min-height:40px !important;
+    padding:0 !important;
+  }
+
+  .lost-found-btn{
+    font-size:0 !important;
+  }
+  .lost-found-btn > span:first-child{font-size:1rem !important}
+  .lost-found-btn .header-action-label,
+  .lost-found-btn > span:nth-child(2){display:none !important}
+
+  .nearby-alert-settings-button{
+    font-size:0 !important;
+  }
+  .nearby-alert-settings-button > span:first-child{font-size:1rem !important}
+
+  .user-menu__toggle{
+    min-height:40px !important;
+    padding:0 9px !important;
+  }
+  .user-menu__name{display:none !important}
+  .login-btn{min-height:40px !important;padding:0 11px !important}
+}
+
+/* Phones: keep only the essential compact actions visible. */
+@media (max-width:620px){
+  .header-container,
+  body.atlas-shell .header-container{
+    width:calc(100% - 16px) !important;
+    grid-template-columns:auto 1fr auto !important;
+    gap:6px !important;
+  }
+
+  .logo-wordmark{
+    display:none !important;
+  }
+
+  .logo-icon,
+  body.atlas-shell .logo-icon{
+    width:40px !important;
+    height:40px !important;
+    flex-basis:40px !important;
+  }
+
+  .nearby-alert-settings-button{
+    display:none !important;
+  }
+
+  .login-btn{
+    min-width:0 !important;
+    padding:0 10px !important;
+    font-size:.80rem !important;
+  }
+}
+
+/* Global Live Map uses exactly the same header, fixed over the 3D scene. */
+.world-experience > .main-header{
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  z-index:7000 !important;
+}
+.world-experience > .main-header + .world-intro{
+  /* world-intro remains independently positioned by the Atlas layout */
+}
+.world-experience .globe-stage{
+  top:76px !important;
+}
+@media(max-width:1240px){
+  .world-experience .globe-stage{top:68px !important}
+}
