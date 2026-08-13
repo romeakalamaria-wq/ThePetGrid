@@ -247,6 +247,44 @@
 
 
   // =========================================
+  // ADMIN MENU ACCESS
+  // =========================================
+
+  async function refreshAdminMenuLink(actions, user) {
+    const moderationLink =
+      actions?.querySelector(".user-menu__moderation");
+
+    if (!moderationLink || !user) {
+      return;
+    }
+
+    const client = getClient();
+
+    if (!client) {
+      moderationLink.hidden = true;
+      return;
+    }
+
+    try {
+      const {
+        data,
+        error
+      } = await client.rpc("is_admin");
+
+      moderationLink.hidden =
+        Boolean(error) || data !== true;
+    } catch (error) {
+      moderationLink.hidden = true;
+
+      console.warn(
+        "ThePetGrid: admin menu check failed.",
+        error
+      );
+    }
+  }
+
+
+  // =========================================
   // HEADER AUTH
   // =========================================
 
@@ -271,6 +309,9 @@
 
     const profileLink =
       pageUrl("my-profile.html");
+
+    const moderationLink =
+      pageUrl("admin-moderation.html");
 
     const user =
       getCurrentUser();
@@ -347,6 +388,15 @@
             My Profile
           </a>
 
+          <a
+            class="user-menu__moderation"
+            href="${moderationLink}"
+            hidden
+          >
+            <span aria-hidden="true">🛡️</span>
+            Moderation Center
+          </a>
+
           <button
             type="button"
             data-auth-logout
@@ -394,6 +444,11 @@
     logoutButton?.addEventListener(
       "click",
       logout
+    );
+
+    refreshAdminMenuLink(
+      actions,
+      user
     );
 
     document.addEventListener(
