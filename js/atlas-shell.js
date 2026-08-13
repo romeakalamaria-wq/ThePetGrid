@@ -95,6 +95,12 @@
   }
 
   ensureAtlasNavLink();
+
+const isMessagesPage = /\/messages\.html$/i.test(window.location.pathname);
+
+if (!isMessagesPage || window.innerWidth > 720) {
   ensureReturnButton();
-  bindTransitions();
+}
+
+bindTransitions();
 })();
