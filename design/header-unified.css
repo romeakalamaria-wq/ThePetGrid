@@ -68,6 +68,21 @@ body.atlas-shell .logo-icon{
 
 .logo-wordmark{display:inline !important}
 
+
+/* Shared image logo */
+.logo .logo-image,
+body.atlas-shell .logo .logo-image{
+  display:block !important;
+  width:auto !important;
+  height:78px !important;
+  max-width:315px !important;
+  margin-left:8px !important;
+  object-fit:contain !important;
+  object-position:left center !important;
+  border:0 !important;
+}
+
+
 .main-nav,
 body.atlas-shell .main-nav{
   min-width:0 !important;
@@ -386,6 +401,12 @@ body.atlas-shell .header-actions > *{
     width:40px !important;
     height:40px !important;
     flex-basis:40px !important;
+  }
+
+  .logo .logo-image,
+  body.atlas-shell .logo .logo-image{
+    height:46px !important;
+    max-width:150px !important;
   }
 
   .nearby-alert-settings-button{

@@ -6,6 +6,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!navigation) return;
 
     // ==========================================
+    // SHARED BRAND LOGO
+    // ==========================================
+
+    const logo = document.querySelector(".logo");
+
+    if (logo) {
+        const isPages = location.pathname.includes("/pages/");
+        const logoSrc = isPages ? "../assets/logo.png" : "assets/logo.png";
+
+        logo.innerHTML = `
+            <img
+                class="logo-image"
+                src="${logoSrc}"
+                alt="ThePetGrid"
+            >
+        `;
+    }
+
+
+    // ==========================================
     // ADD MEMORIALS LINK
     // ==========================================
 
