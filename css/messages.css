@@ -93,16 +93,17 @@ button,input,textarea{font:inherit}button{cursor:pointer}img{display:block;max-w
   }
 
   .send-message-button{
-    position:static !important;
-    width:46px !important;
-    min-width:46px !important;
-    height:46px !important;
-    min-height:46px !important;
-    padding:0 !important;
-    margin:0 !important;
-    flex:0 0 46px !important;
-    transform:none !important;
-  }
+  position:relative !important;
+  top:-6px !important;
+  width:46px !important;
+  min-width:46px !important;
+  height:46px !important;
+  min-height:46px !important;
+  padding:0 !important;
+  margin:0 !important;
+  flex:0 0 46px !important;
+  transform:none !important;
+}
 
   .send-message-text{
     display:none !important;
