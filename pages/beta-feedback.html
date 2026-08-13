@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beta Feedback | ThePetGrid</title>
+  <link href="../assets/favicon.png" rel="icon" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="../design/theme.css" rel="stylesheet">
+  <link href="../design/style.css" rel="stylesheet">
+  <link href="../design/header.css" rel="stylesheet">
+  <link href="../design/header-unified.css?v=20260812-1" rel="stylesheet">
+  <link href="../css/beta-feedback.css?v=1" rel="stylesheet">
+</head>
+<body>
+  <header class="main-header" data-unified-header="true">
+    <div class="header-container">
+      <a class="logo" href="../index.html" aria-label="ThePetGrid home">
+        <span class="logo-icon" aria-hidden="true">🐾</span>
+        <span class="logo-wordmark">ThePetGrid</span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="../index.html">Home</a>
+        <a href="pets.html">Pets</a>
+        <a href="map.html">Map</a>
+        <a href="community.html">Community</a>
+        <a href="messages.html">Messages</a>
+        <a href="memorials.html">Memorials</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="lost-found-btn" href="lost-found.html">
+          <span aria-hidden="true">🆘</span>
+          <span class="header-action-label">Lost &amp; Found</span>
+        </a>
+        <a class="login-btn" href="login.html">Log In</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="beta-feedback-page">
+    <section class="beta-feedback-hero">
+      <div class="beta-feedback-shell">
+        <span class="beta-feedback-kicker">🧪 Closed Beta</span>
+        <h1>Help us make ThePetGrid better.</h1>
+        <p>If something breaks, feels confusing, or could be better, tell us here. Short and simple feedback is perfect.</p>
+      </div>
+    </section>
+
+    <section class="beta-feedback-shell beta-feedback-layout">
+      <aside class="beta-feedback-side">
+        <div class="beta-feedback-card">
+          <span class="beta-feedback-card__icon">🐾</span>
+          <h2>What should you report?</h2>
+          <p>Anything that stops you, confuses you, or makes the experience less clear.</p>
+          <ul>
+            <li>Something did not work</li>
+            <li>You could not find what you expected</li>
+            <li>A page looked wrong on mobile</li>
+            <li>You have an idea that would improve the experience</li>
+          </ul>
+        </div>
+
+        <div class="beta-feedback-card beta-feedback-card--soft">
+          <strong>Your session</strong>
+          <span id="betaFeedbackUser">Checking login…</span>
+          <small>Your username is attached automatically when available.</small>
+        </div>
+      </aside>
+
+      <section class="beta-feedback-form-card">
+        <div class="beta-feedback-form-heading">
+          <span class="beta-feedback-kicker">Beta Feedback</span>
+          <h2>Tell us what happened</h2>
+          <p>Choose the closest option and add a short description.</p>
+        </div>
+
+        <form id="betaFeedbackForm">
+          <fieldset class="beta-feedback-types">
+            <legend>Feedback type</legend>
+
+            <label class="beta-feedback-type">
+              <input type="radio" name="feedbackType" value="bug" checked>
+              <span><b>🐛 Bug</b><small>Something did not work</small></span>
+            </label>
+
+            <label class="beta-feedback-type">
+              <input type="radio" name="feedbackType" value="suggestion">
+              <span><b>💡 Suggestion</b><small>An idea to improve ThePetGrid</small></span>
+            </label>
+
+            <label class="beta-feedback-type">
+              <input type="radio" name="feedbackType" value="unclear">
+              <span><b>❓ Something unclear</b><small>You were not sure what to do</small></span>
+            </label>
+          </fieldset>
+
+          <label class="beta-feedback-field">
+            <span>Where did it happen?</span>
+            <select id="betaFeedbackPage" required>
+              <option value="">Choose a page</option>
+              <option>Home</option>
+              <option>Pets</option>
+              <option>Pet Profile</option>
+              <option>Map / Atlas</option>
+              <option>Community</option>
+              <option>Messages</option>
+              <option>Lost & Found</option>
+              <option>Memorials</option>
+              <option>My Profile</option>
+              <option>Login / Account</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label class="beta-feedback-field">
+            <span>What happened?</span>
+            <textarea id="betaFeedbackDescription" maxlength="1200" rows="7" required placeholder="Example: I tapped Send in Messages on my phone and the button covered the text box."></textarea>
+            <small><span id="betaFeedbackCounter">0</span> / 1200</small>
+          </label>
+
+          <label class="beta-feedback-field">
+            <span>Optional details</span>
+            <input id="betaFeedbackDevice" maxlength="120" type="text" placeholder="Example: iPhone, Chrome, desktop, tablet…">
+          </label>
+
+          <div class="beta-feedback-meta">
+            <span id="betaFeedbackAutoPage">Current page will be attached automatically.</span>
+            <span>Do not include passwords or private information.</span>
+          </div>
+
+          <p id="betaFeedbackStatus" class="beta-feedback-status" aria-live="polite"></p>
+
+          <button id="betaFeedbackSubmit" class="beta-feedback-submit" type="submit">
+            Send Feedback
+          </button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/header.js?v=20260812-unified-header"></script>
+  <script src="../js/beta-feedback.js?v=1"></script>
+  <script src="../js/header-live.js?v=20260812-unified-header"></script>
+</body>
+</html>

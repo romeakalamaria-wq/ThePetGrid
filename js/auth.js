@@ -412,6 +412,11 @@
             My Profile
           </a>
 
+          <a href="${pageUrl("beta-feedback.html")}">
+  <span aria-hidden="true">🧪</span>
+  Beta Feedback
+</a>
+
           <button
             type="button"
             data-auth-logout
