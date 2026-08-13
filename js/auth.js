@@ -250,18 +250,27 @@
   // ADMIN MENU ACCESS
   // =========================================
 
-  async function refreshAdminMenuLink(actions, user) {
-    const moderationLink =
-      actions?.querySelector(".user-menu__moderation");
-
-    if (!moderationLink || !user) {
+  async function installAdminMenuLink(actions, user) {
+    if (!actions || !user) {
       return;
     }
+
+    const dropdown =
+      actions.querySelector(".user-menu__dropdown");
+
+    const logoutButton =
+      actions.querySelector("[data-auth-logout]");
+
+    if (!dropdown || !logoutButton) {
+      return;
+    }
+
+    // Never show an admin link until Supabase confirms this user is an admin.
+    dropdown.querySelector(".user-menu__moderation")?.remove();
 
     const client = getClient();
 
     if (!client) {
-      moderationLink.hidden = true;
       return;
     }
 
@@ -271,11 +280,29 @@
         error
       } = await client.rpc("is_admin");
 
-      moderationLink.hidden =
-        Boolean(error) || data !== true;
-    } catch (error) {
-      moderationLink.hidden = true;
+      if (error || data !== true) {
+        return;
+      }
 
+      const moderationLink =
+        document.createElement("a");
+
+      moderationLink.className =
+        "user-menu__moderation";
+
+      moderationLink.href =
+        pageUrl("admin-moderation.html");
+
+      moderationLink.innerHTML = `
+        <span aria-hidden="true">🛡️</span>
+        Moderation Center
+      `;
+
+      logoutButton.insertAdjacentElement(
+        "beforebegin",
+        moderationLink
+      );
+    } catch (error) {
       console.warn(
         "ThePetGrid: admin menu check failed.",
         error
@@ -309,9 +336,6 @@
 
     const profileLink =
       pageUrl("my-profile.html");
-
-    const moderationLink =
-      pageUrl("admin-moderation.html");
 
     const user =
       getCurrentUser();
@@ -388,15 +412,6 @@
             My Profile
           </a>
 
-          <a
-            class="user-menu__moderation"
-            href="${moderationLink}"
-            hidden
-          >
-            <span aria-hidden="true">🛡️</span>
-            Moderation Center
-          </a>
-
           <button
             type="button"
             data-auth-logout
@@ -446,7 +461,7 @@
       logout
     );
 
-    refreshAdminMenuLink(
+    installAdminMenuLink(
       actions,
       user
     );
