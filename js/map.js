@@ -124,14 +124,17 @@ document.addEventListener("DOMContentLoaded", () => {
       id: row.id, ownerId: row.owner_id || row.ownerId || null, name: row.name || "Unnamed Pet",
       type: row.type || "Other", breed: row.breed || "", country: row.country || "", city: row.city || "",
       image: (cloud ? row.image_url : row.image || row.image_url) || fallbackImage,
-      verified: Boolean(row.verified), longitude: coords[0], latitude: coords[1], online: false
+      verified: Boolean(row.verified),
+      status: String(row.status || "").trim().toLowerCase(),
+      isMemorial: String(row.status || "").trim().toLowerCase() === "memorial",
+      longitude: coords[0], latitude: coords[1], online: false
     };
   }
 
   async function loadPets() {
     const client = window.ThePetGridSupabase?.client;
     if (!client) return (window.PetStore?.getAll?.() || []).map(row => normalizePet(row, false)).filter(Boolean);
-    const { data, error } = await client.from("pets").select("id,owner_id,name,type,breed,country,city,image_url,verified,latitude,longitude,created_at").order("created_at", { ascending: false });
+    const { data, error } = await client.from("pets").select("id,owner_id,name,type,breed,country,city,image_url,verified,latitude,longitude,status,created_at").order("created_at", { ascending: false });
     if (error) throw error;
     return (data || []).map(row => normalizePet(row, true)).filter(Boolean);
   }
@@ -150,7 +153,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderSidebar(list, title = "Pets around the world", message = "Select a marker or search for a location.") {
     ui.title.textContent = title; ui.message.textContent = message; ui.count.textContent = list.length;
-    ui.list.innerHTML = list.slice(0, 40).map(pet => `<a class="map-pet-card" href="pet.html?id=${encodeURIComponent(pet.id)}"><img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}"><span><strong>${escapeHtml(pet.name)}</strong><small>${pet.online ? "🟢 " : ""}${escapeHtml([pet.city, pet.country].filter(Boolean).join(", "))}</small></span></a>`).join("");
+    ui.list.innerHTML = list.slice(0, 40).map(pet => {
+      const href = pet.isMemorial
+        ? `memorial.html?petId=${encodeURIComponent(pet.id)}`
+        : `pet.html?id=${encodeURIComponent(pet.id)}`;
+      const memorialLabel = pet.isMemorial ? "🤍 In Memory · " : "";
+      return `<a class="map-pet-card${pet.isMemorial ? " is-memorial" : ""}" href="${href}"><img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}"><span><strong>${pet.isMemorial ? "🤍 " : ""}${escapeHtml(pet.name)}</strong><small>${memorialLabel}${pet.online ? "🟢 " : ""}${escapeHtml([pet.city, pet.country].filter(Boolean).join(", "))}</small></span></a>`;
+    }).join("");
   }
 
   function renderTopCountries() {
