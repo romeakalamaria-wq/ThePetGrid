@@ -569,6 +569,21 @@ function resetPreview() {
 
 }
 
+function getOwnerDisplayName(user) {
+    const metadata = user?.user_metadata || {};
+
+    return (
+        metadata.display_name ||
+        metadata.full_name ||
+        metadata.name ||
+        metadata.owner_name ||
+        metadata.username ||
+        user?.email?.split("@")[0] ||
+        "Member"
+    ).trim();
+}
+
+
 async function fillOwnerFromSession() {
 
     try {
@@ -576,12 +591,10 @@ async function fillOwnerFromSession() {
         const user =
             await getAuthenticatedUser();
 
-        const username =
-            user.user_metadata?.username ||
-            user.email?.split("@")[0] ||
-            "Member";
+        const ownerDisplayName =
+            getOwnerDisplayName(user);
 
-        petOwner.value = username;
+        petOwner.value = ownerDisplayName;
         petOwner.readOnly = true;
         updatePreview();
 
@@ -672,12 +685,10 @@ form.addEventListener(
             clearErrors();
             resetPreview();
 
-            const username =
-                user.user_metadata?.username ||
-                user.email?.split("@")[0] ||
-                "Member";
+            const ownerDisplayName =
+                getOwnerDisplayName(user);
 
-            petOwner.value = username;
+            petOwner.value = ownerDisplayName;
             petOwner.readOnly = true;
             updatePreview();
 
@@ -790,3 +801,4 @@ form.addEventListener(
 
 resetPreview();
 hideMessage();
+fillOwnerFromSession();
