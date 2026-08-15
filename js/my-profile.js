@@ -48,6 +48,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             image: row.image_url || "",
             verified: Boolean(row.verified),
             status: row.is_memorial ? "memorial" : "new",
+            isLost: false,
+            lostReportId: null,
             likes: Number(row.pet_likes?.[0]?.count || 0),
             followers: 0,
             gifts: 0,
@@ -79,6 +81,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const image = pet.image || "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=80";
         const location = [pet.city, pet.country].filter(Boolean).join(", ");
+        const statusLabel = pet.status === "memorial"
+            ? "Memorial"
+            : pet.isLost
+                ? "🔴 LOST — Active"
+                : "New";
+        const lostAction = pet.status === "memorial"
+            ? ""
+            : pet.isLost
+                ? `<a class="view-btn" href="lost-found.html?reportId=${encodeURIComponent(pet.lostReportId || "")}#reports">🏡 Mark as Found</a>`
+                : `<a class="view-btn" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a>`;
 
         card.innerHTML = `
             <img src="${escapeHtml(image)}" alt="${escapeHtml(pet.name)}">
@@ -86,11 +98,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <h3>${escapeHtml(pet.name)}</h3>
                 <p>${escapeHtml(pet.breed)} · ${escapeHtml(pet.age)}</p>
                 <p>📍 ${escapeHtml(location)}</p>
-                <p>Status: ${pet.status === "memorial" ? "Memorial" : "New"}</p>
+                <p>Status: ${statusLabel}</p>
                 <p>❤️ ${safeNumber(pet.likes)} &nbsp; 👥 ${safeNumber(pet.followers)}</p>
                 <div class="pet-actions">
                     <a class="edit-btn" href="edit-pet.html?id=${encodeURIComponent(pet.id)}">Edit</a>
                     <a class="view-btn" href="pet.html?id=${encodeURIComponent(pet.id)}">View</a>
+                    ${lostAction}
                     <button class="view-btn" type="button" data-action="favorite" data-pet-id="${escapeHtml(pet.id)}" aria-label="Toggle favorite">${window.ThePetGridFavorites?.isFavorite?.(pet.id) ? "⭐" : "☆"}</button>
                     <button class="delete-btn" type="button" data-action="delete" data-pet-id="${escapeHtml(pet.id)}">Delete</button>
                 </div>
@@ -129,6 +142,42 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (error) throw error;
         return Array.isArray(data) ? data.map(normalizePet) : [];
     }
+
+    async function applyLostFoundState(pets, userId) {
+        const client = window.ThePetGridSupabase?.client;
+        if (!client || !pets.length) return pets;
+
+        const petIds = pets.map(pet => pet.id).filter(Boolean);
+        if (!petIds.length) return pets;
+
+        const { data, error } = await client
+            .from("lost_pet_reports")
+            .select("id, pet_id, reporter_id, status, resolved, created_at")
+            .eq("reporter_id", userId)
+            .eq("status", "lost")
+            .eq("resolved", false)
+            .in("pet_id", petIds)
+            .order("created_at", { ascending: false });
+
+        if (error) {
+            console.warn("My Profile: active Lost & Found state could not be loaded.", error);
+            return pets;
+        }
+
+        const activeByPet = new Map();
+        (data || []).forEach(report => {
+            const key = String(report.pet_id || "");
+            if (key && !activeByPet.has(key)) activeByPet.set(key, report);
+        });
+
+        return pets.map(pet => {
+            const report = activeByPet.get(String(pet.id));
+            return report
+                ? { ...pet, isLost: true, lostReportId: report.id }
+                : pet;
+        });
+    }
+
 
     function getStoragePathFromUrl(url) {
         if (!url) return null;
@@ -233,7 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            const pets = await loadMyPets(user.id);
+            let pets = await loadMyPets(user.id);
+            pets = await applyLostFoundState(pets, user.id);
             if (window.ThePetGridFavorites) {
                 await window.ThePetGridFavorites.initialize(pets);
             }
