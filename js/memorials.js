@@ -570,11 +570,15 @@
 
     const modal = document.getElementById("memoryMessageModal");
 
-    document.getElementById("writeMemoryButton")?.addEventListener("click", async () => {
+    const openMemoryForm = async () => {
       const user = await ensureSignedIn(showToast);
       if (!user) return;
       if (modal) modal.hidden = false;
-    });
+    };
+
+    document
+      .querySelectorAll("#writeMemoryButton, [data-open-memory-form]")
+      .forEach(button => button.addEventListener("click", openMemoryForm));
 
     modal?.querySelectorAll("[data-close-memory]").forEach(element =>
       element.addEventListener("click", () => {
