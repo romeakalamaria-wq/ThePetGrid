@@ -39,6 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       image: row.image_url || "",
       verified: Boolean(row.verified),
       status: row.is_memorial ? "memorial" : "new",
+      isLost: false,
+      lostReportId: null,
       likes: Number(row.pet_likes?.[0]?.count || 0),
       followers: 0,
       gifts: 0,
@@ -77,6 +79,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       state.source = "demo";
     }
   }
+
+  async function applyLostFoundState() {
+    const client = window.ThePetGridSupabase?.client;
+    if (!client || state.source !== "supabase" || !state.pets.length) return;
+
+    const petIds = state.pets.map(pet => pet.id).filter(Boolean);
+    if (!petIds.length) return;
+
+    const { data, error } = await client
+      .from("lost_pet_reports")
+      .select("id,pet_id,status,resolved,created_at")
+      .eq("status", "lost")
+      .eq("resolved", false)
+      .in("pet_id", petIds)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.warn("ThePetGrid: active Lost & Found state could not be loaded.", error);
+      return;
+    }
+
+    const activeByPet = new Map();
+    (data || []).forEach(report => {
+      const key = String(report.pet_id || "");
+      if (key && !activeByPet.has(key)) activeByPet.set(key, report);
+    });
+
+    state.pets = state.pets.map(pet => {
+      const report = activeByPet.get(String(pet.id));
+      return report
+        ? { ...pet, isLost: true, lostReportId: report.id, status: pet.status === "memorial" ? "memorial" : "lost" }
+        : pet;
+    });
+  }
+
 
   function getFilteredPets() {
     const term = search.value.trim().toLowerCase();
@@ -134,6 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const liked = isPetLiked(pet);
     const favorite = isPetFavorite(pet);
     const isMemorial = pet.status === "memorial";
+    const isLost = Boolean(pet.isLost) || pet.status === "lost";
     const location = [pet.city, pet.country].filter(Boolean).join(", ") || "Location not added";
     const image = pet.image || "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=900&q=80";
     return `<article class="pet-card">
@@ -153,7 +191,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="pet-card__stats"><span>👥 ${Number(pet.followers || 0).toLocaleString()}</span><span>🎁 ${Number(pet.gifts || 0).toLocaleString()}</span><span>🐾 ${escapeHtml(pet.type || "Pet")}</span></div>
         <div class="pet-card__footer-actions"><a class="pet-card__view" href="pet.html?id=${encodeURIComponent(pet.id)}">View Profile</a>${isMemorial
           ? `<a class="pet-card__memorial" href="memorial.html?petId=${encodeURIComponent(pet.id)}">🕯️ Visit Memorial</a>`
-          : `<a class="pet-card__lost" data-report-lost="${escapeHtml(pet.id)}" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a>`}</div>
+          : isLost
+            ? `<a class="pet-card__lost pet-card__lost--active" href="lost-found.html?reportId=${encodeURIComponent(pet.lostReportId || "")}#reports">🔴 LOST — View Report</a>`
+            : `<a class="pet-card__lost" data-report-lost="${escapeHtml(pet.id)}" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a>`}</div>
       </div>
     </article>`;
   }
@@ -271,6 +311,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.addEventListener("petstore:change", render);
 
   await loadPets();
+  await applyLostFoundState();
 
   if (window.ThePetGridLikes) {
     await window.ThePetGridLikes.initialize(state.pets);
