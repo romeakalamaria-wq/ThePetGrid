@@ -125,8 +125,8 @@ document.addEventListener("DOMContentLoaded", () => {
       type: row.type || "Other", breed: row.breed || "", country: row.country || "", city: row.city || "",
       image: (cloud ? row.image_url : row.image || row.image_url) || fallbackImage,
       verified: Boolean(row.verified),
-      status: String(row.status || "").trim().toLowerCase(),
-      isMemorial: String(row.status || "").trim().toLowerCase() === "memorial",
+      status: row.is_memorial ? "memorial" : "",
+      isMemorial: Boolean(row.is_memorial),
       longitude: coords[0], latitude: coords[1], online: false
     };
   }
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadPets() {
     const client = window.ThePetGridSupabase?.client;
     if (!client) return (window.PetStore?.getAll?.() || []).map(row => normalizePet(row, false)).filter(Boolean);
-    const { data, error } = await client.from("pets").select("id,owner_id,name,type,breed,country,city,image_url,verified,latitude,longitude,status,created_at").order("created_at", { ascending: false });
+    const { data, error } = await client.from("pets").select("id,owner_id,name,type,breed,country,city,image_url,verified,latitude,longitude,is_memorial,created_at").order("created_at", { ascending: false });
     if (error) throw error;
     return (data || []).map(row => normalizePet(row, true)).filter(Boolean);
   }
