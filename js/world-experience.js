@@ -11,7 +11,7 @@
     modes: [...document.querySelectorAll("[data-world-mode]")], focusCard:$("#petFocusCard"), focusImage:$("#petFocusImage"), focusType:$("#petFocusType"), focusName:$("#petFocusName"), focusLocation:$("#petFocusLocation"), focusSignal:$("#petFocusSignal"), focusLink:$("#petFocusLink"), focusFlag:$("#petFocusFlag"), focusTime:$("#petFocusTime"), focusStory:$("#petFocusStory"), exploreNext:$("#exploreNextStory"), closeFocus:$("#closePetFocus"), eventsPanel:$("#worldEventsPanel"), eventsList:$("#worldEventsList"), eventsEmpty:$("#worldEventsEmpty"), eventsToggle:$("#toggleWorldEvents")
   };
 
-  // Closed Beta: the globe only shows real pets/reports. No demonstration pets.
+  // Beta: the globe only shows real pets/reports. No demonstration pets.
 
   const state = {
     globe:null,pets:[],rotating:true,lite:false,sound:false,starFrame:0,stars:[],mode:"all",quality:"high",clouds:null,sun:null,

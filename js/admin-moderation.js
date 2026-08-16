@@ -91,7 +91,7 @@
     panel.innerHTML=`
       <div class="beta-admin-head">
         <div>
-          <span class="beta-admin-kicker">🧪 Closed Beta</span>
+          <span class="beta-admin-kicker">🧪 Beta</span>
           <h2>Beta Feedback Inbox</h2>
           <p>Bug reports, suggestions and unclear moments sent by testers.</p>
         </div>
