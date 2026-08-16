@@ -97,17 +97,19 @@
       <div><small>NEW LIGHT</small><strong id="liveSignalText">A pet joined the world</strong></div>
     </section>
 
-    <nav class="world-dock" aria-label="World modes">
+    <nav class="world-dock" aria-label="World modes and motion control">
       <button class="is-active" type="button" data-world-mode="all"><span>◎</span><small>World</small></button>
       <button type="button" data-world-mode="pets"><span>●</span><small>Pets</small></button>
       <button type="button" data-world-mode="lost"><span>●</span><small>Lost</small></button>
       <button type="button" data-world-mode="memorial"><span>●</span><small>Memorial</small></button>
+      <button id="toggleMotion" class="world-motion-button" type="button" aria-pressed="false" aria-label="Pause Earth rotation">
+        <span aria-hidden="true">⏸</span><small>Pause Earth</small>
+      </button>
     </nav>
 
     <aside class="atlas-controls" aria-label="Atlas controls">
       <span id="qualityBadge" class="quality-badge" title="Adaptive rendering quality">HIGH</span>
       <button id="toggleSound" class="glass-button" type="button" aria-pressed="false">Sound off</button>
-      <button id="toggleMotion" class="glass-button" type="button" aria-pressed="false">Pause motion</button>
       <button id="toggleLite" class="glass-button" type="button" aria-pressed="false">Lite mode</button>
       <a class="glass-button" href="map.html">2D Map</a>
     </aside>

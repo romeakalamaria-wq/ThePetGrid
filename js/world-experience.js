@@ -321,7 +321,7 @@
   function pointColor(point){
     if(point.is_lost)return "#ff526e";
     if(point.is_memorial)return "#aeb5c5";
-    const palette={Dog:"#68e8ff",Cat:"#a77cff",Bird:"#ffc85d",Rabbit:"#72ffb0"};
+    const palette={Dog:"#68e8ff",Cat:"#ff8aa5",Bird:"#ffc85d",Rabbit:"#72ffb0"};
     return palette[point.type]||"#ffffff";
   }
 
@@ -674,7 +674,15 @@
     });
 
     ui.explore.addEventListener("click",()=>{state.globe?.pointOfView({lat:20,lng:12,altitude:1.22},1800);playTone(420,.16)});ui.reset.addEventListener("click",()=>{window.location.href="upload.html"});
-    ui.motion.addEventListener("click",()=>{state.rotating=!state.rotating;if(state.globe)state.globe.controls().autoRotate=state.rotating;ui.motion.setAttribute("aria-pressed",String(!state.rotating));ui.motion.textContent=state.rotating?"Pause motion":"Resume motion"});
+    ui.motion.addEventListener("click",()=>{
+      state.rotating=!state.rotating;
+      if(state.globe)state.globe.controls().autoRotate=state.rotating;
+      ui.motion.setAttribute("aria-pressed",String(!state.rotating));
+      ui.motion.setAttribute("aria-label",state.rotating?"Pause Earth rotation":"Resume Earth rotation");
+      ui.motion.innerHTML=state.rotating
+        ? '<span aria-hidden="true">⏸</span><small>Pause Earth</small>'
+        : '<span aria-hidden="true">▶</span><small>Resume Earth</small>';
+    });
     ui.lite?.addEventListener("click",()=>{
       state.manualQuality=true;
       setQuality(state.lite?"high":"lite",true);
