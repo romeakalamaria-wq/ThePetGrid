@@ -89,8 +89,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const lostAction = pet.status === "memorial"
             ? ""
             : pet.isLost
-                ? `<a class="view-btn" href="lost-found.html?reportId=${encodeURIComponent(pet.lostReportId || "")}#reports">🏡 Mark as Found</a>`
-                : `<a class="view-btn" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a>`;
+                ? `<a class="pet-action pet-action--found" href="lost-found.html?reportId=${encodeURIComponent(pet.lostReportId || "")}#reports">🏡 Mark as Found</a>`
+                : `<a class="pet-action pet-action--sos" href="lost-found.html?mode=lost&petId=${encodeURIComponent(pet.id)}">🆘 Report Lost</a>`;
 
         card.innerHTML = `
             <img src="${escapeHtml(image)}" alt="${escapeHtml(pet.name)}">
@@ -101,11 +101,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <p>Status: ${statusLabel}</p>
                 <p>❤️ ${safeNumber(pet.likes)} &nbsp; 👥 ${safeNumber(pet.followers)}</p>
                 <div class="pet-actions">
-                    <a class="edit-btn" href="edit-pet.html?id=${encodeURIComponent(pet.id)}">Edit</a>
-                    <a class="view-btn" href="pet.html?id=${encodeURIComponent(pet.id)}">View</a>
+                    <a class="pet-action pet-action--edit" href="edit-pet.html?id=${encodeURIComponent(pet.id)}">✏️ Edit</a>
+                    <a class="pet-action pet-action--view" href="pet.html?id=${encodeURIComponent(pet.id)}">👁 View</a>
                     ${lostAction}
-                    <button class="view-btn" type="button" data-action="favorite" data-pet-id="${escapeHtml(pet.id)}" aria-label="Toggle favorite">${window.ThePetGridFavorites?.isFavorite?.(pet.id) ? "⭐" : "☆"}</button>
-                    <button class="delete-btn" type="button" data-action="delete" data-pet-id="${escapeHtml(pet.id)}">Delete</button>
+                    <button class="pet-action pet-action--favorite" type="button" data-action="favorite" data-pet-id="${escapeHtml(pet.id)}" aria-label="Toggle favorite">${window.ThePetGridFavorites?.isFavorite?.(pet.id) ? "⭐ Remove from Favorites" : "☆ Add to Favorites"}</button>
+                    <button class="pet-action pet-action--delete" type="button" data-action="delete" data-pet-id="${escapeHtml(pet.id)}">🗑 Delete</button>
                 </div>
             </div>
         `;
@@ -252,7 +252,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // The shared service already displays the error.
             } finally {
                 favoriteButton.disabled = false;
-                favoriteButton.textContent = window.ThePetGridFavorites.isFavorite(petId) ? "⭐" : "☆";
+                favoriteButton.textContent = window.ThePetGridFavorites.isFavorite(petId)
+                    ? "⭐ Remove from Favorites"
+                    : "☆ Add to Favorites";
             }
         }
     });

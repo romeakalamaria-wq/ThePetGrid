@@ -524,61 +524,107 @@ justify-content:center;
     .privacy-control select, .profile-settings__footer button { width: 100%; }
 }
 
-
 /* ==========================================
-   MY PETS — ACTION BUTTON LAYOUT FIX
-   Keeps labels intact and wraps buttons cleanly.
+   MY PETS — FINAL ACTION LAYOUT
 ========================================== */
 
-.pet-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 18px;
-    width: 100%;
+.pet-actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    margin-top:18px;
+    width:100%;
 }
 
-.pet-actions a,
-.pet-actions button {
-    width: 100%;
-    min-width: 0;
-    min-height: 46px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    white-space: nowrap;
-    line-height: 1.15;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.pet-actions .pet-action{
+    width:100%;
+    min-width:0;
+    min-height:50px;
+    padding:11px 13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    border:1px solid transparent;
+    border-radius:13px;
+    font-family:inherit;
+    font-size:.94rem;
+    font-weight:800;
+    line-height:1.15;
+    text-align:center;
+    text-decoration:none;
+    cursor:pointer;
+    transition:transform .2s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;
 }
 
-/* Give important Lost / Home Again actions enough room. */
-.pet-actions a[href*="lost-found"] {
-    grid-column: 1 / -1;
+.pet-actions .pet-action:hover{
+    transform:translateY(-2px);
 }
 
-/* A lone final action can use the full row instead of becoming tiny. */
-.pet-actions > :last-child:nth-child(odd) {
-    grid-column: 1 / -1;
+.pet-action--edit{
+    background:#f59e0b;
+    color:#fff;
 }
 
-@media (min-width: 760px) {
-    .pets-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+.pet-action--view{
+    background:#2563eb;
+    color:#fff;
+}
+
+/* Lost is the strongest action and owns its full row. */
+.pet-actions .pet-action--sos{
+    grid-column:1 / -1;
+    min-height:56px;
+    background:linear-gradient(135deg,#e11d48,#fb3d5d);
+    color:#fff;
+    border-color:#e11d48;
+    box-shadow:0 10px 22px rgba(225,29,72,.22);
+}
+
+.pet-actions .pet-action--sos:hover{
+    box-shadow:0 13px 27px rgba(225,29,72,.30);
+}
+
+/* Active Lost case: positive green recovery action. */
+.pet-actions .pet-action--found{
+    grid-column:1 / -1;
+    min-height:54px;
+    background:linear-gradient(135deg,#059669,#10b981);
+    color:#fff;
+    box-shadow:0 9px 20px rgba(5,150,105,.18);
+}
+
+/* Favorite is now descriptive and uses the full row. */
+.pet-actions .pet-action--favorite{
+    grid-column:1 / -1;
+    background:#fffbeb;
+    color:#92400e;
+    border-color:#fcd34d;
+}
+
+.pet-actions .pet-action--favorite:hover{
+    background:#fef3c7;
+}
+
+/* Delete remains obvious but visually quieter than SOS. */
+.pet-actions .pet-action--delete{
+    grid-column:1 / -1;
+    background:#fff;
+    color:#b91c1c;
+    border-color:#fecaca;
+}
+
+.pet-actions .pet-action--delete:hover{
+    background:#fef2f2;
+    border-color:#fca5a5;
+}
+
+@media(max-width:420px){
+    .pet-actions{
+        grid-template-columns:1fr;
     }
-}
 
-@media (max-width: 420px) {
-    .pet-actions {
-        grid-template-columns: 1fr;
-    }
-
-    .pet-actions > *,
-    .pet-actions a[href*="lost-found"],
-    .pet-actions > :last-child:nth-child(odd) {
-        grid-column: 1;
+    .pet-actions .pet-action{
+        grid-column:1;
     }
 }
