@@ -2927,12 +2927,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 </div>
 
-                <a
-                    class="profile-pet-card__button"
-                    href="${petUrl}"
-                >
-                    View Pet
-                </a>
+                ${
+                    isCurrentUserProfile()
+                        ? `
+                            <div class="profile-pet-owner-actions" aria-label="Pet management actions">
+                                <div class="profile-pet-owner-actions__row">
+                                    <a
+                                        class="profile-pet-owner-action profile-pet-owner-action--edit"
+                                        href="editPet.html?id=${encodeURIComponent(petId)}"
+                                    >
+                                        <span aria-hidden="true">✏️</span>
+                                        <span>Edit</span>
+                                    </a>
+
+                                    <a
+                                        class="profile-pet-owner-action profile-pet-owner-action--view"
+                                        href="${petUrl}"
+                                    >
+                                        <span aria-hidden="true">👁</span>
+                                        <span>View</span>
+                                    </a>
+                                </div>
+
+                                <a
+                                    class="profile-pet-owner-action profile-pet-owner-action--sos"
+                                    href="lost-found.html?pet=${encodeURIComponent(petId)}"
+                                >
+                                    <span aria-hidden="true">🆘</span>
+                                    <span>Report Lost</span>
+                                </a>
+
+                                <button
+                                    class="profile-pet-owner-action profile-pet-owner-action--favorite"
+                                    type="button"
+                                    data-profile-pet-favorite="${escapeHtml(petId)}"
+                                    aria-pressed="false"
+                                >
+                                    <span aria-hidden="true">⭐</span>
+                                    <span class="profile-pet-owner-action__label">Add to Favorites</span>
+                                </button>
+
+                                <a
+                                    class="profile-pet-owner-action profile-pet-owner-action--delete"
+                                    href="editPet.html?id=${encodeURIComponent(petId)}#delete"
+                                >
+                                    <span aria-hidden="true">🗑</span>
+                                    <span>Delete</span>
+                                </a>
+                            </div>
+                        `
+                        : `
+                            <a
+                                class="profile-pet-card__button"
+                                href="${petUrl}"
+                            >
+                                View Pet
+                            </a>
+                        `
+                }
 
             </div>
         `;
@@ -2955,6 +3007,58 @@ document.addEventListener("DOMContentLoaded", () => {
                     this.src =
                         DEFAULT_AVATAR;
                 };
+        }
+
+
+        const favoriteButton =
+            card.querySelector("[data-profile-pet-favorite]");
+
+        if (favoriteButton && petId) {
+            const favoriteKey = `favorite_${petId}`;
+
+            const syncFavoriteButton = () => {
+                const isFavorite =
+                    localStorage.getItem(favoriteKey) === "true";
+
+                favoriteButton.setAttribute(
+                    "aria-pressed",
+                    String(isFavorite)
+                );
+
+                favoriteButton.classList.toggle(
+                    "is-favorite",
+                    isFavorite
+                );
+
+                const label =
+                    favoriteButton.querySelector(
+                        ".profile-pet-owner-action__label"
+                    );
+
+                if (label) {
+                    label.textContent =
+                        isFavorite
+                            ? "Remove from Favorites"
+                            : "Add to Favorites";
+                }
+            };
+
+            syncFavoriteButton();
+
+            favoriteButton.addEventListener(
+                "click",
+                () => {
+                    const isFavorite =
+                        localStorage.getItem(favoriteKey) === "true";
+
+                    localStorage.setItem(
+                        favoriteKey,
+                        String(!isFavorite)
+                    );
+
+                    syncFavoriteButton();
+                }
+            );
         }
 
 
