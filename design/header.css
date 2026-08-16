@@ -112,88 +112,64 @@
 
 
 /* =========================================================
-   HEADER LAYOUT POLISH — Atlas + global pages
-   Keeps the brand readable and prevents action labels wrapping.
-========================================================= */
-.header-container{
-  width:min(1320px,calc(100% - 32px));
-  gap:clamp(14px,1.6vw,28px);
+   THEPETGRID — ADD NEW PET CTA
+   Strong, consistent treatment in the user menu on all pages
+   ========================================================= */
+.user-menu__dropdown .user-menu__add-pet,
+.user-menu__add-pet{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    min-height:50px;
+    margin:7px;
+    padding:12px 16px;
+    border:1px solid rgba(255,184,0,.72);
+    border-radius:13px;
+    background:linear-gradient(135deg,#ffd51f 0%,#ffb000 52%,#ff8a00 100%);
+    color:#101827 !important;
+    font-weight:900;
+    letter-spacing:-.01em;
+    text-decoration:none;
+    box-shadow:
+        0 8px 20px rgba(255,145,0,.28),
+        inset 0 1px 0 rgba(255,255,255,.55);
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        filter .18s ease;
 }
 
-.logo{
-  flex:0 0 auto;
-  min-width:0;
+.user-menu__dropdown .user-menu__add-pet span,
+.user-menu__add-pet span{
+    font-size:1.05rem;
+    filter:none;
 }
 
-/* Memorial Garden Atlas signature: two deliberately separated lines. */
-.memorial-brand{
-  display:grid;
-  gap:4px;
-  line-height:1;
-  white-space:nowrap;
-}
-.memorial-brand strong{
-  display:block;
-  color:#172033;
-  font-size:1.06rem;
-  font-weight:800;
-  letter-spacing:-.02em;
-}
-.memorial-brand small{
-  display:block;
-  margin:0;
-  color:#718096;
-  font-size:.55rem;
-  font-weight:800;
-  line-height:1.15;
-  letter-spacing:.13em;
-  text-transform:uppercase;
+.user-menu__dropdown .user-menu__add-pet:hover,
+.user-menu__dropdown .user-menu__add-pet:focus-visible,
+.user-menu__add-pet:hover,
+.user-menu__add-pet:focus-visible{
+    color:#07111f !important;
+    background:linear-gradient(135deg,#ffe45c 0%,#ffc21a 48%,#ff9500 100%);
+    transform:translateY(-1px);
+    box-shadow:
+        0 11px 25px rgba(255,145,0,.38),
+        0 0 0 3px rgba(255,193,7,.14),
+        inset 0 1px 0 rgba(255,255,255,.62);
 }
 
-.main-nav{
-  min-width:0;
-  gap:6px;
-}
-.main-nav a{
-  white-space:nowrap;
+.user-menu__dropdown .user-menu__add-pet:active,
+.user-menu__add-pet:active{
+    transform:translateY(0);
 }
 
-.header-actions{
-  flex:0 0 auto;
-  min-width:0;
-}
-.header-actions > a,
-.header-actions > button,
-.login-btn,
-.add-pet-btn,
-.lost-found-btn,
-.atlas-return-btn,
-.user-menu__toggle{
-  flex:0 0 auto;
-  white-space:nowrap;
-}
-.login-btn{
-  min-width:78px;
-  line-height:1;
-}
-
-/* Give the Atlas Memorial header enough room before switching to mobile. */
-@media(max-width:1180px) and (min-width:901px){
-  .memorial-atlas-header .header-container{gap:12px}
-  .memorial-atlas-header .main-nav{gap:3px}
-  .memorial-atlas-header .main-nav a{padding:9px 8px;font-size:.86rem}
-  .memorial-atlas-header .atlas-return-btn{display:none}
-  .memorial-atlas-header .add-pet-btn{padding-inline:12px}
-  .memorial-atlas-header .login-btn{padding-inline:13px}
-}
-
-@media(max-width:1020px) and (min-width:901px){
-  .memorial-brand small{display:none}
-}
-
-@media(max-width:900px){
-  .header-container{width:min(100% - 24px,1320px);gap:10px}
-  .memorial-brand{gap:3px}
-  .memorial-brand small{font-size:.5rem}
-  .login-btn{min-width:72px;padding-inline:13px}
+@media (max-width:700px){
+    .user-menu__dropdown .user-menu__add-pet,
+    .user-menu__add-pet{
+        min-height:48px;
+        margin:6px;
+        padding:11px 14px;
+    }
 }
