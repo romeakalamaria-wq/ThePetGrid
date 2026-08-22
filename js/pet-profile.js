@@ -238,6 +238,14 @@ try {
 
     async function getPetById(petId) {
 
+        // Demo/local pets use numeric IDs (1, 2, 3...).
+        // Resolve them from PetStore first so we do not send an invalid
+        // numeric ID to a Supabase table that uses cloud IDs.
+        const demoPet = getDemoPetById(petId);
+        if (demoPet) {
+            return demoPet;
+        }
+
         const client = window.ThePetGridSupabase?.client;
 
         if (client) {
@@ -260,7 +268,7 @@ try {
             }
         }
 
-        return getDemoPetById(petId);
+        return null;
     }
 
 
@@ -493,7 +501,17 @@ try {
         let nearby = [];
         const client = window.ThePetGridSupabase?.client;
 
-        if (client) {
+        // Keep demo pets inside the demo/local dataset. This prevents
+        // Supabase from receiving demo IDs such as 4 in .neq("id", "4").
+        if (!pet.isCloudPet && window.PetStore?.getAll) {
+            nearby = window.PetStore.getAll()
+                .filter(item =>
+                    String(item.id) !== String(pet.id) &&
+                    ((pet.city && item.city === pet.city) ||
+                     (!pet.city && pet.country && item.country === pet.country))
+                )
+                .slice(0, 6);
+        } else if (client) {
             try {
                 let query = client
                     .from("pets")
@@ -510,14 +528,6 @@ try {
             } catch (error) {
                 console.warn("ThePetGrid: nearby pets could not load.", error);
             }
-        } else if (window.PetStore?.getAll) {
-            nearby = window.PetStore.getAll()
-                .filter(item =>
-                    String(item.id) !== String(pet.id) &&
-                    ((pet.city && item.city === pet.city) ||
-                     (!pet.city && pet.country && item.country === pet.country))
-                )
-                .slice(0, 6);
         }
 
         if (!nearby.length) {
@@ -616,33 +626,22 @@ try {
                 : country;
 
         const likes =
-            pet.isCloudPet && window.ThePetGridLikes
-                ? window.ThePetGridLikes.getCount(
-                    pet.id,
-                    pet.likes
-                )
-                : (
-                    typeof window.PetStore
-                        .getDisplayedLikes ===
-                    "function"
-                        ? window.PetStore
-                            .getDisplayedLikes(
-                                pet.id
-                            )
-                        : Number(
-                            pet.likes || 0
-                        )
-                );
+            pet.isCloudPet
+                ? (window.ThePetGridLikes
+                    ? window.ThePetGridLikes.getCount(pet.id, pet.likes)
+                    : Number(pet.likes || 0))
+                : 0;
 
         const followers =
-            pet.isCloudPet && window.ThePetGridPetFollows
-                ? window.ThePetGridPetFollows.getCount(pet.id, pet.followers)
-                : Number(pet.followers || 0);
+            pet.isCloudPet
+                ? (window.ThePetGridPetFollows
+                    ? window.ThePetGridPetFollows.getCount(pet.id, pet.followers)
+                    : Number(pet.followers || 0))
+                : 0;
 
-        const gifts =
-            Number(
-                pet.gifts || 0
-            );
+        const gifts = pet.isCloudPet
+            ? Number(pet.gifts || 0)
+            : 0;
 
         imageElement.src =
             pet.image || "";
