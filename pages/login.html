@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Account — ThePetGrid</title>
+  <title>Join ThePetGrid — Create Your Free Account</title>
   <link rel="icon" href="../assets/favicon.png">
   <link rel="stylesheet" href="../design/theme.css">
   <link rel="stylesheet" href="../design/style.css">
@@ -43,19 +43,19 @@
   <main class="auth-shell">
     <section class="auth-card">
       <div class="auth-tabs" role="tablist" aria-label="Account action">
-        <button type="button" data-auth-mode="login" class="is-active" role="tab">Log In</button>
-        <button type="button" data-auth-mode="register" role="tab">Register</button>
+        <button type="button" data-auth-mode="register" class="is-active" role="tab" aria-selected="true">Create Free Account</button>
+        <button type="button" data-auth-mode="login" role="tab" aria-selected="false">Log In</button>
       </div>
-      <h1 id="authTitle">Welcome back</h1>
-      <p id="authIntro">Log in to manage your pets and community activity.</p>
+      <h1 id="authTitle">Join ThePetGrid</h1>
+      <p id="authIntro">Create your free account and put your pet on the world map.</p>
       <form id="authForm">
         <label class="field" id="usernameField">Username<input name="username" required autocomplete="username"></label>
-        <label class="field" id="emailField" hidden>Email<input type="email" name="email" autocomplete="email"></label>
+        <label class="field" id="emailField">Email<input type="email" name="email" autocomplete="email"></label>
         <label class="field">Password<input type="password" name="password" required autocomplete="current-password"></label>
         <div class="auth-password-actions" id="forgotPasswordActions" style="display:none">
           <button id="forgotPasswordButton" type="button">Forgot your password?</button>
         </div>
-        <button class="auth-submit" id="authSubmit" type="submit">Log In</button>
+        <button class="auth-submit" id="authSubmit" type="submit">Create Free Account</button>
       </form>
       <form id="forgotPasswordForm" hidden>
         <label class="field">Account email<input type="email" name="resetEmail" required autocomplete="email" placeholder="you@example.com"></label>
@@ -63,7 +63,7 @@
         <button class="auth-secondary-action" id="backToLoginButton" type="button">← Back to Log In</button>
       </form>
       <div id="authMessage" class="auth-message" hidden></div>
-      <p class="auth-note">Demo version: account data is stored only in this browser.</p>
+      <p class="auth-note">Free during beta. Secure authentication powered by Supabase.</p>
     </section>
   </main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-config.js"></script><script src="../js/supabase-client.js"></script><script src="../js/auth.js"></script>
   <script src="../js/login.js"></script>

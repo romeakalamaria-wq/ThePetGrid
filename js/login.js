@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await window.ThePetGridAuth.ready;
 
   const client = window.ThePetGridSupabase?.client || null;
-  let mode = "login";
+  let mode = "register";
   let busy = false;
 
   authNote.textContent = client
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     modeButtons.forEach((button) => { button.disabled = value; });
     submitButton.textContent = value
       ? (mode === "register" ? "Creating account..." : "Logging in...")
-      : (mode === "register" ? "Create Account" : "Log In");
+      : (mode === "register" ? "Create Free Account" : "Log In");
   }
 
   function setMode(nextMode) {
@@ -58,11 +58,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(".auth-tabs").hidden = false;
     const registering = mode === "register";
 
-    title.textContent = registering ? "Create your account" : "Welcome back";
+    title.textContent = registering ? "Join ThePetGrid" : "Welcome back";
     intro.textContent = registering
-      ? "Join ThePetGrid and create a profile for your pets."
+      ? "Create your free account and put your pet on the world map."
       : "Log in to manage your pets and community activity.";
-    submitButton.textContent = registering ? "Create Account" : "Log In";
+    submitButton.textContent = registering ? "Create Free Account" : "Log In";
     usernameField.hidden = false;
     emailField.hidden = !registering;
     form.elements.username.required = true;
@@ -80,7 +80,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const initialParams = new URLSearchParams(window.location.search);
-  if (initialParams.get("mode") === "register") {
+  const requestedMode = initialParams.get("mode");
+  if (requestedMode === "login") {
+    setMode("login");
+  } else {
     setMode("register");
   }
 
@@ -240,11 +243,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const existingUser = window.ThePetGridAuth.getCurrentUser();
   if (existingUser) {
-    showMessage(`You are already logged in as ${existingUser.username}.`);
+    showMessage(`You are already logged in as ${existingUser.username || existingUser.user_metadata?.username || existingUser.email?.split("@")[0] || "Member"}.`);
   }
 
-  setMode("login");
-  if (new URLSearchParams(window.location.search).get("passwordReset") === "success") {
+  const finalParams = new URLSearchParams(window.location.search);
+  if (finalParams.get("passwordReset") === "success") {
+    setMode("login");
     showMessage("Your password was changed successfully. You can now log in.");
   }
 });
