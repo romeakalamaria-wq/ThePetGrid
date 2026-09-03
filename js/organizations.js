@@ -1,11 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Elements references matching your directory layout
     const searchInput = document.querySelector('input[placeholder*="Name, city or country"]');
-    const typeSelect = document.querySelector('select'); // If you have a type dropdown
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn') || document.querySelector('button:contains("Clear filters")') || document.querySelector('.header-actions + div button');
+    const typeSelect = document.querySelector('select'); 
     
-    // Fallback if container IDs differ, adjust querySelector to your exact grid container
-    const orgsContainer = document.getElementById('organizationsGrid') || document.querySelector('.pet-grid') || document.querySelector('main .shell .grid') || document.getElementById('featuredPets');
+    // SAFE SELECTOR FIX: Find the clear button by targeting classes or fallback array loop
+    let clearFiltersBtn = document.getElementById('clearFiltersBtn') || document.querySelector('.header-actions + div button');
+    
+    if (!clearFiltersBtn) {
+        // Safe programmatic fallback search by text content instead of broken :contains selector
+        const allButtons = document.querySelectorAll('button');
+        clearFiltersBtn = Array.from(allButtons).find(btn => btn.textContent.trim() === 'Clear filters');
+    }
+    
+    // Container element reference mapping
+    const orgsContainer = document.getElementById('organizationsGrid') || document.querySelector('.pet-grid') || document.getElementById('featuredPets');
     
     let allOrganizations = [];
 
@@ -45,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (orgs.length === 0) {
             orgsContainer.innerHTML = `
-                <div class="col-span-full text-center py-12 text-gray-500 bg-[#0d1b33] rounded-2xl border border-dashed border-gray-800">
+                <div class="col-span-full text-center py-12 text-gray-500 bg-[#061326] rounded-2xl border border-dashed border-gray-800">
                     No active organizations match your current discovery scope.
                 </div>`;
             return;
@@ -53,10 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         orgs.forEach(org => {
             const card = document.createElement('div');
-            // Clean premium glassmorphism styling wrapping your UI card rules
-            card.className = "bg-[#061326] border border-gray-800/60 rounded-3xl p-6 hover:border-orange-500/50 transition duration-300 flex flex-col justify-between shadow-xl relative overflow-hidden";
+            card.className = "bg-[#061326] border border-gray-800 rounded-3xl p-6 hover:border-orange-500/50 transition duration-300 flex flex-col justify-between shadow-xl relative overflow-hidden";
             
-            // Build dynamic verified token badge structure
             const verifiedBadge = org.is_verified 
                 ? `<span class="bg-blue-500/10 text-blue-400 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-blue-500/20 tracking-wider">✓ Verified</span>` 
                 : '';
@@ -64,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div>
                     <div class="flex justify-between items-start mb-4">
-                        <img src="${org.avatar_url || '../assets/logo.png'}" 
+                        <img src="${org.avatar_url || 'https://unsplash.com'}" 
                              class="w-16 h-16 rounded-xl object-cover border border-gray-800 bg-[#0a1f38]" 
                              alt="${org.name}">
                         ${verifiedBadge}
@@ -99,12 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderOrganizations(filtered);
     }
 
-    // Bind real-time input event triggers
     if (searchInput) {
         searchInput.addEventListener('input', filterDirectory);
     }
 
-    // Clear filters interaction trigger button
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
             if (searchInput) searchInput.value = '';
@@ -113,6 +117,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Execute lookup fetch call sequence
     setTimeout(fetchOrganizations, 600);
 });
