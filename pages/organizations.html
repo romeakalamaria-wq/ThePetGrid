@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organizations — ThePetGrid</title>
+  <meta name="description" content="Discover animal welfare, rescue and shelter organizations on ThePetGrid.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design/header-unified.css?v=20260812-1">
+  <link rel="stylesheet" href="../css/organizations.css?v=1">
+</head>
+<body>
+<header class="main-header" data-unified-header="true">
+  <div class="header-container">
+    <a class="logo" href="../index.html" aria-label="ThePetGrid home">
+      <span class="logo-icon" aria-hidden="true">🐾</span>
+      <span class="logo-wordmark">ThePetGrid</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a>
+      <a href="pets.html">Pets</a>
+      <a href="map.html">Map</a>
+      <a href="community.html">Community</a>
+      <a href="organizations.html" class="active" data-organizations-nav>Organizations</a>
+      <a href="messages.html">Messages</a>
+      <a href="memorials.html">Memorials</a>
+    </nav>
+    <div class="header-actions">
+      <a class="lost-found-btn" href="lost-found.html"><span aria-hidden="true">🆘</span><span>Lost &amp; Found</span></a>
+      <a class="login-btn" href="login.html">Log In</a>
+    </div>
+  </div>
+</header>
+
+<main class="org-page">
+  <section class="org-hero">
+    <div>
+      <span class="org-eyebrow">THEPETGRID • ANIMAL WELFARE</span>
+      <h1>Organizations making a difference.</h1>
+      <p>Discover shelters, rescues and animal-welfare groups — and give them a dedicated home inside ThePetGrid.</p>
+    </div>
+    <a class="org-hero-cta" href="organization.html">Explore organizations <span>→</span></a>
+  </section>
+
+  <section class="org-shell" aria-labelledby="orgDirectoryTitle">
+    <div class="org-toolbar">
+      <div>
+        <span class="org-kicker">Directory</span>
+        <h2 id="orgDirectoryTitle">Find an organization</h2>
+      </div>
+      <button id="orgClearFilters" class="org-clear" type="button">Clear filters</button>
+    </div>
+
+    <div class="org-filters">
+      <label class="org-search">
+        <span>Search</span>
+        <input id="orgSearch" type="search" placeholder="Name, city or country..." autocomplete="off">
+      </label>
+      <label>
+        <span>Type</span>
+        <select id="orgType">
+          <option value="">All types</option>
+          <option value="rescue">Rescue</option>
+          <option value="shelter">Shelter</option>
+          <option value="animal_welfare">Animal welfare</option>
+          <option value="sanctuary">Sanctuary</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label>
+        <span>Country</span>
+        <input id="orgCountry" type="text" placeholder="Country">
+      </label>
+    </div>
+
+    <div id="orgStatus" class="org-status" aria-live="polite">Loading organizations…</div>
+    <div id="orgGrid" class="org-grid"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/header.js?v=20260812-unified-header"></script>
+<script src="../js/organizations.js?v=1"></script>
+<script src="../js/header-live.js?v=20260812-unified-header"></script>
+</body>
+</html>

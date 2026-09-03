@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Organization Profile | ThePetGrid</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <script src="https://jsdelivr.net"></script>
+    <script src="https://tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #0d0f12; color: #f3f4f6; }
+        .glass-card { background: rgba(18, 22, 28, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="index.html" class="text-2xl font-extrabold tracking-tight text-white">
+            🐾 The<span class="text-orange-500">PetGrid</span>
+        </a>
+        <a id="viewLiveProfile" href="#" class="text-sm text-orange-400 hover:underline">View Live Profile</a>
+    </header>
+
+    <!-- Settings Form -->
+    <main class="flex-grow flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-lg glass-card rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div>
+            
+            <h1 class="text-2xl font-extrabold text-white mb-1">Organization Settings</h1>
+            <p class="text-gray-400 text-sm mb-6">Update your professional profile details, logo, and links.</p>
+
+            <form id="editOrgForm" class="space-y-5">
+                <!-- Org Name -->
+                <div>
+                    <label class="block text-xs uppercase font-bold tracking-wider text-gray-400 mb-2">Organization Name</label>
+                    <input type="text" id="editOrgName" required
+                           class="w-full bg-[#161b22] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition">
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-xs uppercase font-bold tracking-wider text-gray-400 mb-2">About / Mission</label>
+                    <textarea id="editOrgDescription" rows="4" 
+                              class="w-full bg-[#161b22] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- Website -->
+                <div>
+                    <label class="block text-xs uppercase font-bold tracking-wider text-gray-400 mb-2">Website URL</label>
+                    <input type="url" id="editOrgWebsite" 
+                           class="w-full bg-[#161b22] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition">
+                </div>
+
+                <!-- Logo URL -->
+                <div>
+                    <label class="block text-xs uppercase font-bold tracking-wider text-gray-400 mb-2">Logo Image URL</label>
+                    <input type="url" id="editOrgAvatar" 
+                           class="w-full bg-[#161b22] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition">
+                </div>
+
+                <!-- Feedback Message -->
+                <div id="updateMsg" class="hidden text-sm p-3 rounded-xl font-semibold"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold py-3.5 rounded-xl transition duration-300">
+                    Save Changes 💾
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-6 text-xs text-gray-600">
+        &copy; 2026 ThePetGrid. All rights reserved.
+    </footer>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/edit-org.js"></script>
+</body>
+</html>

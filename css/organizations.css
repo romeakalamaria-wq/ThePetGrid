@@ -1,0 +1,58 @@
+/* =========================================================
+   THEPETGRID — ORGANIZATIONS MODULE v1
+   ========================================================= */
+:root{--org-bg:#070d1d;--org-panel:#0d172a;--org-line:rgba(148,163,184,.16);--org-text:#f8fafc;--org-muted:#9eabc0;--org-gold:#ffb703;--org-orange:#fb8500}
+*{box-sizing:border-box}
+body{margin:0;font-family:Outfit,system-ui,sans-serif;background:#f5f7fb;color:#172033}
+.org-page,.org-profile-page{min-height:calc(100vh - 76px)}
+.org-hero{max-width:1540px;margin:0 auto;padding:72px 28px 58px;display:flex;justify-content:space-between;align-items:end;gap:30px;background:linear-gradient(135deg,#071226,#0e2233);color:#fff}
+.org-hero h1{max-width:760px;margin:10px 0 14px;font-size:clamp(2.3rem,5vw,4.7rem);line-height:.98;letter-spacing:-.045em}
+.org-hero p{max-width:700px;margin:0;color:#c1ccdd;font-size:1.08rem;line-height:1.7}
+.org-eyebrow,.org-kicker{font-size:.75rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:var(--org-gold)}
+.org-hero-cta{display:inline-flex;align-items:center;gap:14px;min-height:50px;padding:0 19px;border-radius:13px;background:linear-gradient(135deg,var(--org-gold),var(--org-orange));color:#16120a;text-decoration:none;font-weight:850;white-space:nowrap}
+.org-shell{max-width:1320px;margin:0 auto;padding:42px 22px 80px}
+.org-toolbar{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:20px}
+.org-toolbar h2{margin:5px 0 0;font-size:2rem}
+.org-clear{border:1px solid #d8dee9;background:#fff;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}
+.org-filters{display:grid;grid-template-columns:minmax(260px,2fr) 1fr 1fr;gap:13px;padding:15px;background:#fff;border:1px solid #e1e6ef;border-radius:18px;box-shadow:0 10px 35px rgba(15,23,42,.05)}
+.org-filters label{display:flex;flex-direction:column;gap:7px;font-size:.78rem;font-weight:800;color:#667085}
+.org-filters input,.org-filters select{height:46px;border:1px solid #d8dee9;border-radius:11px;background:#fbfcfe;padding:0 13px;font:inherit;color:#172033;outline:none}
+.org-filters input:focus,.org-filters select:focus{border-color:#ffb703;box-shadow:0 0 0 3px rgba(255,183,3,.12)}
+.org-status{padding:20px 2px;color:#69758a}
+.org-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.org-card{background:#fff;border:1px solid #e1e6ef;border-radius:22px;overflow:hidden;box-shadow:0 12px 35px rgba(15,23,42,.07);transition:transform .2s,box-shadow .2s}
+.org-card:hover{transform:translateY(-4px);box-shadow:0 20px 45px rgba(15,23,42,.11)}
+.org-card__cover{height:135px;background:linear-gradient(135deg,#11253b,#24465a);position:relative}
+.org-card__logo{position:absolute;left:20px;bottom:-28px;width:70px;height:70px;border-radius:18px;border:5px solid #fff;background:#f2f5f9;object-fit:cover;display:grid;place-items:center;font-size:1.8rem}
+.org-card__body{padding:40px 20px 20px}
+.org-card h3{margin:0 0 6px;font-size:1.25rem}
+.org-card__verified{font-size:.75rem;color:#0f766e;font-weight:850}
+.org-card__meta{margin:11px 0;color:#69758a;font-size:.9rem}
+.org-card__desc{min-height:54px;margin:0;color:#596579;line-height:1.55;font-size:.91rem}
+.org-card__footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px}
+.org-type{font-size:.72rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em;color:#7c5c00;background:#fff6d8;padding:7px 9px;border-radius:8px}
+.org-view{display:inline-flex;align-items:center;min-height:40px;padding:0 13px;border-radius:10px;background:#101827;color:#fff;text-decoration:none;font-weight:800;font-size:.85rem}
+.org-empty{grid-column:1/-1;text-align:center;padding:55px 20px;border:1px dashed #cbd5e1;border-radius:18px;color:#69758a;background:#fff}
+
+.org-profile-page{background:#f5f7fb;padding-bottom:80px}
+.org-profile{max-width:1180px;margin:0 auto}
+.org-profile__cover{height:280px;background:linear-gradient(135deg,#071226,#1a3448);border-radius:0 0 26px 26px;overflow:hidden;background-size:cover;background-position:center;position:relative}
+.org-profile__cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(2,6,23,.7))}
+.org-profile__header{position:relative;z-index:1;margin:-60px 28px 0;padding:0 26px 24px;display:flex;align-items:end;gap:22px}
+.org-profile__logo{width:125px;height:125px;border-radius:27px;object-fit:cover;background:#fff;border:6px solid #fff;box-shadow:0 12px 30px rgba(2,6,23,.18)}
+.org-profile__name h1{margin:0;font-size:2.3rem;color:#172033}
+.org-profile__name p{margin:5px 0 0;color:#69758a}
+.org-profile__verified{color:#0f766e;font-weight:850}
+.org-profile__actions{margin-left:auto;display:flex;gap:9px}
+.org-profile__actions a,.org-follow{min-height:42px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;text-decoration:none;font:inherit;font-weight:800}
+.org-profile__actions a{background:#fff;border:1px solid #d8dee9;color:#172033}
+.org-follow{border:0;background:linear-gradient(135deg,var(--org-gold),var(--org-orange));color:#16120a;cursor:pointer}
+.org-profile__content{display:grid;grid-template-columns:1.4fr .8fr;gap:20px;padding:0 28px}
+.org-panel{background:#fff;border:1px solid #e1e6ef;border-radius:20px;padding:24px}
+.org-panel h2{margin:0 0 12px}
+.org-panel p{line-height:1.7;color:#596579}
+.org-info{display:grid;gap:10px}
+.org-info div{padding:12px 13px;background:#f7f9fc;border-radius:11px;color:#445066}
+.org-pets-placeholder{padding:30px;border:1px dashed #cbd5e1;border-radius:14px;color:#69758a}
+@media(max-width:900px){.org-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.org-profile__content{grid-template-columns:1fr}.org-profile__header{align-items:start;flex-wrap:wrap}.org-profile__actions{margin-left:0}}
+@media(max-width:650px){.org-hero{padding:50px 18px 38px;display:block}.org-hero-cta{margin-top:24px}.org-shell{padding:28px 13px 60px}.org-filters{grid-template-columns:1fr}.org-grid{grid-template-columns:1fr}.org-profile__cover{height:210px;border-radius:0}.org-profile__header{margin:-48px 14px 0;padding:0 10px 20px}.org-profile__logo{width:96px;height:96px}.org-profile__name h1{font-size:1.7rem}.org-profile__content{padding:0 14px}.org-toolbar{align-items:start}}

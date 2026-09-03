@@ -57,6 +57,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
+    // ORGANIZATIONS LINK
+    // ==========================================
+
+    if (!navigation.querySelector('[data-organizations-nav]')) {
+        const organizationsLink = document.createElement("a");
+        organizationsLink.href = location.pathname.includes("/pages/")
+            ? "organizations.html"
+            : "pages/organizations.html";
+        organizationsLink.textContent = "Organizations";
+        organizationsLink.dataset.organizationsNav = "true";
+
+        const communityLink = [...navigation.querySelectorAll("a")]
+            .find(link =>
+                (link.getAttribute("href") || "").endsWith("community.html")
+            );
+
+        if (communityLink) {
+            communityLink.insertAdjacentElement("afterend", organizationsLink);
+        } else {
+            navigation.appendChild(organizationsLink);
+        }
+    }
+
+    // ==========================================
     // MENU FUNCTIONS
     // ==========================================
 

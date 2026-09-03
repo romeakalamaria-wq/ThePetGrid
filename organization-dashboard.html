@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Dashboard | ThePetGrid</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <script src="https://jsdelivr.net"></script>
+    <script src="https://tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #0d0f12; color: #f3f4f6; }
+        .glass-card { background: rgba(18, 22, 28, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Navbar -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-4 flex justify-between items-center border-b border-gray-900">
+        <a href="index.html" class="text-2xl font-extrabold tracking-tight text-white">
+            🐾 The<span class="text-orange-500">PetGrid</span> <span class="text-xs text-gray-500 uppercase font-mono px-2 py-0.5 border border-gray-800 rounded">Admin</span>
+        </a>
+        <div class="flex items-center gap-4">
+            <a id="viewPublicProfile" href="#" class="text-sm text-orange-400 hover:underline">View Public Profile</a>
+            <a href="index.html" class="text-sm text-gray-400 hover:text-white transition">Exit</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow">
+        <!-- Welcome Header -->
+        <div class="mb-8">
+            <h1 id="dashboardTitle" class="text-3xl font-extrabold text-white tracking-tight">Loading Dashboard...</h1>
+            <p class="text-gray-400 text-sm mt-1">Manage your team members and list pets ready for adoption on the global grid.</p>
+        </div>
+
+        <!-- Quick Action Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Add Pet Form Link -->
+            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-2">Connect a New Pet</h3>
+                    <p class="text-gray-400 text-sm mb-4">Add a pet profile directly to your shelter repository.</p>
+                </div>
+                <!-- Simple interaction form for adding existing pet IDs -->
+                <form id="linkPetForm" class="space-y-3">
+                    <input type="text" id="petIdInput" placeholder="Enter Pet UUID (e.g. from pets table)" required
+                           class="w-full bg-[#161b22] border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-xl text-sm transition">
+                        + Link Pet to Org
+                    </button>
+                </form>
+                <p id="petLinkMsg" class="hidden text-xs mt-2"></p>
+            </div>
+
+            <!-- Total Pets Stats Counter -->
+            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
+                <div>
+                    <h3 class="text-sm uppercase font-bold tracking-wider text-gray-400 mb-1">Managed Pets</h3>
+                    <p id="petCount" class="text-5xl font-extrabold text-white my-2">0</p>
+                </div>
+                <p class="text-xs text-gray-500">Live profiles synced with the network map.</p>
+            </div>
+
+            <!-- Team Members Counter -->
+            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                <div>
+                    <h3 class="text-sm uppercase font-bold tracking-wider text-gray-400 mb-1">Active Team Staff</h3>
+                    <p id="memberCount" class="text-5xl font-extrabold text-white my-2">0</p>
+                </div>
+                <p class="text-xs text-gray-500">Owners, Admins, and content Editors.</p>
+            </div>
+        </div>
+
+        <!-- Two Column Main Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Side: Pets List Table -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-white mb-4">Organization Repository</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="text-xs uppercase bg-[#161b22] text-gray-400 font-bold border-b border-gray-800">
+                            <tr>
+                                <th class="px-4 py-3">Pet Info</th>
+                                <th class="px-4 py-3">Breed</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardPetsList">
+                            <tr>
+                                <td colspan="4" class="text-center py-8 text-gray-500">Loading pet profiles...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Side: Staff Members Management List -->
+            <div class="glass-card rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-white mb-4">Team & Permissions</h2>
+                <div id="dashboardMembersList" class="space-y-4">
+                    <p class="text-sm text-gray-500 text-center py-6">Loading management staff...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-6 text-xs text-gray-600 border-t border-gray-900">
+        &copy; 2026 ThePetGrid. All rights reserved.
+    </footer>
+
+    <!-- Script integrations -->
+    <script src="js/supabase-config.js"></script>
+    <script src="js/org-dashboard.js"></script>
+</body>
+</html>
