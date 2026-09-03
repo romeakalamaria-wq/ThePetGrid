@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>ThePetGrid — Every Pet Has a Place</title><link href="assets/favicon.png" rel="icon"/><link href="https://googleapis.com" rel="preconnect"/><link crossorigin="" href="https://gstatic.com" rel="preconnect"/><link href="https://googleapis.com" rel="stylesheet"/><link href="design/theme.css" rel="stylesheet"/><link href="design/style.css" rel="stylesheet"/><link href="design/header.css" rel="stylesheet"/><link href="css/home.css" rel="stylesheet"/><link href="design/atlas-shell.css" rel="stylesheet"/><link rel="stylesheet" href="design/header-unified.css?v=20260812-1">
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>ThePetGrid — Every Pet Has a Place</title><link href="assets/favicon.png" rel="icon"/><link href="https://googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://googleapis.com" rel="stylesheet"/><link href="design/theme.css" rel="stylesheet"/><link href="design/style.css" rel="stylesheet"/><link href="design/header.css" rel="stylesheet"/><link href="css/home.css" rel="stylesheet"/><link href="design/atlas-shell.css" rel="stylesheet"/><link rel="stylesheet" href="design/header-unified.css?v=20260812-1">
 <style>
 /* Conversion hero polish */
 .hero .hero-grid{align-items:center;gap:clamp(42px,7vw,100px)}
@@ -17,6 +17,72 @@
 .btn-org-portal:hover {
   background: #f97316 !important;
   color: #ffffff !important;
+}
+
+/* ==========================================================
+   ADVANCED UNIFIED HEADER REPAIR (B2B FLEXBOX & ALIGNMENT)
+   ========================================================== */
+.header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+.header-actions div, 
+.header-actions .user-nav-container,
+.header-actions [class*="user"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  position: relative !important;
+}
+.header-actions a[href*="profile"], 
+.header-actions .username-display,
+.header-actions strong {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.header-actions a[href*="profile"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.header-actions #logoutBtn, 
+.header-actions button[id*="logout"],
+.header-actions a[id*="logout"],
+.header-actions .login-btn + a {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.05) !important;
+  border: 1px solid rgba(248, 113, 113, 0.15) !important;
+  padding: 8px 14px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.header-actions #logoutBtn:hover,
+.header-actions button[id*="logout"]:hover {
+  background: #f87171 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.2) !important;
+}
+.header-actions br,
+.header-actions div span,
+.header-actions div a:not(#logoutBtn):not([id*="logout"]):not(:first-child) {
+  display: none !important;
 }
 </style></head><body class="atlas-shell"><header class="main-header" data-unified-header="true">
   <div class="header-container">
@@ -44,7 +110,7 @@
       <a class="login-btn" href="pages/login.html">Log In</a>
     </div>
   </div>
-</header><body class="atlas-shell"><main><section class="hero"><div class="shell hero-grid"><div><span class="eyebrow">🌍 PUT YOUR PET ON THE WORLD MAP</span><h1>Every Pet Has a <span>Place on the Grid.</span></h1><p>Create your pet's profile, place them on the global map, and join ThePetGrid from the beginning. Your pet can be one of the first on the grid.</p>
+</header><main><section class="hero"><div class="shell hero-grid"><div><span class="eyebrow">🌍 PUT YOUR PET ON THE WORLD MAP</span><h1>Every Pet Has a <span>Place on the Grid.</span></h1><p>Create your pet's profile, place them on the global map, and join ThePetGrid from the beginning. Your pet can be one of the first on the grid.</p>
         
         <div class="cta-row">
           <a class="btn btn-primary" id="betaPrimaryCta" href="pages/login.html?mode=register">🐾 Put Your Pet on the Map — Free</a>
@@ -56,7 +122,7 @@
 
 </div><div class="hero-card"><img alt="Pets around the world on ThePetGrid" src="assets/PET2.png"/></div></div></section><section class="section"><div class="shell"><div class="stats-band"><div class="stat"><strong>Be One of the First</strong>Founding Community</div><div class="stat"><strong>Worldwide</strong>One Global Pet Map</div><div class="stat"><strong>Free</strong>Create Your Pet Profile</div></div></div></section><section class="section"><div class="shell"><div class="section-head"><div><span class="eyebrow">Explore the Grid</span><h2>Meet pets on the grid</h2></div><a class="btn btn-secondary" href="pages/pets.html">Browse all</a></div><div class="pet-grid" id="featuredPets"></div></div></section></main><script src="store/pet-store.js"></script><script src="js/home.js"></script>
 
-<!-- LIVE LINK ΓΙΑ ΤΟ SUPABASE (ΑΠΟΤΡΕΠΕΙ ΤΟ ΣΦΑΛΜΑ 404 ΣΤΟ ΣΥΣΤΗΜΑ) -->
+<!-- ΔΙΟΡΘΩΜΕΝΟ ΚΑΙ ΕΓΚΥΡΟ LIVE LINK ΓΙΑ ΤΟ SUPABASE (CDNJS) -->
 <script src="https://cloudflare.com"></script>
 
 <script src="js/supabase-config.js"></script><script src="js/supabase-client.js"></script><script src="js/auth.js"></script><script src="js/header.js?v=20260812-unified-header"></script><script src="js/header-live.js?v=20260812-unified-header"></script>
@@ -95,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                // Περιμένουμε να είναι έτοιμο το δικό σου σύστημα Auth
                 await window.ThePetGridAuth.ready;
                 const user = window.ThePetGridAuth.getCurrentUser?.();
 
@@ -104,9 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                // Χρήση του έτοιμου supabase client από το project σου
                 const supabaseClient = window.supabase;
                 if (!supabaseClient) {
-                    alert("Database client initializing. Please refresh.");
+                    alert("Database client initializing. Please try again in a moment.");
                     return;
                 }
 

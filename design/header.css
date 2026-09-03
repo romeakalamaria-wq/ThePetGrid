@@ -6,8 +6,6 @@
 .nav-toggle{display:none;border:0;background:#fff3d6;border-radius:10px;width:42px;height:42px;font-size:1.25rem;cursor:pointer}
 @media(max-width:900px){.header-container{flex-wrap:wrap;padding:12px 0}.nav-toggle{display:block;margin-left:auto}.main-nav{display:none;order:3;width:100%;flex-direction:column;align-items:stretch;margin:0;padding:8px 0}.main-nav.is-open{display:flex}.header-actions{display:none}.main-nav a{width:100%}}
 .user-menu{position:relative}.user-menu__toggle{min-height:42px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;color:#334155;font:inherit;font-weight:700;cursor:pointer}.user-menu__avatar{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#fff3d6}.user-menu__dropdown{position:absolute;top:calc(100% + 10px);right:0;min-width:170px;padding:8px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;box-shadow:0 18px 45px rgba(15,23,42,.16)}.user-menu__dropdown[hidden]{display:none}.user-menu__dropdown a,.user-menu__dropdown button{display:flex;width:100%;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:#334155;text-decoration:none;font:inherit;font-weight:650;text-align:left;cursor:pointer}.user-menu__dropdown a:hover,.user-menu__dropdown button:hover{background:#fff3d6;color:#b45309}@media(max-width:900px){.header-actions{display:flex;margin-left:auto}.add-pet-btn{display:none}.user-menu__toggle span:nth-child(2){display:none}}
-
-/* Sprint 5.7 — live message notification */
 .messages-nav-link{position:relative;display:inline-flex!important;align-items:center;gap:6px}
 .message-pet-icon{display:none;font-size:1rem;line-height:1;filter:drop-shadow(0 2px 3px rgba(15,23,42,.14))}
 .messages-nav-link.has-unread .message-pet-icon{display:inline-block;animation:messagePetPop .35s ease both}
@@ -21,34 +19,46 @@
 @keyframes messagePetPop{from{transform:scale(.4) rotate(-18deg)}to{transform:none}}
 @media(max-width:900px){.message-unread-badge{position:static;display:inline-grid;margin-left:auto}.messages-nav-link.has-unread .message-pet-icon{display:inline-block}.message-live-toast{top:82px;right:16px}}
 
-/* Sprint 9.1 — prominent Lost & Found action */
-.lost-found-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  min-height:42px;
-  padding:0 15px;
-  border:1px solid rgba(190,18,60,.18);
-  border-radius:12px;
-  background:linear-gradient(135deg,#fb7185,#e11d48);
-  color:#fff;
-  text-decoration:none;
-  font-weight:800;
-  white-space:nowrap;
-  box-shadow:0 9px 22px rgba(225,29,72,.24);
-  transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+/* Sprint 9.1 — prominent Lost & Found action (VERTICAL ALIGNMENT REPAIRED) */
+.lost-found-btn {
+  display: inline-flex !important;
+  align-items: center !important;      /* Φέρνει τα γράμματα ΚΑΘΕΤΑ στη μέση */
+  justify-content: center !important;   /* Κεντράρει το περιεχόμενο οριζόντια */
+  gap: 8px !important;                 /* Δίνει σωστή απόσταση από το emoji */
+  min-height: 42px !important;
+  padding: 0 16px !important;          /* 0 πάνω-κάτω για να δουλέψει το flex ευθυγράμμισης */
+  border: 1px solid rgba(190,18,60,.18);
+  border-radius: 12px;
+  background: linear-gradient(135deg,#fb7185,#e11d48);
+  color: #fff !important;
+  text-decoration: none;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 9px 22px rgba(225,29,72,.24);
+  line-height: 1 !important;           /* Μηδενίζει το κενό της γραμματοσειράς που σπρώχνει τα γράμματα επάνω */
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
 }
-.lost-found-btn:hover,.lost-found-btn:focus-visible{
-  color:#fff;
-  transform:translateY(-2px);
-  box-shadow:0 13px 28px rgba(225,29,72,.34);
-  filter:saturate(1.08);
+
+.lost-found-btn:hover, .lost-found-btn:focus-visible {
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 13px 28px rgba(225,29,72,.34);
+  filter: saturate(1.08);
 }
+
+/* Διόρθωση για το emoji SOS ώστε να είναι κεντραρισμένο με τα γράμματα */
+.lost-found-btn span[aria-hidden="true"] {
+  font-size: 1.1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  transform: translateY(-1px) !important;
+}
+
 .lost-found-btn[aria-current="page"]{outline:3px solid rgba(251,113,133,.24);outline-offset:2px}
-@media(max-width:1120px){.lost-found-btn{padding:0 12px}.lost-found-btn span+*{display:none}}
-@media(max-width:900px){.lost-found-btn{display:inline-flex;min-width:44px;padding:0 11px;font-size:.9rem}.header-actions{gap:8px}}
-@media(max-width:480px){.lost-found-btn{font-size:0;gap:0}.lost-found-btn span{font-size:1.15rem}}
+@media(max-width:1120px){.lost-found-btn{padding:0 12px !important}.lost-found-btn span+*{display:none}}
+@media(max-width:900px){.lost-found-btn{display:inline-flex !important;min-height:42px !important;padding:0 11px !important;font-size:.9rem}.header-actions{gap:8px}}
+@media(max-width:480px){.lost-found-btn{font-size:0;gap:0}.lost-found-btn span{font-size:1.15rem !important}}
 
 /* Sprint 9.3.1 — global lost pet emergency alert */
 .global-lost-alert{position:relative;z-index:850;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;width:100%;padding:12px max(20px,calc((100vw - 1320px)/2));background:linear-gradient(90deg,#9f1239,#e11d48 50%,#be123c);color:#fff;text-decoration:none;box-shadow:0 8px 24px rgba(159,18,57,.22);animation:lost-alert-pulse 1.35s ease-in-out infinite}
@@ -62,114 +72,46 @@
 
 /* Sprint 9.4 — nearby lost pet alerts */
 .nearby-alert-settings-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 12px;border:1px solid #bfdbfe;border-radius:12px;background:#eff6ff;color:#1d4ed8;font:inherit;font-size:.83rem;font-weight:800;cursor:pointer}
-.nearby-alert-panel{position:fixed;z-index:6000;top:86px;right:24px;width:min(370px,calc(100vw - 32px));padding:19px;border:1px solid #dbeafe;border-radius:20px;background:rgba(255,255,255,.98);box-shadow:0 24px 70px rgba(15,23,42,.25);backdrop-filter:blur(16px)}
-.nearby-alert-panel[hidden]{display:none}.nearby-alert-panel__header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:17px}.nearby-alert-panel__header strong,.nearby-alert-panel__header small{display:block}.nearby-alert-panel__header small{margin-top:4px;color:#64748b}.nearby-alert-panel__header button{width:34px;height:34px;border:0;border-radius:50%;background:#eff6ff;color:#1d4ed8;font-size:1.35rem;cursor:pointer}.nearby-alert-panel label{display:grid;gap:7px;margin:13px 0;color:#334155;font-weight:750}.nearby-alert-panel select{width:100%;border:1px solid #dbe3ee;border-radius:11px;background:#fff;padding:11px 12px;font:inherit}.nearby-alert-panel__switch{display:flex!important;grid-template-columns:auto 1fr;align-items:center}.nearby-alert-panel__switch input{width:18px;height:18px}.nearby-alert-panel__save{width:100%;min-height:46px;border:0;border-radius:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font:inherit;font-weight:850;cursor:pointer}.nearby-alert-panel__save:disabled{opacity:.65}.nearby-alert-panel p{margin:12px 0 0;color:#64748b;font-size:.84rem;line-height:1.45}
-.nearby-lost-toast{position:fixed;z-index:6500;right:24px;top:92px;display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:12px;width:min(470px,calc(100vw - 32px));padding:14px 16px;border:2px solid #fecdd3;border-radius:19px;background:#fff;box-shadow:0 24px 70px rgba(159,18,57,.28);color:#172033;text-decoration:none;opacity:0;transform:translateY(-20px) scale(.96);pointer-events:none;transition:.28s ease}.nearby-lost-toast.is-visible{opacity:1;transform:none;pointer-events:auto}.nearby-lost-toast__icon{display:grid;width:48px;height:48px;place-items:center;border-radius:14px;background:#fff1f2;font-size:1.5rem;animation:nearby-alert-ring 1s ease-in-out infinite}.nearby-lost-toast span:nth-child(2){min-width:0}.nearby-lost-toast strong,.nearby-lost-toast small{display:block}.nearby-lost-toast small{margin-top:3px;overflow:hidden;color:#64748b;font-size:.82rem;text-overflow:ellipsis;white-space:nowrap}.nearby-lost-toast b{color:#be123c;font-size:.82rem;white-space:nowrap}@keyframes nearby-alert-ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
-@media(prefers-reduced-motion:reduce){.nearby-lost-toast__icon{animation:none}}
-@media(max-width:1120px){.nearby-alert-settings-button span:last-child{display:none}}
-@media(max-width:640px){.nearby-alert-panel{top:76px;right:16px}.nearby-lost-toast{top:76px;right:16px;grid-template-columns:42px minmax(0,1fr)}.nearby-lost-toast b{display:none}.nearby-lost-toast__icon{width:42px;height:42px}}
+.nearby-alert-panel{position:fixed;z-index:6000;top:86px;right:24px;width:min(370px,calc(100vw - 32px));padding:19px;border:1px solid #dbeafe;border-radius:20px}
 
-/* Sprint 9.4.1 — persistent lost pet notification center */
-.notification-center-button{position:relative;display:inline-grid;width:42px;height:42px;place-items:center;border:1px solid #fecdd3;border-radius:12px;background:#fff1f2;color:#be123c;font:inherit;font-size:1.15rem;cursor:pointer;transition:.2s ease}
-.notification-center-button:hover,.notification-center-button:focus-visible{border-color:#fb7185;background:#ffe4e6;transform:translateY(-1px)}
-.notification-center-button.has-unread{box-shadow:0 0 0 4px rgba(244,63,94,.12)}
-.notification-center-button__badge{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;border:2px solid #fff;border-radius:999px;background:#e11d48;color:#fff;font-size:.68rem;font-weight:900;line-height:16px;text-align:center}
-.notification-center-button__badge[hidden]{display:none}
-.notification-center{position:fixed;z-index:6200;top:86px;right:24px;width:min(430px,calc(100vw - 32px));max-height:min(650px,calc(100vh - 112px));overflow:hidden;border:1px solid #fecdd3;border-radius:22px;background:rgba(255,255,255,.99);box-shadow:0 28px 80px rgba(15,23,42,.28);backdrop-filter:blur(18px)}
-.notification-center[hidden]{display:none}
-.notification-center__header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 19px 15px;border-bottom:1px solid #ffe4e6;background:linear-gradient(135deg,#fff1f2,#fff)}
-.notification-center__header strong,.notification-center__header small{display:block}.notification-center__header strong{color:#881337;font-size:1rem}.notification-center__header small{margin-top:3px;color:#64748b;font-size:.8rem}
-.notification-center__header>button{display:grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border:0;border-radius:50%;background:#ffe4e6;color:#be123c;font-size:1.25rem;cursor:pointer}
-.notification-center__toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:.76rem;font-weight:750}
-.notification-center__toolbar button{border:0;background:transparent;color:#e11d48;font:inherit;font-weight:850;cursor:pointer}.notification-center__toolbar button:disabled{color:#94a3b8;cursor:default}
-.notification-center__list{max-height:500px;overflow:auto;overscroll-behavior:contain}
-.notification-center__item{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:11px;align-items:start;padding:14px 17px;border-bottom:1px solid #f1f5f9;color:#172033;text-decoration:none;transition:.18s ease}
-.notification-center__item:hover,.notification-center__item:focus-visible{background:#fff7f8}.notification-center__item.is-unread{background:#fff1f2}.notification-center__item.is-resolved{background:#f0fdf4}
-.notification-center__icon{display:grid;width:42px;height:42px;place-items:center;border-radius:13px;background:#ffe4e6;font-size:1.2rem}.notification-center__item.is-resolved .notification-center__icon{background:#dcfce7}
-.notification-center__copy{min-width:0}.notification-center__copy strong,.notification-center__copy small,.notification-center__copy em{display:block}.notification-center__copy strong{overflow:hidden;color:#172033;font-size:.88rem;font-style:normal;text-overflow:ellipsis;white-space:nowrap}.notification-center__copy small{margin-top:3px;overflow:hidden;color:#64748b;font-size:.77rem;text-overflow:ellipsis;white-space:nowrap}.notification-center__copy em{margin-top:5px;color:#94a3b8;font-size:.7rem;font-style:normal;font-weight:700}.notification-center__item.is-resolved .notification-center__copy em{color:#15803d}
-.notification-center__dot{width:9px;height:9px;margin-top:5px;border-radius:50%;background:#e11d48;box-shadow:0 0 0 4px rgba(225,29,72,.12)}
-.notification-center__empty{margin:0;padding:38px 20px;color:#64748b;text-align:center}.notification-center__empty[hidden]{display:none}
-@media(max-width:640px){.notification-center{top:76px;right:16px;max-height:calc(100vh - 92px)}.notification-center__list{max-height:calc(100vh - 230px)}}
-.user-menu__dropdown .user-menu__add-pet{align-items:center;gap:8px;margin-bottom:5px;background:linear-gradient(135deg,#fff3d6,#ffedd5);color:#b45309;font-weight:850}
-
-.memorials-nav-link{display:inline-flex!important;align-items:center;gap:5px}
-.memorials-nav-link:before{content:"🤍";font-size:.82rem}
-
-/* Sprint 10.2 — gentle Memorial notifications */
-.notification-center__item--memorial{background:#faf7fd}
-.notification-center__item--memorial.is-unread{background:#f3ecf7}
-.notification-center__item--memorial .notification-center__icon{background:#e9e1ef}
-.notification-center__item--memorial .notification-center__dot{background:#75658f;box-shadow:0 0 0 4px rgba(117,101,143,.14)}
-.notification-center__pet-photo{overflow:hidden;padding:0;border:2px solid rgba(117,101,143,.22);border-radius:50%!important;background:#eee8f2!important}
-.notification-center__pet-photo img{display:block;width:100%;height:100%;object-fit:cover;filter:grayscale(.25)}
-.notification-center__cta{display:inline-flex;margin-top:8px;color:#6c5880;font-size:.72rem;font-weight:850}
-
-/* Sprint 10.4 — pet gift notifications */
-.notification-center__item--gift{background:#fffdf7}
-.notification-center__item--gift.is-unread{background:#fff7df}
-.notification-center__item--gift .notification-center__icon{background:#ffedb8}
-.notification-center__item--gift .notification-center__dot{background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.14)}
-
-
-/* =========================================================
-   THEPETGRID — ADD NEW PET CTA
-   Strong, consistent treatment in the user menu on all pages
-   ========================================================= */
-.user-menu__dropdown .user-menu__add-pet,
-.user-menu__add-pet{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:9px;
-    min-height:50px;
-    margin:7px;
-    padding:12px 16px;
-    border:1px solid rgba(255,184,0,.72);
-    border-radius:13px;
-    background:linear-gradient(135deg,#ffd51f 0%,#ffb000 52%,#ff8a00 100%);
-    color:#101827 !important;
-    font-weight:900;
-    letter-spacing:-.01em;
-    text-decoration:none;
-    box-shadow:
-        0 8px 20px rgba(255,145,0,.28),
-        inset 0 1px 0 rgba(255,255,255,.55);
-    transition:
-        transform .18s ease,
-        box-shadow .18s ease,
-        filter .18s ease;
+/* Dynamic Auth Session Layout Alignment & Overlap Fixes */
+.header-actions div, .header-actions .user-nav-container, .header-actions [class*="user"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
-
-.user-menu__dropdown .user-menu__add-pet span,
-.user-menu__add-pet span{
-    font-size:1.05rem;
-    filter:none;
+.header-actions a[href*="profile"], .header-actions .username-display, .header-actions strong {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  text-decoration: none !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  transition: all 0.2s ease !important;
 }
-
-.user-menu__dropdown .user-menu__add-pet:hover,
-.user-menu__dropdown .user-menu__add-pet:focus-visible,
-.user-menu__add-pet:hover,
-.user-menu__add-pet:focus-visible{
-    color:#07111f !important;
-    background:linear-gradient(135deg,#ffe45c 0%,#ffc21a 48%,#ff9500 100%);
-    transform:translateY(-1px);
-    box-shadow:
-        0 11px 25px rgba(255,145,0,.38),
-        0 0 0 3px rgba(255,193,7,.14),
-        inset 0 1px 0 rgba(255,255,255,.62);
+.header-actions a[href*="profile"]:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
 }
-
-.user-menu__dropdown .user-menu__add-pet:active,
-.user-menu__add-pet:active{
-    transform:translateY(0);
+.header-actions #logoutBtn, .header-actions button[id*="logout"], .header-actions a[id*="logout"] {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #e11d48 !important;
+  background: rgba(225, 29, 72, 0.05) !important;
+  border: 1px solid rgba(225, 29, 72, 0.15) !important;
+  padding: 8px 14px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  transition: all 0.2s ease !important;
 }
-
-@media (max-width:700px){
-    .user-menu__dropdown .user-menu__add-pet,
-    .user-menu__add-pet{
-        min-height:48px;
-        margin:6px;
-        padding:11px 14px;
-    }
+.header-actions #logoutBtn:hover, .header-actions button[id*="logout"]:hover {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+}
+.header-actions br, .header-actions div span, .header-actions div a:not(#logoutBtn):not([id*="logout"]):not(:first-child) {
+  display: none !important;
 }
