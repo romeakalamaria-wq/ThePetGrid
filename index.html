@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>ThePetGrid — Every Pet Has a Place</title><link href="assets/favicon.png" rel="icon"/><link href="https://googleapis.com" rel="preconnect"/><link crossorigin="" href="https://gstatic.com" rel="preconnect"/><link href="https://googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="design/theme.css" rel="stylesheet"/><link href="design/style.css" rel="stylesheet"/><link href="design/header.css" rel="stylesheet"/><link href="css/home.css" rel="stylesheet"/><link href="design/atlas-shell.css" rel="stylesheet"/><link rel="stylesheet" href="design/header-unified.css?v=20260812-1">
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>ThePetGrid — Every Pet Has a Place</title><link href="assets/favicon.png" rel="icon"/><link href="https://googleapis.com" rel="preconnect"/><link crossorigin="" href="https://gstatic.com" rel="preconnect"/><link href="https://googleapis.com" rel="stylesheet"/><link href="design/theme.css" rel="stylesheet"/><link href="design/style.css" rel="stylesheet"/><link href="design/header.css" rel="stylesheet"/><link href="css/home.css" rel="stylesheet"/><link href="design/atlas-shell.css" rel="stylesheet"/><link rel="stylesheet" href="design/header-unified.css?v=20260812-1">
 <style>
 /* Conversion hero polish */
 .hero .hero-grid{align-items:center;gap:clamp(42px,7vw,100px)}
@@ -44,7 +44,7 @@
       <a class="login-btn" href="pages/login.html">Log In</a>
     </div>
   </div>
-</header><main><section class="hero"><div class="shell hero-grid"><div><span class="eyebrow">🌍 PUT YOUR PET ON THE WORLD MAP</span><h1>Every Pet Has a <span>Place on the Grid.</span></h1><p>Create your pet's profile, place them on the global map, and join ThePetGrid from the beginning. Your pet can be one of the first on the grid.</p>
+</header><body class="atlas-shell"><main><section class="hero"><div class="shell hero-grid"><div><span class="eyebrow">🌍 PUT YOUR PET ON THE WORLD MAP</span><h1>Every Pet Has a <span>Place on the Grid.</span></h1><p>Create your pet's profile, place them on the global map, and join ThePetGrid from the beginning. Your pet can be one of the first on the grid.</p>
         
         <div class="cta-row">
           <a class="btn btn-primary" id="betaPrimaryCta" href="pages/login.html?mode=register">🐾 Put Your Pet on the Map — Free</a>
@@ -54,7 +54,12 @@
           <a class="btn btn-secondary btn-org-portal" id="heroOrgPortalBtn" href="#">🏢 Org Portal</a>
         </div>
 
-</div><div class="hero-card"><img alt="Pets around the world on ThePetGrid" src="assets/PET2.png"/></div></div></section><section class="section"><div class="shell"><div class="stats-band"><div class="stat"><strong>Be One of the First</strong>Founding Community</div><div class="stat"><strong>Worldwide</strong>One Global Pet Map</div><div class="stat"><strong>Free</strong>Create Your Pet Profile</div></div></div></section><section class="section"><div class="shell"><div class="section-head"><div><span class="eyebrow">Explore the Grid</span><h2>Meet pets on the grid</h2></div><a class="btn btn-secondary" href="pages/pets.html">Browse all</a></div><div class="pet-grid" id="featuredPets"></div></div></section></main><script src="store/pet-store.js"></script><script src="js/home.js"></script><script src="https://jsdelivr.net"></script><script src="js/supabase-config.js"></script><script src="js/supabase-client.js"></script><script src="js/auth.js"></script><script src="js/header.js?v=20260812-unified-header"></script><script src="js/header-live.js?v=20260812-unified-header"></script>
+</div><div class="hero-card"><img alt="Pets around the world on ThePetGrid" src="assets/PET2.png"/></div></div></section><section class="section"><div class="shell"><div class="stats-band"><div class="stat"><strong>Be One of the First</strong>Founding Community</div><div class="stat"><strong>Worldwide</strong>One Global Pet Map</div><div class="stat"><strong>Free</strong>Create Your Pet Profile</div></div></div></section><section class="section"><div class="shell"><div class="section-head"><div><span class="eyebrow">Explore the Grid</span><h2>Meet pets on the grid</h2></div><a class="btn btn-secondary" href="pages/pets.html">Browse all</a></div><div class="pet-grid" id="featuredPets"></div></div></section></main><script src="store/pet-store.js"></script><script src="js/home.js"></script>
+
+<!-- LIVE LINK ΓΙΑ ΤΟ SUPABASE (ΑΠΟΤΡΕΠΕΙ ΤΟ ΣΦΑΛΜΑ 404 ΣΤΟ ΣΥΣΤΗΜΑ) -->
+<script src="https://cloudflare.com"></script>
+
+<script src="js/supabase-config.js"></script><script src="js/supabase-client.js"></script><script src="js/auth.js"></script><script src="js/header.js?v=20260812-unified-header"></script><script src="js/header-live.js?v=20260812-unified-header"></script>
 <script src="js/atlas-shell.js"></script>
 
 <script>
@@ -76,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// Διορθωμένος Μηχανισμός Routing για το Org Portal που περιμένει το Auth Wrapper
+// Δρομολόγηση για το Org Portal με βάση το δικό σου Auth State
 document.addEventListener('DOMContentLoaded', () => {
     const orgBtn = document.getElementById('heroOrgPortalBtn');
 
@@ -90,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Περιμένουμε να είναι έτοιμο το δικό σου σύστημα Auth
                 await window.ThePetGridAuth.ready;
                 const user = window.ThePetGridAuth.getCurrentUser?.();
 
@@ -100,10 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Χρήση του έτοιμου supabase client από το project σου
                 const supabaseClient = window.supabase;
                 if (!supabaseClient) {
-                    alert("Database client initializing. Please try again in a moment.");
+                    alert("Database client initializing. Please refresh.");
                     return;
                 }
 
@@ -133,13 +136,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
-
-<!-- Vercel Web Analytics -->
-<script>
-  window.va = window.va || function () {
-    (window.vaq = window.vaq || []).push(arguments);
-  };
-</script>
-<script defer src="/_vercel/insights/script.js"></script>
-
 </body></html>
