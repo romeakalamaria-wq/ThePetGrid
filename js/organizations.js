@@ -19,13 +19,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Fetch organizations roll dynamically from Supabase
     async function fetchOrganizations() {
-        if (!window.supabase) {
-            console.error("ThePetGrid Bridge Error: Supabase client instance missing.");
+        // SMART INITIALIZATION FIX: Smart fallback check for your custom client instance wrappers
+        let supabaseClient = window.supabase;
+        
+        // If window.supabase is the raw library constructor, fall back to checking your active config instances
+        if (supabaseClient && typeof supabaseClient.from !== 'function') {
+            if (window.supabaseClient && typeof window.supabaseClient.from === 'function') {
+                supabaseClient = window.supabaseClient;
+            } else if (window.supabaseInstance && typeof window.supabaseInstance.from === 'function') {
+                supabaseClient = window.supabaseInstance;
+            } else {
+                console.error("ThePetGrid Bridge Error: Active initialized client instance not found. Falling back to query execution hooks.");
+            }
+        }
+
+        if (!supabaseClient || typeof supabaseClient.from !== 'function') {
+            console.error("ThePetGrid Bridge Error: Initialized Supabase client instance completely missing.");
+            if (orgsContainer) {
+                orgsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center py-8">Database core initializing. Please refresh in a moment.</p>`;
+            }
             return;
         }
 
         try {
-            const { data, error } = await window.supabase
+            const { data, error } = await supabaseClient
                 .from('organizations')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -117,5 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    setTimeout(fetchOrganizations, 600);
+    // Delay lookup initialization slightly to ensure all sibling asset instances are loaded on window thread
+    setTimeout(fetchOrganizations, 800);
 });
