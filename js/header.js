@@ -5,30 +5,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!navigation) return;
 
-    // ==========================================
     // SHARED BRAND LOGO
-    // ==========================================
-
     const logo = document.querySelector(".logo");
 
     if (logo) {
         const isPages = location.pathname.includes("/pages/");
-        const logoSrc = isPages ? "../assets/logo.png" : "assets/logo.png";
+        const logoSrc = isPages
+            ? "../assets/logo.png"
+            : "assets/logo.png";
 
-        logo.innerHTML = `
-            <img
-                class="logo-image"
-                src="${logoSrc}"
-                alt="ThePetGrid"
-            >
-        `;
+        const logoImage = document.createElement("img");
+        logoImage.className = "logo-image";
+        logoImage.src = logoSrc;
+        logoImage.alt = "ThePetGrid";
+
+        logo.replaceChildren(logoImage);
     }
 
-
-    // ==========================================
-    // ADD MEMORIALS LINK
-    // ==========================================
-
+    // MEMORIALS LINK
     if (!navigation.querySelector('[href$="memorials.html"]')) {
 
         const memorialLink = document.createElement("a");
@@ -43,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const messagesLink = [...navigation.querySelectorAll("a")]
             .find(link =>
                 (link.getAttribute("href") || "")
-                .endsWith("messages.html")
+                    .endsWith("messages.html")
             );
 
         if (messagesLink) {
@@ -56,78 +50,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ==========================================
-    // ORGANIZATIONS LINK
-    // ==========================================
-
-    if (!navigation.querySelector('[data-organizations-nav]')) {
-        const organizationsLink = document.createElement("a");
-        organizationsLink.href = location.pathname.includes("/pages/")
-            ? "organizations.html"
-            : "pages/organizations.html";
-        organizationsLink.textContent = "Organizations";
-        organizationsLink.dataset.organizationsNav = "true";
-
-        const communityLink = [...navigation.querySelectorAll("a")]
-            .find(link =>
-                (link.getAttribute("href") || "").endsWith("community.html")
-            );
-
-        if (communityLink) {
-            communityLink.insertAdjacentElement("afterend", organizationsLink);
-        } else {
-            navigation.appendChild(organizationsLink);
-        }
-    }
-
-    // ==========================================
-    // MENU FUNCTIONS
-    // ==========================================
-
+    // MENU
     function closeMenu() {
-
         navigation.classList.remove("is-open");
 
         if (toggle) {
-            toggle.setAttribute(
-                "aria-expanded",
-                "false"
-            );
+            toggle.setAttribute("aria-expanded", "false");
         }
-
     }
 
     function openMenu() {
-
         navigation.classList.add("is-open");
 
         if (toggle) {
-            toggle.setAttribute(
-                "aria-expanded",
-                "true"
-            );
+            toggle.setAttribute("aria-expanded", "true");
         }
-
     }
 
     function toggleMenu() {
-
         if (navigation.classList.contains("is-open")) {
-
             closeMenu();
-
         } else {
-
             openMenu();
-
         }
-
     }
 
-    // ==========================================
     // HAMBURGER
-    // ==========================================
-
     if (toggle) {
 
         toggle.setAttribute(
@@ -137,38 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 : "false"
         );
 
-        toggle.addEventListener("click", function (e) {
-
+        toggle.addEventListener("click", (e) => {
             e.stopPropagation();
-
             toggleMenu();
-
         });
-
     }
 
-    // ==========================================
-    // CLOSE AFTER CLICKING PAGE
-    // ==========================================
-
-    navigation.addEventListener("click", function (e) {
-
+    // CLOSE AFTER LINK CLICK
+    navigation.addEventListener("click", (e) => {
         if (e.target.closest("a")) {
-
             closeMenu();
-
         }
-
     });
 
-    // ==========================================
     // CLICK OUTSIDE
-    // ==========================================
+    document.addEventListener("click", (e) => {
 
-    document.addEventListener("click", function (e) {
-
-        if (!navigation.classList.contains("is-open"))
+        if (!navigation.classList.contains("is-open")) {
             return;
+        }
 
         if (
             navigation.contains(e.target) ||
@@ -178,71 +113,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         closeMenu();
-
     });
 
-    // ==========================================
-    // ESC KEY
-    // ==========================================
-
-    document.addEventListener("keydown", function (e) {
+    // ESC
+    document.addEventListener("keydown", (e) => {
 
         if (
             e.key === "Escape" &&
             navigation.classList.contains("is-open")
         ) {
-
             closeMenu();
-
         }
-
     });
 
-    // ==========================================
     // DESKTOP
-    // ==========================================
-
-    window.addEventListener("resize", function () {
+    window.addEventListener("resize", () => {
 
         if (window.innerWidth > 1240) {
-
             closeMenu();
-
         }
-
     });
 
-    // ==========================================
     // BACK BUTTON
-    // ==========================================
+    window.addEventListener("pageshow", closeMenu);
 
-    window.addEventListener(
-        "pageshow",
-        closeMenu
-    );
-
-    // ==========================================
     // ACTIVE LINK
-    // ==========================================
-
     const current =
         location.pathname.split("/").pop() ||
         "index.html";
 
-    navigation
-        .querySelectorAll("a")
-        .forEach(link => {
+    navigation.querySelectorAll("a").forEach((link) => {
 
-            const target =
-                (link.getAttribute("href") || "")
+        const target =
+            (link.getAttribute("href") || "")
                 .split("/")
                 .pop();
 
-            link.classList.toggle(
-                "active",
-                target === current
-            );
-
-        });
+        link.classList.toggle(
+            "active",
+            target === current
+        );
+    });
 
 });
